@@ -1,9 +1,6 @@
 use std::fmt;
 use super::{Array, Dimension};
 
-/// HACK: fmt::rt::FlagAlternate has been hidden away
-const FlagAlternate: usize = 2;
-
 fn format_array<A, D: Dimension, F>(view: &Array<A, D>, f: &mut fmt::Formatter,
                                     mut format: F) -> fmt::Result where
     F: FnMut(&mut fmt::Formatter, &A) -> fmt::Result,
@@ -19,7 +16,7 @@ fn format_array<A, D: Dimension, F>(view: &Array<A, D>, f: &mut fmt::Formatter,
         None => view.dim.clone(),
         Some(ix) => ix,
     };
-    for _ in (0..ndim) {
+    for _ in 0..ndim {
         try!(write!(f, "["));
     }
     let mut first = true;
@@ -36,17 +33,17 @@ fn format_array<A, D: Dimension, F>(view: &Array<A, D>, f: &mut fmt::Formatter,
                 // New row.
                 // # of ['s needed
                 let n = ndim - i - 1;
-                for _ in (0..n) {
+                for _ in 0..n {
                     try!(write!(f, "]"));
                 }
                 try!(write!(f, ","));
-                if f.flags() & (1 << FlagAlternate) == 0 {
+                if !f.alternate() {
                     try!(write!(f, "\n"));
                 }
-                for _ in (0..ndim - n) {
+                for _ in 0..ndim - n {
                     try!(write!(f, " "));
                 }
-                for _ in (0..n) {
+                for _ in 0..n {
                     try!(write!(f, "["));
                 }
                 first = true;
@@ -64,7 +61,7 @@ fn format_array<A, D: Dimension, F>(view: &Array<A, D>, f: &mut fmt::Formatter,
             last_index = index;
         }
     }
-    for _ in (0..ndim) {
+    for _ in 0..ndim {
         try!(write!(f, "]"));
     }
     Ok(())

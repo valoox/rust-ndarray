@@ -1,11 +1,19 @@
-#![feature(
-    rc_unique,
-    )]
 #![crate_name="ndarray"]
 #![crate_type="dylib"]
 
 //! The **ndarray** crate provides the [**Array**](./struct.Array.html) type, an
 //! n-dimensional container similar to numpy's ndarray.
+//!
+//! ## Crate Summary and Status
+//!
+//! - Implements the numpy striding scheme for n-dimensional arrays
+//! - `Array` is clone on write, so it can be both a view or an owner of the
+//!   data.
+//! - Striding and broadcasting is fully implemented
+//! - Due to iterators, arithmetic operations, matrix multiplication etc
+//!   are not very well optimized, this is not a serious crate for numerics
+//!   or linear algebra. `Array` is a good container.
+//! - There is no integration with linear algebra packages (at least not yet).
 //!
 
 #[cfg(feature = "serde")]
@@ -51,14 +59,6 @@ mod si;
 pub type Ix = u32;
 /// Array index type (signed)
 pub type Ixs = i32;
-
-unsafe fn to_ref<'a, A>(ptr: *const A) -> &'a A {
-    mem::transmute(ptr)
-}
-
-unsafe fn to_ref_mut<'a, A>(ptr: *mut A) -> &'a mut A {
-    mem::transmute(ptr)
-}
 
 /// The **Array** type is an *N-dimensional array*.
 ///
@@ -288,7 +288,7 @@ impl<A, D> Array<A, D> where D: Dimension
     pub fn at<'a>(&'a self, index: D) -> Option<&'a A> {
         self.dim.stride_offset_checked(&self.strides, &index)
             .map(|offset| unsafe {
-                to_ref(self.ptr.offset(offset) as *const _)
+                &*self.ptr.offset(offset)
             })
     }
 
@@ -301,7 +301,7 @@ impl<A, D> Array<A, D> where D: Dimension
     pub unsafe fn uchk_at<'a>(&'a self, index: D) -> &'a A {
         debug_assert!(self.dim.stride_offset_checked(&self.strides, &index).is_some());
         let off = Dimension::stride_offset(&index, &self.strides);
-        to_ref(self.ptr.offset(off) as *const _)
+        &*self.ptr.offset(off)
     }
 
     /// Perform *unchecked* array indexing.
@@ -311,11 +311,11 @@ impl<A, D> Array<A, D> where D: Dimension
     /// **Note:** Only unchecked for non-debug builds of ndarray.<br>
     /// **Note:** The array must be uniquely held when mutating it.
     #[inline]
-    pub unsafe fn uchk_at_mut<'a>(&'a mut self, index: D) -> &'a mut A {
-        debug_assert!(Rc::is_unique(&self.data));
+    pub unsafe fn uchk_at_mut(&mut self, index: D) -> &mut A {
+        debug_assert!(Rc::get_mut(&mut self.data).is_some());
         debug_assert!(self.dim.stride_offset_checked(&self.strides, &index).is_some());
         let off = Dimension::stride_offset(&index, &self.strides);
-        to_ref_mut(self.ptr.offset(off))
+        &mut *self.ptr.offset(off)
     }
 
     /// Return a protoiterator
@@ -570,7 +570,7 @@ impl<A, D> Array<A, D> where D: Dimension
     /// This method is mostly only useful with unsafe code.
     pub fn ensure_unique(&mut self) where A: Clone
     {
-        if Rc::is_unique(&self.data) {
+        if Rc::get_mut(&mut self.data).is_some() {
             return
         }
         if self.dim.size() <= self.data.len() / 2 {
@@ -582,7 +582,7 @@ impl<A, D> Array<A, D> where D: Dimension
         }
         let our_off = (self.ptr as isize - self.data.as_ptr() as isize)
             / mem::size_of::<A>() as isize;
-        let rvec = Rc::make_unique(&mut self.data);
+        let rvec = Rc::make_mut(&mut self.data);
         unsafe {
             self.ptr = rvec.as_mut_ptr().offset(our_off);
         }
@@ -595,7 +595,7 @@ impl<A, D> Array<A, D> where D: Dimension
         self.ensure_unique();
         self.dim.stride_offset_checked(&self.strides, &index)
             .map(|offset| unsafe {
-                to_ref_mut(self.ptr.offset(offset))
+                &mut *self.ptr.offset(offset)
             })
     }
 
@@ -666,9 +666,10 @@ impl<A, D> Array<A, D> where D: Dimension
     ///
     /// **Note:** The data is uniquely held and nonaliased
     /// while it is mutably borrowed.
-    pub fn raw_data_mut<'a>(&'a mut self) -> &'a mut [A] where A: Clone
+    pub fn raw_data_mut<'a>(&'a mut self) -> &'a mut [A]
+        where A: Clone
     {
-        self.data.make_unique()
+        &mut Rc::make_mut(&mut self.data)[..]
     }
 
 
@@ -878,7 +879,7 @@ impl<A, D> Array<A, D> where
     {
         let n = self.shape()[axis];
         let mut res = self.subview(axis, 0);
-        for i in (1..n) {
+        for i in 1..n {
             res.iadd(&self.subview(axis, i))
         }
         res
@@ -910,7 +911,7 @@ impl<A, D> Array<A, D> where
         let mut sum = self.sum(axis);
         let one = libnum::one::<A>();
         let mut cnt = one;
-        for _ in (1..n) {
+        for _ in 1..n {
             cnt = cnt + one;
         }
         for elt in sum.iter_mut() {
