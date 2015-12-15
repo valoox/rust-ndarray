@@ -1,7 +1,7 @@
 [package]
 
 name = "rendarray"
-version = "0.1.0"
+version = "0.2.0-alpha"
 authors = ["bluss"]
 license = "MIT/Apache-2.0"
 
@@ -10,7 +10,7 @@ documentation = "http://bluss.github.io/rust-ndarray/"
 
 description = "An N-dimensional array for elements of arbitrary type. Lightweight array views and slicing. The Array is copy-on-write and similar to numpy’s ndarray."
 
-keywords = ["array", "data-structure", "n-dimensional"]
+keywords = ["array", "data-structure", "n-dimensional", "matrix"]
 
 [lib]
 name = "ndarray"
@@ -20,17 +20,16 @@ version = "0.1"
 features = ["complex"]
 default-features = false
 
-[dependencies.rustc-serialize]
-version = "0.3"
-optional = true
-
 [dependencies.itertools]
 version = "0.4"
 
-[dependencies.serde]
-version = "0.4"
-optional = true
+#[dependencies.rustc-serialize]
+#version = "0.3"
+#optional = true
 
+#[dependencies.serde]
+#version = "0.4"
+#optional = true
 
 [features]
 
