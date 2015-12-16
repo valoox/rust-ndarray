@@ -262,6 +262,15 @@
 <span id="219">219</span>
 <span id="220">220</span>
 <span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
 </pre><pre class='rust '>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;rustc-serialize&quot;</span>)]</span>
 <span class='kw'>use</span> <span class='ident'>serialize</span>::{<span class='ident'>Encodable</span>, <span class='ident'>Encoder</span>, <span class='ident'>Decodable</span>, <span class='ident'>Decoder</span>};
@@ -275,13 +284,17 @@
 };
 
 <span class='kw'>use</span> <span class='ident'>super</span>::{
-    <span class='ident'>Array</span>, <span class='ident'>Dimension</span>, <span class='ident'>Ix</span>, <span class='ident'>Elements</span>, <span class='ident'>ElementsMut</span>,
+    <span class='ident'>Array</span>, <span class='ident'>Dimension</span>, <span class='ident'>Ix</span>,
+    <span class='ident'>Elements</span>,
+    <span class='ident'>ElementsMut</span>,
     <span class='ident'>ArrayBase</span>,
     <span class='ident'>ArrayView</span>,
     <span class='ident'>ArrayViewMut</span>,
     <span class='ident'>Data</span>,
     <span class='ident'>DataMut</span>,
 };
+<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;rustc-serialize&quot;</span>)]</span>
+<span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>DataOwned</span>;
 
 <span class='doccomment'>/// Access the element at **index**.</span>
 <span class='doccomment'>///</span>
@@ -421,10 +434,13 @@
 <span class='comment'>// Use version number so we can add a packed format later.</span>
 <span class='kw'>static</span> <span class='ident'>ARRAY_FORMAT_VERSION</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='number'>1u8</span>;
 
+<span class='doccomment'>/// **Requires `feature = &quot;rustc-serialize&quot;`**</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;rustc-serialize&quot;</span>)]</span>
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>: <span class='ident'>Encodable</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span> <span class='op'>+</span> <span class='ident'>Encodable</span><span class='op'>&gt;</span> <span class='ident'>Encodable</span> <span class='kw'>for</span> <span class='ident'>Array</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>Encodable</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+    <span class='kw'>where</span> <span class='ident'>A</span>: <span class='ident'>Encodable</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span> <span class='op'>+</span> <span class='ident'>Encodable</span>,
+          <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
-    <span class='kw'>fn</span> <span class='ident'>encode</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Encoder</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>S</span>::<span class='ident'>Error</span><span class='op'>&gt;</span>
+    <span class='kw'>fn</span> <span class='ident'>encode</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='ident'>Encoder</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>s</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>E</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>E</span>::<span class='ident'>Error</span><span class='op'>&gt;</span>
     {
         <span class='ident'>s</span>.<span class='ident'>emit_struct</span>(<span class='string'>&quot;Array&quot;</span>, <span class='number'>3</span>, <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>e</span>.<span class='ident'>emit_struct_field</span>(<span class='string'>&quot;v&quot;</span>, <span class='number'>0</span>, <span class='op'>|</span><span class='ident'>e</span><span class='op'>|</span> {
@@ -450,11 +466,13 @@
     }
 }
 
+<span class='doccomment'>/// **Requires `feature = &quot;rustc-serialize&quot;`**</span>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;rustc-serialize&quot;</span>)]</span>
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>: <span class='ident'>Decodable</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span> <span class='op'>+</span> <span class='ident'>Decodable</span><span class='op'>&gt;</span>
-    <span class='ident'>Decodable</span> <span class='kw'>for</span> <span class='ident'>Array</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>Decodable</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+    <span class='kw'>where</span> <span class='ident'>A</span>: <span class='ident'>Decodable</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span> <span class='op'>+</span> <span class='ident'>Decodable</span>,
+          <span class='ident'>S</span>: <span class='ident'>DataOwned</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
-    <span class='kw'>fn</span> <span class='ident'>decode</span><span class='op'>&lt;</span><span class='ident'>S</span>: <span class='ident'>Decoder</span><span class='op'>&gt;</span>(<span class='ident'>d</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>S</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>Array</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>S</span>::<span class='ident'>Error</span><span class='op'>&gt;</span>
+    <span class='kw'>fn</span> <span class='ident'>decode</span><span class='op'>&lt;</span><span class='ident'>E</span>: <span class='ident'>Decoder</span><span class='op'>&gt;</span>(<span class='ident'>d</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>E</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>E</span>::<span class='ident'>Error</span><span class='op'>&gt;</span>
     {
         <span class='ident'>d</span>.<span class='ident'>read_struct</span>(<span class='string'>&quot;Array&quot;</span>, <span class='number'>3</span>, <span class='op'>|</span><span class='ident'>d</span><span class='op'>|</span> {
             <span class='kw'>let</span> <span class='ident'>version</span>: <span class='ident'>u8</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>read_struct_field</span>(<span class='string'>&quot;v&quot;</span>, <span class='number'>0</span>, <span class='ident'>Decodable</span>::<span class='ident'>decode</span>));
@@ -471,7 +489,7 @@
                             <span class='prelude-val'>Err</span>(<span class='ident'>d</span>.<span class='ident'>error</span>(<span class='string'>&quot;data and dimension must match in size&quot;</span>))
                         } <span class='kw'>else</span> {
                             <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>elements</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='ident'>with_capacity</span>(<span class='ident'>len</span>);
-                            <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> (<span class='number'>0</span>..<span class='ident'>len</span>) {
+                            <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>len</span> {
                                 <span class='ident'>elements</span>.<span class='ident'>push</span>(<span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>d</span>.<span class='ident'>read_seq_elt</span>::<span class='op'>&lt;</span><span class='ident'>A</span>, _<span class='op'>&gt;</span>(<span class='ident'>i</span>, <span class='ident'>Decodable</span>::<span class='ident'>decode</span>)))
                             }
                             <span class='prelude-val'>Ok</span>(<span class='ident'>elements</span>)
@@ -479,7 +497,7 @@
                     })
             }));
             <span class='kw'>unsafe</span> {
-                <span class='prelude-val'>Ok</span>(<span class='ident'>Array</span>::<span class='ident'>from_vec_dim</span>(<span class='ident'>dim</span>, <span class='ident'>elements</span>))
+                <span class='prelude-val'>Ok</span>(<span class='ident'>ArrayBase</span>::<span class='ident'>from_vec_dim</span>(<span class='ident'>dim</span>, <span class='ident'>elements</span>))
             }
         })
     }
