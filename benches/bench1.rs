@@ -10,13 +10,26 @@ use ndarray::{arr0, arr1, arr2};
 use test::black_box;
 
 #[bench]
-fn bench_std_add(bench: &mut test::Bencher)
+fn bench_std_add_shared(bench: &mut test::Bencher)
 {
     let mut a = arr2::<f32, _>(&[[1., 2., 2.],
                               [3., 4., 4.],
                               [3., 4., 4.],
                               [3., 4., 4.],
                               [5., 6., 6.]]);
+    let b = a.clone();
+    bench.iter(|| a.iadd(&b));
+}
+
+#[bench]
+fn bench_std_add_owned(bench: &mut test::Bencher)
+{
+    let a = arr2::<f32, _>(&[[1., 2., 2.],
+                              [3., 4., 4.],
+                              [3., 4., 4.],
+                              [3., 4., 4.],
+                              [5., 6., 6.]]);
+    let mut a = a.to_owned();
     let b = a.clone();
     bench.iter(|| a.iadd(&b));
 }
@@ -57,22 +70,71 @@ fn bench_std_iter_2d(bench: &mut test::Bencher)
 #[bench]
 fn bench_std_iter_1d_large(bench: &mut test::Bencher)
 {
-    let a = Array::<f32, _>::zeros((1024));
-    bench.iter(|| for &elt in a.iter() { black_box(elt); })
+    let a = Array::<i32, _>::zeros(64 * 64);
+    let a = black_box(a);
+    bench.iter(|| {
+        let mut sum = 0;
+        for &elt in a.iter() {
+            sum += elt;
+        }
+        sum
+    });
 }
 
 #[bench]
 fn bench_std_iter_1d_raw_large(bench: &mut test::Bencher)
 {
-    let a = Array::<f32, _>::zeros((1024));
-    bench.iter(|| for &elt in a.raw_data().iter() { black_box(elt); })
+    // this is autovectorized to death (= great performance)
+    let a = Array::<i32, _>::zeros(64 * 64);
+    let a = black_box(a);
+    bench.iter(|| {
+        let mut sum = 0;
+        for &elt in a.raw_data() {
+            sum += elt;
+        }
+        sum
+    });
 }
 
 #[bench]
 fn bench_std_iter_2d_large(bench: &mut test::Bencher)
 {
-    let a = Array::<f32, _>::zeros((16, 64));
-    bench.iter(|| for &elt in a.iter() { black_box(elt); })
+    let a = Array::<i32, _>::zeros((64, 64));
+    let a = black_box(a);
+    bench.iter(|| {
+        let mut sum = 0;
+        for &elt in a.iter() {
+            sum += elt;
+        }
+        sum
+    });
+}
+
+#[bench]
+fn bench_std_iter_2d_raw_large(bench: &mut test::Bencher)
+{
+    // this is autovectorized to death (= great performance)
+    let a = Array::<i32, _>::zeros((64, 64));
+    let a = black_box(a);
+    bench.iter(|| {
+        let mut sum = 0;
+        for &elt in a.raw_data() {
+            sum += elt;
+        }
+        sum
+    });
+}
+
+#[bench]
+fn assign_scalar_2d_transposed(bench: &mut test::Bencher)
+{
+    let mut a = arr2::<f32, _>(&[[1., 2., 2.],
+                              [3., 4., 4.],
+                              [3., 4., 4.],
+                              [3., 4., 4.],
+                              [5., 6., 6.]]);
+    a.swap_axes(0, 1);
+    bench.iter(|| a.assign_scalar(&3.))
 }
 
 #[bench]
@@ -83,8 +145,35 @@ fn assign_scalar_2d(bench: &mut test::Bencher)
                               [3., 4., 4.],
                               [3., 4., 4.],
                               [5., 6., 6.]]);
-    a.swap_axes(0, 1);
     bench.iter(|| a.assign_scalar(&3.))
+}
+
+#[bench]
+fn assign_scalar_2d_large(bench: &mut test::Bencher)
+{
+    let a = Array::zeros((64, 64));
+    let mut a = black_box(a);
+    let s = black_box(3.);
+    bench.iter(|| a.assign_scalar(&s))
+}
+
+#[bench]
+fn assign_scalar_2d_transposed_large(bench: &mut test::Bencher)
+{
+    let mut a = Array::zeros((64, 64));
+    a.swap_axes(0, 1);
+    let mut a = black_box(a);
+    let s = black_box(3.);
+    bench.iter(|| a.assign_scalar(&s))
+}
+
+#[bench]
+fn assign_scalar_2d_raw_large(bench: &mut test::Bencher)
+{
+    let a = Array::zeros((64, 64));
+    let mut a = black_box(a);
+    let s = black_box(3.);
+    bench.iter(|| for elt in a.raw_data_mut() { *elt = s; });
 }
 
 #[bench]
@@ -120,6 +209,24 @@ fn bench_mat_mul(bench: &mut test::Bencher)
     let mut at = a.clone();
     at.swap_axes(0, 1);
     bench.iter(|| at.mat_mul(&a));
+}
+
+#[bench]
+fn bench_create_iter(bench: &mut test::Bencher)
+{
+    let a = arr2(&[[1., 2., 2.],
+                   [3., 4., 4.],
+                   [3., 4., 4.],
+                   [3., 4., 4.],
+                   [5., 6., 6.]]);
+    let mut at = a.clone();
+    at.swap_axes(0, 1);
+    let v = black_box(at.view());
+
+    bench.iter(|| {
+        let v = black_box(v);
+        v.into_iter()
+    });
 }
 
 #[bench]
