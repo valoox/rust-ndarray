@@ -1,15 +1,16 @@
 #![crate_name="ndarray"]
 #![crate_type="dylib"]
 
-//! The `ndarray` crate provides an n-dimensional container similar to numpy's ndarray.
+//! The `ndarray` crate provides an N-dimensional container similar to numpy's
+//! ndarray.
 //!
 //! - [`ArrayBase`](struct.ArrayBase.html)<br>
 //!   The n-dimensional array type itself, parameterized by data storage.
 //! - `Array`<br>
-//!   Array where the data is reference counted and copy on write, it
+//!   An array where the data is reference counted and copy on write, it
 //!   can act as both an owner as the data as well as a lightweight view.
 //! - `OwnedArray`<br>
-//!   Array where the data is owned uniquely.
+//!   An array where the data is owned uniquely.
 //! - `ArrayView`<br>
 //!   A lightweight array view.
 //! - `ArrayViewMut`<br>
@@ -18,15 +19,13 @@
 //! ## Crate Summary and Status
 //!
 //! - Implements the numpy striding and broadcasting scheme for n-dimensional arrays
-//! - `Array` is clone on write, so it can be both a view or an owner of the
-//!   data. `OwnedArray` is a uniquely owned array.
 //! - Focus is on being a generic n-dimensional container
-//! - Due to iterators, arithmetic operations, matrix multiplication etc
+//! - Due to that arithmetic operations and matrix multiplication etc
 //!   are not very well optimized, this is not a serious crate for numerics
 //!   or linear algebra.
 //! - There is no integration with linear algebra packages (at least not yet).
 //!
-//! ## Crate feature flags
+//! ## Crate Feature Flags
 //!
 //! - `assign_ops`
 //!   - Optional, requires nightly
@@ -86,34 +85,148 @@ pub type Ix = u32;
 /// Array index type (signed)
 pub type Ixs = i32;
 
-/// The `Array` type is an *N-dimensional array*.
+/// An *N-dimensional array*.
 ///
-/// A reference counted array with copy-on-write mutability.
+/// The array is a general container of elements. It can be of numerical use
+/// too, supporting all mathematical operators by applying them elementwise.  It
+/// cannot grow or shrink, but can be sliced into views of parts of its data.
 ///
-/// The array can be a container of numerical use, supporting
-/// all mathematical operators by applying them elementwise -- but it can
-/// store any kind of value. It cannot grow or shrink, but can be sliced into
-/// views of parts of its data.
+/// The `ArrayBase<S, D>` is parameterized by:
 ///
-/// The array is both a view and a shared owner of its data. Some methods,
-/// for example [*slice()*](#method.slice), merely change the view of the data,
-/// while methods like [*iadd()*](#method.iadd) allow mutating the element
+/// - `S` for the data storage
+/// - `D` for the number of dimensions
+///
+/// Type aliases [`Array`], [`OwnedArray`], [`ArrayView`], and [`ArrayViewMut`] refer
+/// to `ArrayBase` with different types for the data storage.
+///
+/// [`Array`]: type.Array.html
+/// [`OwnedArray`]: type.OwnedArray.html
+/// [`ArrayView`]: type.ArrayView.html
+/// [`ArrayViewMut`]: type.ArrayViewMut.html
+///
+/// ## `Array`
+///
+/// `Array<A, D>` is a an array with reference counted data and copy-on-write
+/// mutability.
+///
+/// The `Array` is both a view and a shared owner of its data. Some methods,
+/// for example [`slice()`](#method.slice), merely change the view of the data,
+/// while methods like [`iadd()`](#method.iadd) allow mutating the element
 /// values.
 ///
 /// Calling a method for mutating elements, for example
-/// [*get_mut()*](#method.get_mut), [*iadd()*](#method.iadd) or
-/// [*iter_mut()*](#method.iter_mut) will break sharing and require a clone of
+/// [`get_mut()`](#method.get_mut), [`iadd()`](#method.iadd) or
+/// [`iter_mut()`](#method.iter_mut) will break sharing and require a clone of
 /// the data (if it is not uniquely held).
 ///
 /// ## Method Conventions
 ///
 /// Methods mutating the view or array elements in place use an *i* prefix,
-/// for example *slice* vs. *islice* and *add* vs *iadd*.
+/// for example `slice` vs. `islice` and `add` vs `iadd`.
+///
+/// Note that all `ArrayBase` variants can change their view (slicing) of the
+/// data freely, even when the data can't be mutated.
 ///
 /// ## Indexing
 ///
 /// Arrays use `u32` for indexing, represented by the types `Ix` and `Ixs`
-/// (signed).
+/// (signed). ***Note: A future version will switch to `usize`.***
+///
+/// ## Slicing and Subviews
+///
+/// You can use slicing to create a view of a subset of the data in
+/// the array. Slicing methods include `.slice()`, `.islice()`,
+/// `.slice_mut()`.
+///
+/// Slices are passed with the type [`Si`] with fields `Si(begin, end, stride)`,
+/// where the values are signed integers, and `end` is an `Option<Ixs>`.
+/// The constant [`S`] is a shorthand for the full range of an axis.
+///
+/// [`Si`]: struct.Si.html
+/// [`S`]: constant.S.html
+///
+/// The dimensionality of the array determines the number of *axes*, for example
+/// a 3D array has three axes. These are listed in “big endian” order, so that
+/// the greatest dimension is listed first, the lowest dimension with the most
+/// rapidly varying index is the last.
+///
+/// In a 2D array this means that the axes are listed in (row, column) order, and
+/// the natural order of the elements is
+/// *(0, 0), (0, 1), ... (1, 0), (1, 1), (1, 2) ...* etc..
+///
+/// ```
+/// use ndarray::{arr3};
+/// use ndarray::{Si, S};
+///
+/// // 3 elements per row, times 2 rows, times 2 means a shape of `[2, 2, 3]`.
+/// let a = arr3(&[[[ 1,  2,  3],
+///                 [ 4,  5,  6]],
+///                [[ 7,  8,  9],
+///                 [10, 11, 12]]]);
+/// assert_eq!(a.shape(), &[2, 2, 3]);
+///
+/// // Let's create a slice with
+/// //
+/// // - Every element in each row: `S`
+/// // - Only the first row in each submatrix: `Si(0, Some(1), 1)`
+/// // - In both of the submatrices of the third dimension: `S`
+///
+/// let b = a.slice(&[S, Si(0, Some(1), 1), S]);
+/// let c = arr3(&[[[ 1,  2,  3]],
+///                [[ 7,  8,  9]]]);
+/// assert_eq!(b, c);
+/// assert_eq!(b.shape(), &[2, 1, 3]);
+///
+/// // Let's create a slice with
+/// // 
+/// // - Row elements in reverse order: `Si(0, None, -1)`
+/// // - The last row in each submatrix: `Si(-1, None, 1)`
+/// // - In both submatrices of the third dimension: `S`
+/// let d = a.slice(&[S, Si(-1, None, 1), Si(0, None, -1)]);
+/// let e = arr3(&[[[ 6,  5,  4]],
+///                [[12, 11, 10]]]);
+/// assert_eq!(d, e);
+/// ```
+///
+/// Subview methods allow you to restrict the array view while removing
+/// one axis from the array. Subview methods include `.subview()`,
+/// `.isubview()`, `.subview_mut()`.
+/// 
+/// Subview takes two arguments: axis and index.
+///
+/// ```
+/// use ndarray::{arr3, aview2};
+/// use ndarray::{Si, S};
+///
+/// // 3 elements per row, times 2 rows, times 2 means a shape of `[2, 2, 3]`.
+/// let a = arr3(&[[[ 1,  2,  3],
+///                 [ 4,  5,  6]],
+///                [[ 7,  8,  9],
+///                 [10, 11, 12]]]);
+/// assert_eq!(a.shape(), &[2, 2, 3]);
+///
+/// // Let's take a subview along the greatest dimension (axis 0),
+/// // taking the 0th submatrix, then the 1st.
+///
+/// let sub_0 = a.subview(0, 0);
+/// let sub_1 = a.subview(0, 1);
+///
+/// assert_eq!(sub_0, aview2(&[[ 1,  2,  3],
+///                            [ 4,  5,  6]]));
+/// assert_eq!(sub_1, aview2(&[[ 7,  8,  9],
+///                            [10, 11, 12]]));
+/// assert_eq!(sub_0.shape(), &[2, 3]);
+///
+/// // This is the subview picking only the first column of the 2nd axis
+/// let sub_col = a.subview(2, 0);
+///
+/// assert_eq!(sub_col, aview2(&[[ 1,  4],
+///                              [ 7, 10]]));
+/// ```
+///
+/// `.isubview()` modifies the view in the same way as `subview()`, but
+/// since it is *in place*, it cannot remove the collapsed axis. It becomes
+/// an axis of length 1.
 ///
 /// ## Broadcasting
 ///
@@ -306,7 +419,7 @@ impl<S: DataClone, D: Clone> Clone for ArrayBase<S, D>
 
 impl<S: DataClone + Copy, D: Copy> Copy for ArrayBase<S, D> { }
 
-/// Constructor methods single dimensional `ArrayBase`.
+/// Constructor methods for single dimensional `ArrayBase`.
 impl<S> ArrayBase<S, Ix>
     where S: DataOwned,
 {
@@ -522,6 +635,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
 
     /// Return a read-only view of the array
     pub fn view(&self) -> ArrayView<A, D> {
+        debug_assert!(self.pointer_is_inbounds());
         ArrayView {
             ptr: self.ptr,
             dim: self.dim.clone(),
@@ -534,7 +648,9 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     pub fn view_mut(&mut self) -> ArrayViewMut<A, D>
         where S: DataMut,
     {
+        debug_assert!(self.pointer_is_inbounds());
         self.ensure_unique();
+        debug_assert!(self.pointer_is_inbounds());
         ArrayViewMut {
             ptr: self.ptr,
             dim: self.dim.clone(),
@@ -586,6 +702,18 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// Array's view.
     pub fn raw_data(&self) -> &[A] {
         self.data.slice()
+    }
+
+    fn pointer_is_inbounds(&self) -> bool {
+        let slc = self.data.slice();
+        let ptr = slc.as_ptr() as *mut _;
+        let end =  unsafe {
+            ptr.offset(slc.len() as isize)
+        };
+        if ptr != self.ptr {
+            println!("{:p} <= {:p} <= {:p}", ptr, self.ptr, end);
+        }
+        self.ptr >= ptr && self.ptr <= end
     }
 
     /// Return the array's data as a slice, if it is contiguous and
@@ -728,6 +856,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     ///
     /// Iterator element type is `&A`.
     pub fn iter(&self) -> Elements<A, D> {
+        debug_assert!(self.pointer_is_inbounds());
         self.view().into_iter_()
     }
 
@@ -776,8 +905,9 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     ///     == (10, 2)
     /// );
     /// ```
-    pub fn broadcast<E: Dimension>(&self, dim: E)
+    pub fn broadcast<E>(&self, dim: E)
         -> Option<ArrayView<A, E>>
+        where E: Dimension
     {
         /// Return new stride when trying to grow `from` into shape `to`
         ///
@@ -990,7 +1120,9 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     pub fn iter_mut(&mut self) -> ElementsMut<A, D>
         where S: DataMut,
     {
+        debug_assert!(self.pointer_is_inbounds());
         self.ensure_unique();
+        debug_assert!(self.pointer_is_inbounds());
         self.view_mut().into_iter_()
     }
 
@@ -1363,9 +1495,8 @@ pub fn arr3<A: Clone, V: Initializer<Elem=U>, U: Initializer<Elem=A>>(xs: &[V])
 
 
 impl<A, S, D> ArrayBase<S, D>
-    where A: Clone + Add<Output=A>,
-          S: Data<Elem=A>,
-          D: RemoveAxis,
+    where S: Data<Elem=A>,
+          D: Dimension,
 {
     /// Return sum along `axis`.
     ///
@@ -1384,6 +1515,8 @@ impl<A, S, D> ArrayBase<S, D>
     ///
     /// **Panics** if `axis` is out of bounds.
     pub fn sum(&self, axis: usize) -> OwnedArray<A, <D as RemoveAxis>::Smaller>
+        where A: Clone + Add<Output=A>,
+              D: RemoveAxis,
     {
         let n = self.shape()[axis];
         let mut res = self.view().subview(axis, 0).to_owned();
@@ -1393,13 +1526,7 @@ impl<A, S, D> ArrayBase<S, D>
         }
         res
     }
-}
 
-impl<A, S, D> ArrayBase<S, D>
-    where A: Copy + linalg::Field,
-          S: Data<Elem=A>,
-          D: RemoveAxis,
-{
     /// Return mean along `axis`.
     ///
     /// ```
@@ -1416,6 +1543,8 @@ impl<A, S, D> ArrayBase<S, D>
     ///
     /// **Panics** if `axis` is out of bounds.
     pub fn mean(&self, axis: usize) -> OwnedArray<A, <D as RemoveAxis>::Smaller>
+        where A: Copy + linalg::Field,
+              D: RemoveAxis,
     {
         let n = self.shape()[axis];
         let mut sum = self.sum(axis);
@@ -1424,10 +1553,19 @@ impl<A, S, D> ArrayBase<S, D>
         for _ in 1..n {
             cnt = cnt + one;
         }
-        for elt in sum.iter_mut() {
-            *elt = *elt / cnt;
-        }
+        sum.idiv_scalar(&cnt);
         sum
+    }
+
+    /// Return `true` if the arrays' elementwise differences are all within
+    /// the given absolute tolerance.<br>
+    /// Return `false` otherwise, or if the shapes disagree.
+    pub fn allclose<S2>(&self, rhs: &ArrayBase<S2, D>, tol: A) -> bool
+        where A: Float + PartialOrd,
+              S2: Data<Elem=A>,
+    {
+        self.shape() == rhs.shape() &&
+        self.iter().zip(rhs.iter()).all(|(x, y)| (*x - *y).abs() <= tol)
     }
 }
 
@@ -1472,14 +1610,7 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
             Self::one_dimensional_iter(self.ptr.offset(stride_offset(index, sc)), m, sr)
         }
     }
-}
 
-
-// Matrix multiplication only defined for simple types to
-// avoid trouble with failing + and *, and destructors
-impl<A: Copy + linalg::Ring, S> ArrayBase<S, (Ix, Ix)>
-    where S: Data<Elem=A>,
-{
     /// Perform matrix multiplication of rectangular arrays `self` and `rhs`.
     ///
     /// The array sizes must agree in the way that
@@ -1504,12 +1635,17 @@ impl<A: Copy + linalg::Ring, S> ArrayBase<S, (Ix, Ix)>
     /// ```
     ///
     pub fn mat_mul(&self, rhs: &ArrayBase<S, (Ix, Ix)>) -> Array<A, (Ix, Ix)>
+        where A: Copy + linalg::Ring
     {
+        // NOTE: Matrix multiplication only defined for simple types to
+        // avoid trouble with panicking + and *, and destructors
+
         let ((m, a), (b, n)) = (self.dim, rhs.dim);
         let (self_columns, other_rows) = (a, b);
         assert!(self_columns == other_rows);
 
         // Avoid initializing the memory in vec -- set it during iteration
+        // Panic safe because A: Copy
         let mut res_elems = Vec::<A>::with_capacity(m as usize * n as usize);
         unsafe {
             res_elems.set_len(m as usize * n as usize);
@@ -1518,10 +1654,9 @@ impl<A: Copy + linalg::Ring, S> ArrayBase<S, (Ix, Ix)>
         let mut j = 0;
         for rr in res_elems.iter_mut() {
             unsafe {
-                let dot = (0..a).fold(libnum::zero::<A>(),
+                *rr = (0..a).fold(libnum::zero::<A>(),
                     |s, k| s + *self.uchk_at((i, k)) * *rhs.uchk_at((k, j))
                 );
-                std::ptr::write(rr, dot);
             }
             j += 1;
             if j == n {
@@ -1544,6 +1679,7 @@ impl<A: Copy + linalg::Ring, S> ArrayBase<S, (Ix, Ix)>
     ///
     /// **Panics** if sizes are incompatible.
     pub fn mat_mul_col(&self, rhs: &ArrayBase<S, Ix>) -> Array<A, Ix>
+        where A: Copy + linalg::Ring
     {
         let ((m, a), n) = (self.dim, rhs.dim);
         let (self_columns, other_rows) = (a, n);
@@ -1557,10 +1693,9 @@ impl<A: Copy + linalg::Ring, S> ArrayBase<S, (Ix, Ix)>
         let mut i = 0;
         for rr in res_elems.iter_mut() {
             unsafe {
-                let dot = (0..a).fold(libnum::zero::<A>(),
+                *rr = (0..a).fold(libnum::zero::<A>(),
                     |s, k| s + *self.uchk_at((i, k)) * *rhs.uchk_at(k)
                 );
-                std::ptr::write(rr, dot);
             }
             i += 1;
         }
@@ -1571,32 +1706,11 @@ impl<A: Copy + linalg::Ring, S> ArrayBase<S, (Ix, Ix)>
 }
 
 
-impl<A, S, D> ArrayBase<S, D>
-    where A: Float + PartialOrd,
-          S: Data<Elem=A>,
-          D: Dimension
-{
-    /// Return `true` if the arrays' elementwise differences are all within
-    /// the given absolute tolerance.<br>
-    /// Return `false` otherwise, or if the shapes disagree.
-    pub fn allclose<S2>(&self, rhs: &ArrayBase<S2, D>, tol: A) -> bool
-        where S2: Data<Elem=A>,
-    {
-        self.shape() == rhs.shape() &&
-        self.iter().zip(rhs.iter()).all(|(x, y)| (*x - *y).abs() <= tol)
-    }
-}
-
 
 // Array OPERATORS
 
-macro_rules! impl_binary_op(
+macro_rules! impl_binary_op_inherent(
     ($trt:ident, $mth:ident, $imethod:ident, $imth_scalar:ident, $doc:expr) => (
-impl<A, S, D> ArrayBase<S, D> where
-    A: Clone + $trt<A, Output=A>,
-    S: DataMut<Elem=A>,
-    D: Dimension,
-{
     /// Perform elementwise
     #[doc=$doc]
     /// between `self` and `rhs`,
@@ -1606,7 +1720,8 @@ impl<A, S, D> ArrayBase<S, D> where
     ///
     /// **Panics** if broadcasting isn't possible.
     pub fn $imethod <E: Dimension, S2> (&mut self, rhs: &ArrayBase<S2, E>)
-        where S2: Data<Elem=A>,
+        where A: Clone + $trt<A, Output=A>,
+              S2: Data<Elem=A>,
     {
         if self.dim.ndim() == rhs.dim.ndim() &&
             self.shape() == rhs.shape() {
@@ -1625,13 +1740,56 @@ impl<A, S, D> ArrayBase<S, D> where
     #[doc=$doc]
     /// between `self` and the scalar `x`,
     /// *in place*.
-    pub fn $imth_scalar (&mut self, x: &A) {
+    pub fn $imth_scalar (&mut self, x: &A)
+        where A: Clone + $trt<A, Output=A>,
+    {
         self.unordered_foreach_mut(|elt| {
             *elt = elt.clone(). $mth (x.clone());
         });
     }
+    );
+);
+
+/// *In-place* arithmetic operations.
+impl<A, S, D> ArrayBase<S, D>
+    where S: DataMut<Elem=A>,
+          D: Dimension,
+{
+
+
+impl_binary_op_inherent!(Add, add, iadd, iadd_scalar, "Addition");
+impl_binary_op_inherent!(Sub, sub, isub, isub_scalar, "Subtraction");
+impl_binary_op_inherent!(Mul, mul, imul, imul_scalar, "Multiplication");
+impl_binary_op_inherent!(Div, div, idiv, idiv_scalar, "Divsion");
+impl_binary_op_inherent!(Rem, rem, irem, irem_scalar, "Remainder");
+impl_binary_op_inherent!(BitAnd, bitand, ibitand, ibitand_scalar, "Bit and");
+impl_binary_op_inherent!(BitOr, bitor, ibitor, ibitor_scalar, "Bit or");
+impl_binary_op_inherent!(BitXor, bitxor, ibitxor, ibitxor_scalar, "Bit xor");
+impl_binary_op_inherent!(Shl, shl, ishl, ishl_scalar, "Left shift");
+impl_binary_op_inherent!(Shr, shr, ishr, ishr_scalar, "Right shift");
+
+    /// Perform an elementwise negation of `self`, *in place*.
+    pub fn ineg(&mut self)
+        where A: Clone + Neg<Output=A>,
+    {
+        self.unordered_foreach_mut(|elt| {
+            *elt = elt.clone().neg()
+        });
+    }
+
+    /// Perform an elementwise unary not of `self`, *in place*.
+    pub fn inot(&mut self)
+        where A: Clone + Not<Output=A>,
+    {
+        self.unordered_foreach_mut(|elt| {
+            *elt = elt.clone().not()
+        });
+    }
+
 }
 
+macro_rules! impl_binary_op(
+    ($trt:ident, $mth:ident, $doc:expr) => (
 /// Perform elementwise
 #[doc=$doc]
 /// between `self` and `rhs`,
@@ -1703,16 +1861,47 @@ impl<'a, A, S, S2, D, E> $trt<&'a ArrayBase<S2, E>> for &'a ArrayBase<S, D>
     );
 );
 
-impl_binary_op!(Add, add, iadd, iadd_scalar, "Addition");
-impl_binary_op!(Sub, sub, isub, isub_scalar, "Subtraction");
-impl_binary_op!(Mul, mul, imul, imul_scalar, "Multiplication");
-impl_binary_op!(Div, div, idiv, idiv_scalar, "Divsion");
-impl_binary_op!(Rem, rem, irem, irem_scalar, "Remainder");
-impl_binary_op!(BitAnd, bitand, ibitand, ibitand_scalar, "Bit and");
-impl_binary_op!(BitOr, bitor, ibitor, ibitor_scalar, "Bit or");
-impl_binary_op!(BitXor, bitxor, ibitxor, ibitxor_scalar, "Bit xor");
-impl_binary_op!(Shl, shl, ishl, ishl_scalar, "Shift left");
-impl_binary_op!(Shr, shr, ishr, ishr_scalar, "Shift right");
+mod arithmetic_ops {
+    use super::*;
+    use std::ops::*;
+
+    impl_binary_op!(Add, add, "Addition");
+    impl_binary_op!(Sub, sub, "Subtraction");
+    impl_binary_op!(Mul, mul, "Multiplication");
+    impl_binary_op!(Div, div, "Divsion");
+    impl_binary_op!(Rem, rem, "Remainder");
+    impl_binary_op!(BitAnd, bitand, "Bit and");
+    impl_binary_op!(BitOr, bitor, "Bit or");
+    impl_binary_op!(BitXor, bitxor, "Bit xor");
+    impl_binary_op!(Shl, shl, "Left shift");
+    impl_binary_op!(Shr, shr, "Right shift");
+
+    impl<A, S, D> Neg for ArrayBase<S, D>
+        where A: Clone + Neg<Output=A>,
+              S: DataMut<Elem=A>,
+              D: Dimension
+    {
+        type Output = Self;
+        /// Perform an elementwise negation of `self` and return the result.
+        fn neg(mut self) -> Self {
+            self.ineg();
+            self
+        }
+    }
+
+    impl<A, S, D> Not for ArrayBase<S, D>
+        where A: Clone + Not<Output=A>,
+              S: DataMut<Elem=A>,
+              D: Dimension
+    {
+        type Output = Self;
+        /// Perform an elementwise unary not of `self` and return the result.
+        fn not(mut self) -> Self {
+            self.inot();
+            self
+        }
+    }
+}
 
 #[cfg(feature = "assign_ops")]
 mod assign_ops {
@@ -1781,61 +1970,6 @@ mod assign_ops {
                     "Implement `self ^= rhs` as elementwise bit xor (in place).\n");
 }
 
-impl<A, S, D> ArrayBase<S, D>
-    where A: Clone + Neg<Output=A>,
-          S: DataMut<Elem=A>,
-          D: Dimension
-{
-    /// Perform an elementwise negation of `self`, *in place*.
-    pub fn ineg(&mut self)
-    {
-        self.unordered_foreach_mut(|elt| {
-            *elt = elt.clone().neg()
-        });
-    }
-}
-
-impl<A, S, D> Neg for ArrayBase<S, D>
-    where A: Clone + Neg<Output=A>,
-          S: DataMut<Elem=A>,
-          D: Dimension
-{
-    type Output = Self;
-    /// Perform an elementwise negation of `self` and return the result.
-    fn neg(mut self) -> Self {
-        self.ineg();
-        self
-    }
-}
-
-impl<A, S, D> ArrayBase<S, D>
-    where A: Clone + Not<Output=A>,
-          S: DataMut<Elem=A>,
-          D: Dimension
-{
-    /// Perform an elementwise unary not of `self`, *in place*.
-    pub fn inot(&mut self)
-    {
-        self.unordered_foreach_mut(|elt| {
-            *elt = elt.clone().not()
-        });
-    }
-}
-
-
-impl<A, S, D> Not for ArrayBase<S, D>
-    where A: Clone + Not<Output=A>,
-          S: DataMut<Elem=A>,
-          D: Dimension
-{
-    type Output = Self;
-    /// Perform an elementwise unary not of `self` and return the result.
-    fn not(mut self) -> Self {
-        self.inot();
-        self
-    }
-}
-
 /// An iterator over the elements of an array.
 ///
 /// Iterator element type is `&'a A`.
@@ -1848,7 +1982,7 @@ struct ElementsBase<'a, A: 'a, D> {
     inner: Baseiter<'a, A, D>,
 }
 
-/// An iterator over the elements of an array.
+/// An iterator over the elements of an array (mutable).
 ///
 /// Iterator element type is `&'a mut A`.
 pub struct ElementsMut<'a, A: 'a, D> {
@@ -1865,7 +1999,7 @@ struct ElementsBaseMut<'a, A: 'a, D> {
 /// An iterator over the indexes and elements of an array.
 #[derive(Clone)]
 pub struct Indexed<'a, A: 'a, D>(ElementsBase<'a, A, D>);
-/// An iterator over the indexes and elements of an array.
+/// An iterator over the indexes and elements of an array (mutable).
 pub struct IndexedMut<'a, A: 'a, D>(ElementsBaseMut<'a, A, D>);
 
 fn zipsl<T, U>(t: T, u: U) -> ZipSlices<T, U>
