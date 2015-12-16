@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ndarray` crate.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ndarray">
 
-    <title>rendarray 0.2.0-alpha.2 - ndarray - Rust</title>
+    <title>rendarray 0.2.0-alpha.3 - ndarray - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,17 +46,18 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-1880' title='goto source code'>[src]</a></span></h1>
-<div class='docblock'><p>The <code>ndarray</code> crate provides an n-dimensional container similar to numpy&#39;s ndarray.</p>
+        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2014' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>The <code>ndarray</code> crate provides an N-dimensional container similar to numpy&#39;s
+ndarray.</p>
 
 <ul>
 <li><a href="struct.ArrayBase.html"><code>ArrayBase</code></a><br>
 The n-dimensional array type itself, parameterized by data storage.</li>
 <li><code>Array</code><br>
-Array where the data is reference counted and copy on write, it
+An array where the data is reference counted and copy on write, it
 can act as both an owner as the data as well as a lightweight view.</li>
 <li><code>OwnedArray</code><br>
-Array where the data is owned uniquely.</li>
+An array where the data is owned uniquely.</li>
 <li><code>ArrayView</code><br>
 A lightweight array view.</li>
 <li><code>ArrayViewMut</code><br>
@@ -66,16 +67,14 @@ A lightweight read-write array view.</li>
 <h2 id='crate-summary-and-status' class='section-header'><a href='#crate-summary-and-status'>Crate Summary and Status</a></h2>
 <ul>
 <li>Implements the numpy striding and broadcasting scheme for n-dimensional arrays</li>
-<li><code>Array</code> is clone on write, so it can be both a view or an owner of the
-data. <code>OwnedArray</code> is a uniquely owned array.</li>
 <li>Focus is on being a generic n-dimensional container</li>
-<li>Due to iterators, arithmetic operations, matrix multiplication etc
+<li>Due to that arithmetic operations and matrix multiplication etc
 are not very well optimized, this is not a serious crate for numerics
 or linear algebra.</li>
 <li>There is no integration with linear algebra packages (at least not yet).</li>
 </ul>
 
-<h2 id='crate-feature-flags' class='section-header'><a href='#crate-feature-flags'>Crate feature flags</a></h2>
+<h2 id='crate-feature-flags' class='section-header'><a href='#crate-feature-flags'>Crate Feature Flags</a></h2>
 <ul>
 <li><code>assign_ops</code>
 
@@ -106,7 +105,7 @@ or linear algebra.</li>
                         <td><a class='struct' href='struct.ArrayBase.html'
                                title='ndarray::ArrayBase'>ArrayBase</a></td>
                         <td class='docblock short'>
-                             <p>The <code>Array</code> type is an <em>N-dimensional array</em>.</p>
+                             <p>An <em>N-dimensional array</em>.</p>
 
                         </td>
                     </tr>
@@ -124,7 +123,7 @@ or linear algebra.</li>
                         <td><a class='struct' href='struct.ElementsMut.html'
                                title='ndarray::ElementsMut'>ElementsMut</a></td>
                         <td class='docblock short'>
-                             <p>An iterator over the elements of an array.</p>
+                             <p>An iterator over the elements of an array (mutable).</p>
 
                         </td>
                     </tr>
@@ -142,7 +141,7 @@ or linear algebra.</li>
                         <td><a class='struct' href='struct.IndexedMut.html'
                                title='ndarray::IndexedMut'>IndexedMut</a></td>
                         <td class='docblock short'>
-                             <p>An iterator over the indexes and elements of an array.</p>
+                             <p>An iterator over the indexes and elements of an array (mutable).</p>
 
                         </td>
                     </tr>
@@ -151,7 +150,7 @@ or linear algebra.</li>
                         <td><a class='struct' href='struct.Indexes.html'
                                title='ndarray::Indexes'>Indexes</a></td>
                         <td class='docblock short'>
-                             <p>An iterator of the indexes of an array shape.</p>
+                             <p>An iterator over the indexes of an array shape.</p>
 
                         </td>
                     </tr>

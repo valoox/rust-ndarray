@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Indexes","An iterator of the indexes of an array shape."]]});
+initSidebarItems({"struct":[["Indexes","An iterator over the indexes of an array shape."]]});
