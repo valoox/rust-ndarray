@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `blas` mod in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, blas">
 
-    <title>rendarray 0.2.0-alpha.4 - ndarray::blas - Rust</title>
+    <title>rendarray 0.2.0-alpha.5 - ndarray::blas - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-407' class='srclink' href='../../src/ndarray/blas.rs.html#1-275' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-409' class='srclink' href='../../src/ndarray/blas.rs.html#1-274' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Experimental BLAS (Basic Linear Algebra Subprograms) integration</p>
 
 <p><strong><em>Requires <code>features = &quot;rblas&quot;</code></em></strong></p>
@@ -79,11 +79,10 @@
 }
 </pre>
 
-<p>Use the checked or panicking methods in trait <code>AsBlas</code> to
-convert an array into a view that implements rblas’ <code>Vector</code> or <code>Matrix</code>
-traits.</p>
+<p>Use the methods in trait <code>AsBlas</code> to convert an array into a view that
+implements rblas’ <code>Vector</code> or <code>Matrix</code> traits.</p>
 
-<p>Blas supports strided vectors but not matrices, so they can be copied into
+<p>Blas supports strided vectors but not matrices, so they will be copied into
 c-contiguous layout automatically. Blas has its own error reporting system
 and will not panic on errors (that I know), instead output its own error
 conditions, for example on dimension mismatch in a matrix multiplication.</p>

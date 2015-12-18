@@ -336,7 +336,7 @@
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>eye</span><span class='op'>&lt;</span><span class='ident'>A</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Zero</span> <span class='op'>+</span> <span class='ident'>One</span><span class='op'>&gt;</span>(<span class='ident'>n</span>: <span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='ident'>Mat</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>
 {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>eye</span> <span class='op'>=</span> <span class='ident'>Array</span>::<span class='ident'>zeros</span>((<span class='ident'>n</span>, <span class='ident'>n</span>));
-    <span class='kw'>for</span> <span class='ident'>a_ii</span> <span class='kw'>in</span> <span class='ident'>eye</span>.<span class='ident'>diag_iter_mut</span>() {
+    <span class='kw'>for</span> <span class='ident'>a_ii</span> <span class='kw'>in</span> <span class='ident'>eye</span>.<span class='ident'>diag_mut</span>() {
         <span class='op'>*</span><span class='ident'>a_ii</span> <span class='op'>=</span> <span class='ident'>one</span>::<span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>();
     }
     <span class='ident'>eye</span>

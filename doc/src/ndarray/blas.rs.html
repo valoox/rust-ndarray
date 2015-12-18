@@ -315,7 +315,6 @@
 <span id="272">272</span>
 <span id="273">273</span>
 <span id="274">274</span>
-<span id="275">275</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Experimental BLAS (Basic Linear Algebra Subprograms) integration</span>
 <span class='doccomment'>//!</span>
@@ -354,11 +353,10 @@
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ```</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Use the checked or panicking methods in trait `AsBlas` to</span>
-<span class='doccomment'>//! convert an array into a view that implements rblas’ `Vector` or `Matrix`</span>
-<span class='doccomment'>//! traits.</span>
+<span class='doccomment'>//! Use the methods in trait `AsBlas` to convert an array into a view that</span>
+<span class='doccomment'>//! implements rblas’ `Vector` or `Matrix` traits.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Blas supports strided vectors but not matrices, so they can be copied into</span>
+<span class='doccomment'>//! Blas supports strided vectors but not matrices, so they will be copied into</span>
 <span class='doccomment'>//! c-contiguous layout automatically. Blas has its own error reporting system</span>
 <span class='doccomment'>//! and will not panic on errors (that I know), instead output its own error</span>
 <span class='doccomment'>//! conditions, for example on dimension mismatch in a matrix multiplication.</span>

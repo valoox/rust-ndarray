@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ndarray` crate.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ndarray">
 
-    <title>rendarray 0.2.0-alpha.4 - ndarray - Rust</title>
+    <title>rendarray 0.2.0-alpha.5 - ndarray - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,32 +46,43 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2113' title='goto source code'>[src]</a></span></h1>
-<div class='docblock'><p>The <code>ndarray</code> crate provides an N-dimensional container similar to numpy&#39;s
+        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2166' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>The <code>ndarray</code> crate provides an N-dimensional container similar to numpy’s
 ndarray.</p>
 
 <ul>
-<li><a href="struct.ArrayBase.html"><code>ArrayBase</code></a><br>
-The n-dimensional array type itself, parameterized by data storage.</li>
-<li><code>Array</code><br>
-An array where the data is reference counted and copy on write, it
-can act as both an owner as the data as well as a lightweight view.</li>
-<li><code>OwnedArray</code><br>
+<li><a href="struct.ArrayBase.html"><code>ArrayBase</code></a>:
+The N-dimensional array type itself.</li>
+<li><a href="type.Array.html"><code>Array</code></a>:
+An array where the data is shared and copy on write, it
+can act as both an owner of the data as well as a lightweight view.</li>
+<li><a href="type.OwnedArray.html"><code>OwnedArray</code></a>:
 An array where the data is owned uniquely.</li>
-<li><code>ArrayView</code><br>
-A lightweight array view.</li>
-<li><code>ArrayViewMut</code><br>
-A lightweight read-write array view.</li>
+<li><a href="type.ArrayView.html"><code>ArrayView</code></a>, <a href="type.ArrayViewMut.html"><code>ArrayViewMut</code></a>:
+Lightweight array views.</li>
 </ul>
 
-<h2 id='crate-summary-and-status' class='section-header'><a href='#crate-summary-and-status'>Crate Summary and Status</a></h2>
+<h2 id='highlights' class='section-header'><a href='#highlights'>Highlights</a></h2>
 <ul>
-<li>Implements the numpy striding and broadcasting scheme for n-dimensional arrays</li>
-<li>Focus is on being a generic n-dimensional container</li>
-<li>Due to that arithmetic operations and matrix multiplication etc
-are not very well optimized, this is not a serious crate for numerics
-or linear algebra.</li>
-<li>There is no integration with linear algebra packages (at least not yet).</li>
+<li>Generic N-dimensional array</li>
+<li>General slicing, also with steps &gt; 1, and negative indices to mean
+elements from the end of the axis.</li>
+<li>There is both an easy to use copy on write array (<code>Array</code>),
+or a regular uniquely owned array (<code>OwnedArray</code>), and both can use
+read-only and read-write array views.</li>
+<li>Iteration and most operations are efficient on contiguous c-order arrays
+(the default layout, without any transposition or discontiguous subslicing).</li>
+<li>Array views can be used to slice and mutate any <code>[T]</code> data.</li>
+</ul>
+
+<h2 id='status-and-lookout' class='section-header'><a href='#status-and-lookout'>Status and Lookout</a></h2>
+<ul>
+<li>Still iterating on the API</li>
+<li>Focus is on being a generic N-dimensional container</li>
+<li>Implements numpy striding and broadcasting</li>
+<li>Arithmetic operations and numerics need a rethink. They are not very
+well optimized.</li>
+<li>There is experimental bridging to the linear algebra package <code>rblas</code>.</li>
 </ul>
 
 <h2 id='crate-feature-flags' class='section-header'><a href='#crate-feature-flags'>Crate Feature Flags</a></h2>
@@ -114,13 +125,23 @@ or linear algebra.</li>
 
                         </td>
                     </tr>
+                </table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='macro' href='macro.s!.html'
+                               title='ndarray::s!'>s!</a></td>
+                        <td class='docblock short'>
+                             <p>Slice argument constructor.</p>
+
+                        </td>
+                    </tr>
                 </table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table>
                     <tr class=' module-item'>
                         <td><a class='struct' href='struct.ArrayBase.html'
                                title='ndarray::ArrayBase'>ArrayBase</a></td>
                         <td class='docblock short'>
-                             <p>An <em>N-dimensional array</em>.</p>
+                             <p>An <em>N</em>-dimensional array.</p>
 
                         </td>
                     </tr>
@@ -204,7 +225,7 @@ or linear algebra.</li>
                         <td><a class='trait' href='trait.Data.html'
                                title='ndarray::Data'>Data</a></td>
                         <td class='docblock short'>
-                             <p>Array&#39;s inner representation.</p>
+                             <p>Array’s inner representation.</p>
 
                         </td>
                     </tr>
@@ -213,7 +234,7 @@ or linear algebra.</li>
                         <td><a class='trait' href='trait.DataClone.html'
                                title='ndarray::DataClone'>DataClone</a></td>
                         <td class='docblock short'>
-                             <p>Clone an Array&#39;s storage.</p>
+                             <p>Clone an Array’s storage.</p>
 
                         </td>
                     </tr>
@@ -222,7 +243,7 @@ or linear algebra.</li>
                         <td><a class='trait' href='trait.DataMut.html'
                                title='ndarray::DataMut'>DataMut</a></td>
                         <td class='docblock short'>
-                             <p>Array&#39;s writable inner representation.</p>
+                             <p>Array’s writable inner representation.</p>
 
                         </td>
                     </tr>
@@ -279,14 +300,6 @@ or linear algebra.</li>
                              <p>Helper trait to define a larger-than relation for array shapes:
 removing one axis from <em>Self</em> gives smaller dimension <em>Smaller</em>.</p>
 
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='trait' href='trait.SliceRange.html'
-                               title='ndarray::SliceRange'>SliceRange</a></td>
-                        <td class='docblock short'>
-                             
                         </td>
                     </tr>
                 </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
@@ -350,6 +363,24 @@ removing one axis from <em>Self</em> gives smaller dimension <em>Smaller</em>.</
                                title='ndarray::aview2'>aview2</a></td>
                         <td class='docblock short'>
                              <p>Return a two-dimensional array view with elements borrowing <code>xs</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.aview_mut1.html'
+                               title='ndarray::aview_mut1'>aview_mut1</a></td>
+                        <td class='docblock short'>
+                             <p>Return a one-dimensional read-write array view with elements borrowing <code>xs</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.zeros.html'
+                               title='ndarray::zeros'>zeros</a></td>
+                        <td class='docblock short'>
+                             <p>Return an array filled with zeros</p>
 
                         </td>
                     </tr>
