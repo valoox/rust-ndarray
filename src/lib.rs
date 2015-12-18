@@ -33,6 +33,9 @@
 //! - `rustc-serialize`
 //!   - Optional, stable
 //!   - Enables serialization support
+//! - `rblas`
+//!   - Optional, stable
+//!   - Enables `rblas` integration
 //!
 #![cfg_attr(feature = "assign_ops", feature(augmented_assignments,
                                             op_assign_traits))]
@@ -46,36 +49,39 @@ extern crate itertools as it;
 #[cfg(not(nocomplex))]
 extern crate num as libnum;
 
-use std::mem;
-use std::rc::Rc;
 use libnum::Float;
+
+use std::mem;
 use std::ops::{Add, Sub, Mul, Div, Rem, Neg, Not, Shr, Shl,
     BitAnd,
     BitOr,
     BitXor,
 };
+use std::rc::Rc;
 use std::slice::{self, Iter, IterMut};
-
-pub use dimension::{Dimension, RemoveAxis};
-pub use si::{Si, S, SliceRange};
-use dimension::stride_offset;
-
-pub use indexes::Indexes;
-
-use iterators::Baseiter;
 
 use it::ZipSlices;
 
+pub use dimension::{Dimension, RemoveAxis};
+pub use indexes::Indexes;
+pub use shape_error::ShapeError;
+pub use si::{Si, S, SliceRange};
+
+use dimension::stride_offset;
+use iterators::Baseiter;
 
 pub mod linalg;
 mod arraytraits;
 #[cfg(feature = "serde")]
 mod arrayserialize;
 mod arrayformat;
+#[cfg(feature = "rblas")]
+pub mod blas;
 mod dimension;
 mod indexes;
 mod iterators;
 mod si;
+mod shape_error;
 //mod macros;
 
 // NOTE: In theory, the whole library should compile
@@ -138,7 +144,8 @@ pub type Ixs = i32;
 /// the array. Slicing methods include `.slice()`, `.islice()`,
 /// `.slice_mut()`.
 ///
-/// Slices are passed with the type [`Si`] with fields `Si(begin, end, stride)`,
+/// The slicing specification is passed as a function argument as a fixed size
+/// array with elements of type [`Si`] with fields `Si(begin, end, stride)`,
 /// where the values are signed integers, and `end` is an `Option<Ixs>`.
 /// The constant [`S`] is a shorthand for the full range of an axis.
 ///
@@ -169,7 +176,9 @@ pub type Ixs = i32;
 /// //
 /// // - Every element in each row: `S`
 /// // - Only the first row in each submatrix: `Si(0, Some(1), 1)`
-/// // - In both of the submatrices of the third dimension: `S`
+/// // - In both of the submatrices of the greatest dimension: `S`
+/// //
+/// // The argument passed is of type `&[Si; 3]` since the array has three axes.
 ///
 /// let b = a.slice(&[S, Si(0, Some(1), 1), S]);
 /// let c = arr3(&[[[ 1,  2,  3]],
@@ -181,7 +190,7 @@ pub type Ixs = i32;
 /// // 
 /// // - Row elements in reverse order: `Si(0, None, -1)`
 /// // - The last row in each submatrix: `Si(-1, None, 1)`
-/// // - In both submatrices of the third dimension: `S`
+/// // - In both submatrices of the greatest dimension: `S`
 /// let d = a.slice(&[S, Si(-1, None, 1), Si(0, None, -1)]);
 /// let e = arr3(&[[[ 6,  5,  4]],
 ///                [[12, 11, 10]]]);
@@ -374,10 +383,10 @@ pub unsafe trait DataOwned : Data {
 }
 
 /// Array representation that is a lightweight view.
-pub trait DataShared : Clone + DataClone { }
+pub unsafe trait DataShared : Clone + DataClone { }
 
-impl<A> DataShared for Rc<Vec<A>> { }
-impl<'a, A> DataShared for &'a [A] { }
+unsafe impl<A> DataShared for Rc<Vec<A>> { }
+unsafe impl<'a, A> DataShared for &'a [A] { }
 
 unsafe impl<A> DataOwned for Vec<A> {
     fn new(elements: Vec<A>) -> Self { elements }
@@ -745,8 +754,14 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
 
     /// Return a sliced array.
     ///
-    /// **Panics** if `indexes` does not match the number of array axes.
-    pub fn slice(&self, indexes: &[Si]) -> Self
+    /// [`D::SliceArg`] is typically a fixed size array of `Si`, with one
+    /// element per axis.
+    ///
+    /// [`D::SliceArg`]: trait.Dimension.html#associatedtype.SliceArg
+    ///
+    /// **Panics** if an index is out of bounds or stride is zero.<br>
+    /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
+    pub fn slice(&self, indexes: &D::SliceArg) -> Self
         where S: DataShared
     {
         let mut arr = self.clone();
@@ -756,8 +771,14 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
 
     /// Slice the array's view in place.
     ///
-    /// **Panics** if `indexes` does not match the number of array axes.
-    pub fn islice(&mut self, indexes: &[Si])
+    /// [`D::SliceArg`] is typically a fixed size array of `Si`, with one
+    /// element per axis.
+    ///
+    /// [`D::SliceArg`]: trait.Dimension.html#associatedtype.SliceArg
+    ///
+    /// **Panics** if an index is out of bounds or stride is zero.<br>
+    /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
+    pub fn islice(&mut self, indexes: &D::SliceArg)
     {
         let offset = Dimension::do_slices(&mut self.dim, &mut self.strides, indexes);
         unsafe {
@@ -767,8 +788,14 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
 
     /// Return an iterator over a sliced view.
     ///
-    /// **Panics** if `indexes` does not match the number of array axes.
-    pub fn slice_iter(&self, indexes: &[Si]) -> Elements<A, D>
+    /// [`D::SliceArg`] is typically a fixed size array of `Si`, with one
+    /// element per axis.
+    ///
+    /// [`D::SliceArg`]: trait.Dimension.html#associatedtype.SliceArg
+    ///
+    /// **Panics** if an index is out of bounds or stride is zero.<br>
+    /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
+    pub fn slice_iter(&self, indexes: &D::SliceArg) -> Elements<A, D>
     {
         let mut it = self.view();
         let offset = Dimension::do_slices(&mut it.dim, &mut it.strides, indexes);
@@ -1114,6 +1141,29 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         S::ensure_unique(self);
     }
 
+    #[cfg(feature = "rblas")]
+    /// If the array is not in the standard layout, copy all elements
+    /// into the standard layout so that the array is C-contiguous.
+    fn ensure_standard_layout(&mut self)
+        where S: DataOwned,
+              A: Clone
+    {
+        if !self.is_standard_layout() {
+            let mut v: Vec<A> = self.iter().cloned().collect();
+            self.ptr = v.as_mut_ptr();
+            self.data = DataOwned::new(v);
+            self.strides = self.dim.default_strides();
+        }
+    }
+
+    /*
+    /// Set the array to the standard layout, without adjusting elements.
+    /// Useful for overwriting.
+    fn force_standard_layout(&mut self) {
+        self.strides = self.dim.default_strides();
+    }
+    */
+
     /// Return an iterator of mutable references to the elements of the array.
     ///
     /// Iterator element type is `&mut A`.
@@ -1144,8 +1194,14 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
 
     /// Return a sliced read-write view of the array.
     ///
-    /// **Panics** if `indexes` does not match the number of array axes.
-    pub fn slice_mut(&mut self, indexes: &[Si]) -> ArrayViewMut<A, D>
+    /// [`D::SliceArg`] is typically a fixed size array of `Si`, with one
+    /// element per axis.
+    ///
+    /// [`D::SliceArg`]: trait.Dimension.html#associatedtype.SliceArg
+    ///
+    /// **Panics** if an index is out of bounds or stride is zero.<br>
+    /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
+    pub fn slice_mut(&mut self, indexes: &D::SliceArg) -> ArrayViewMut<A, D>
         where S: DataMut
     {
         let mut arr = self.view_mut();
@@ -1156,10 +1212,16 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// Return an iterator of mutable references into the sliced view
     /// of the array.
     ///
+    /// [`D::SliceArg`] is typically a fixed size array of `Si`, with one
+    /// element per axis.
+    ///
+    /// [`D::SliceArg`]: trait.Dimension.html#associatedtype.SliceArg
+    ///
     /// Iterator element type is `&mut A`.
     ///
-    /// **Panics** if `indexes` does not match the number of array axes.
-    pub fn slice_iter_mut(&mut self, indexes: &[Si]) -> ElementsMut<A, D>
+    /// **Panics** if an index is out of bounds or stride is zero.<br>
+    /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
+    pub fn slice_iter_mut(&mut self, indexes: &D::SliceArg) -> ElementsMut<A, D>
         where S: DataMut,
     {
         let mut it = self.view_mut();
@@ -1248,10 +1310,13 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     }
 
 
-    /// Transform the array into `shape`; any other shape
-    /// with the same number of elements is accepted.
+    /// Transform the array into `shape`; any shape with the same number of
+    /// elements is accepted.
     ///
-    /// **Panics** if sizes are incompatible.
+    /// May clone all elements if needed to arrange elements in standard
+    /// layout (and break sharing).
+    ///
+    /// **Panics** if shapes are incompatible.
     ///
     /// ```
     /// use ndarray::{arr1, arr2};
@@ -1266,7 +1331,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         where S: DataShared + DataOwned, A: Clone,
     {
         if shape.size() != self.dim.size() {
-            panic!("Incompatible sizes in reshape, attempted from: {:?}, to: {:?}",
+            panic!("Incompatible shapes in reshape, attempted from: {:?}, to: {:?}",
                    self.dim.slice(), shape.slice())
         }
         // Check if contiguous, if not => copy all, else just adapt strides
@@ -1283,6 +1348,40 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
             unsafe {
                 ArrayBase::from_vec_dim(shape, v)
             }
+        }
+    }
+
+    /// Transform the array into `shape`; any shape with the same number of
+    /// elements is accepted, but the source array or view must be
+    /// contiguous, otherwise we cannot rearrange the dimension.
+    ///
+    /// ```
+    /// use ndarray::{aview1, aview2};
+    ///
+    /// assert!(
+    ///     aview1(&[1., 2., 3., 4.]).into_shape((2, 2)).unwrap()
+    ///     == aview2(&[[1., 2.],
+    ///                 [3., 4.]])
+    /// );
+    /// ```
+    pub fn into_shape<E>(self, shape: E) -> Result<ArrayBase<S, E>, ShapeError>
+        where E: Dimension
+    {
+        if shape.size() != self.dim.size() {
+            return Err(ShapeError::IncompatibleShapes(
+                    self.dim.slice().to_vec().into_boxed_slice(),
+                    shape.slice().to_vec().into_boxed_slice()));
+        }
+        // Check if contiguous, if not => copy all, else just adapt strides
+        if self.is_standard_layout() {
+            Ok(ArrayBase {
+                data: self.data,
+                ptr: self.ptr,
+                strides: shape.default_strides(),
+                dim: shape,
+            })
+        } else {
+            Err(ShapeError::IncompatibleLayout)
         }
     }
 
@@ -2012,3 +2111,4 @@ enum ElementsRepr<S, C> {
     Slice(S),
     Counted(C),
 }
+
