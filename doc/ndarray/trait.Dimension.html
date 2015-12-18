@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `Dimension` trait in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, Dimension">
 
-    <title>rendarray 0.2.0-alpha.3 - ndarray::Dimension - Rust</title>
+    <title>rendarray 0.2.0-alpha.4 - ndarray::Dimension - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,8 +46,9 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-414' class='srclink' href='../src/ndarray/dimension.rs.html#24-178' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-484' class='srclink' href='../src/ndarray/dimension.rs.html#19-186' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub unsafe trait Dimension: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> {
+    type SliceArg: ?<a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>[<a class='struct' href='../ndarray/struct.Si.html' title='ndarray::Si'>Si</a>]</a>&gt;;
     fn <a href='#tymethod.ndim' class='fnname'>ndim</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>;
 
     fn <a href='#method.slice' class='fnname'>slice</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a> { ... }
@@ -58,11 +59,30 @@
     fn <a href='#method.next_for' class='fnname'>next_for</a>(&amp;self, index: Self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt; { ... }
     fn <a href='#method.stride_offset' class='fnname'>stride_offset</a>(index: &amp;Self, strides: &amp;Self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a> { ... }
     fn <a href='#method.stride_offset_checked' class='fnname'>stride_offset_checked</a>(&amp;self, strides: &amp;Self, index: &amp;Self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a>&gt; { ... }
-    fn <a href='#method.do_slices' class='fnname'>do_slices</a>(dim: &amp;mut Self, strides: &amp;mut Self, slices: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='struct' href='../ndarray/struct.Si.html' title='ndarray::Si'>Si</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a> { ... }
+    fn <a href='#method.do_slices' class='fnname'>do_slices</a>(dim: &amp;mut Self, strides: &amp;mut Self, slices: &amp;Self::<a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>SliceArg</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a> { ... }
 }</pre><div class='docblock'><p>Trait for the shape and index types of arrays.</p>
 
-<p>unsafe trait due to how the assumptions in the default impls work.</p>
+<p><code>unsafe</code> because of the assumptions in the default methods.</p>
+
+<p><strong><em>Don&#39;t implement this trait, it&#39;s internal to the crate and will
+evolve at will.</em></strong></p>
 </div>
+            <h2 id='associated-types'>Associated Types</h2>
+            <div class='methods'>
+        <h3 id='associatedtype.SliceArg' class='method stab '><code>type SliceArg: ?<a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>[<a class='struct' href='../ndarray/struct.Si.html' title='ndarray::Si'>Si</a>]</a>&gt;</code></h3><div class='docblock'><p><code>SliceArg</code> is the type which is used to specify slicing for this
+dimension.</p>
+
+<p>For the fixed size dimensions (tuples) it is a fixed size array
+of the correct size, which you pass by reference. For the <code>Vec</code>
+dimension it is a slice.</p>
+
+<ul>
+<li>For <code>Ix</code>: <code>[Si; 1]</code></li>
+<li>For <code>(Ix, Ix)</code>: <code>[Si; 2]</code></li>
+<li>and so on..</li>
+<li>For <code>Vec&lt;Ix&gt;</code>: <code>[Si]</code></li>
+</ul>
+</div></div>
             <h2 id='required-methods'>Required Methods</h2>
             <div class='methods'>
         <h3 id='tymethod.ndim' class='method stab '><code>fn <a href='#tymethod.ndim' class='fnname'>ndim</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h3></div>
@@ -72,7 +92,7 @@
 or None if there are no more.</p>
 </div><h3 id='method.stride_offset' class='method stab '><code>fn <a href='#method.stride_offset' class='fnname'>stride_offset</a>(index: &amp;Self, strides: &amp;Self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a></code></h3><div class='docblock'><p>Return stride offset for index.</p>
 </div><h3 id='method.stride_offset_checked' class='method stab '><code>fn <a href='#method.stride_offset_checked' class='fnname'>stride_offset_checked</a>(&amp;self, strides: &amp;Self, index: &amp;Self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a>&gt;</code></h3><div class='docblock'><p>Return stride offset for this dimension and index.</p>
-</div><h3 id='method.do_slices' class='method stab '><code>fn <a href='#method.do_slices' class='fnname'>do_slices</a>(dim: &amp;mut Self, strides: &amp;mut Self, slices: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='struct' href='../ndarray/struct.Si.html' title='ndarray::Si'>Si</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a></code></h3><div class='docblock'><p>Modify dimension, strides and return data pointer offset</p>
+</div><h3 id='method.do_slices' class='method stab '><code>fn <a href='#method.do_slices' class='fnname'>do_slices</a>(dim: &amp;mut Self, strides: &amp;mut Self, slices: &amp;Self::<a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>SliceArg</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.isize.html'>isize</a></code></h3><div class='docblock'><p>Modify dimension, strides and return data pointer offset</p>
 
 <p><strong>Panics</strong> if <code>slices</code> does not correspond to the number of axes,
 if any stride is 0, or if any index is out of bounds.</p>

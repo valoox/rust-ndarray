@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ndarray` crate.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ndarray">
 
-    <title>rendarray 0.2.0-alpha.3 - ndarray - Rust</title>
+    <title>rendarray 0.2.0-alpha.4 - ndarray - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2014' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2113' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>The <code>ndarray</code> crate provides an N-dimensional container similar to numpy&#39;s
 ndarray.</p>
 
@@ -88,9 +88,24 @@ or linear algebra.</li>
 <li>Optional, stable</li>
 <li>Enables serialization support</li>
 </ul></li>
+<li><code>rblas</code>
+
+<ul>
+<li>Optional, stable</li>
+<li>Enables <code>rblas</code> integration</li>
+</ul></li>
 </ul>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table>
+                    <tr class=' module-item'>
+                        <td><a class='mod' href='blas/index.html'
+                               title='ndarray::blas'>blas</a></td>
+                        <td class='docblock short'>
+                             <p>Experimental BLAS (Basic Linear Algebra Subprograms) integration</p>
+
+                        </td>
+                    </tr>
+                
                     <tr class=' module-item'>
                         <td><a class='mod' href='linalg/index.html'
                                title='ndarray::linalg'>linalg</a></td>
@@ -160,6 +175,16 @@ or linear algebra.</li>
                                title='ndarray::Si'>Si</a></td>
                         <td class='docblock short'>
                              <p>A slice, a description of a range of an array axis.</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.ShapeError.html'
+                               title='ndarray::ShapeError'>ShapeError</a></td>
+                        <td class='docblock short'>
+                             <p>An error that can be produced by <code>.into_shape()</code></p>
 
                         </td>
                     </tr>
