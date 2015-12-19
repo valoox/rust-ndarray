@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1255' class='srclink' href='../src/ndarray/lib.rs.html#291-301' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1255' class='srclink' href='../src/ndarray/lib.rs.html#290-300' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ArrayBase&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> {
     // some fields omitted
 }</pre><div class='docblock'><p>An <em>N</em>-dimensional array.</p>
@@ -96,19 +96,18 @@ the array. Slicing methods include <code>.slice()</code>, <code>.islice()</code>
 <code>.slice_mut()</code>.</p>
 
 <p>The dimensionality of the array determines the number of <em>axes</em>, for example
-a 2D array has three axes. These are listed in “big endian” order, so that
+a 2D array has two axes. These are listed in “big endian” order, so that
 the greatest dimension is listed first, the lowest dimension with the most
-rapidly varying index is the last.</p>
-
-<p>In a 2D array this means that indices are <code>(row, column)</code>, and the order of
+rapidly varying index is the last.
+For the 2D array this means that indices are <code>(row, column)</code>, and the order of
 the elements is <em>(0, 0), (0, 1), (0, 2), ... (1, 0), (1, 1), (1, 2) ...</em> etc.</p>
 
 <p>The slicing specification is passed as a function argument as a fixed size
 array with elements of type <a href="struct.Si.html"><code>Si</code></a> with fields <code>Si(begin, end, stride)</code>,
 where the values are signed integers, and <code>end</code> is an <code>Option&lt;Ixs&gt;</code>.
 The constant <a href="constant.S.html"><code>S</code></a> is a shorthand for the full range of an axis.
-For example, if the array has three axes, the slice argument is passed as
-type <code>&amp;[Si; 3]</code>.</p>
+For example, if the array has two axes, the slice argument is passed as
+type <code>&amp;[Si; 2]</code>.</p>
 
 <p>The macro <a href="macro.s!.html"><code>s![]</code></a> is however a much more convenient way to
 specify the slicing argument, so it will be used in all examples.</p>

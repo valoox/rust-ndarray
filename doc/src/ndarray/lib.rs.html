@@ -2236,7 +2236,6 @@
 <span id="2193">2193</span>
 <span id="2194">2194</span>
 <span id="2195">2195</span>
-<span id="2196">2196</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span><span class='op'>=</span><span class='string'>&quot;ndarray&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span><span class='op'>=</span><span class='string'>&quot;dylib&quot;</span>]</span>
@@ -2396,19 +2395,18 @@
 <span class='doccomment'>/// `.slice_mut()`.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The dimensionality of the array determines the number of *axes*, for example</span>
-<span class='doccomment'>/// a 2D array has three axes. These are listed in “big endian” order, so that</span>
+<span class='doccomment'>/// a 2D array has two axes. These are listed in “big endian” order, so that</span>
 <span class='doccomment'>/// the greatest dimension is listed first, the lowest dimension with the most</span>
 <span class='doccomment'>/// rapidly varying index is the last.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// In a 2D array this means that indices are `(row, column)`, and the order of</span>
+<span class='doccomment'>/// For the 2D array this means that indices are `(row, column)`, and the order of</span>
 <span class='doccomment'>/// the elements is *(0, 0), (0, 1), (0, 2), ... (1, 0), (1, 1), (1, 2) ...* etc.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The slicing specification is passed as a function argument as a fixed size</span>
 <span class='doccomment'>/// array with elements of type [`Si`] with fields `Si(begin, end, stride)`,</span>
 <span class='doccomment'>/// where the values are signed integers, and `end` is an `Option&lt;Ixs&gt;`.</span>
 <span class='doccomment'>/// The constant [`S`] is a shorthand for the full range of an axis.</span>
-<span class='doccomment'>/// For example, if the array has three axes, the slice argument is passed as</span>
-<span class='doccomment'>/// type `&amp;[Si; 3]`.</span>
+<span class='doccomment'>/// For example, if the array has two axes, the slice argument is passed as</span>
+<span class='doccomment'>/// type `&amp;[Si; 2]`.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The macro [`s![]`](macro.s!.html) is however a much more convenient way to</span>
 <span class='doccomment'>/// specify the slicing argument, so it will be used in all examples.</span>
