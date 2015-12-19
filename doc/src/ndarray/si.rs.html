@@ -189,7 +189,7 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// `Si(a, None, -1)` is every element, from `a`</span>
 <span class='doccomment'>/// until the end, in reverse order. Python equivalent is `[a::-1]`.</span>
-<span class='doccomment'>/// Macro equivalent is `s![..;-1]`.</span>
+<span class='doccomment'>/// Macro equivalent is `s![a..;-1]`.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Si</span>(<span class='kw'>pub</span> <span class='ident'>Ixs</span>, <span class='kw'>pub</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>, <span class='kw'>pub</span> <span class='ident'>Ixs</span>);
 
 <span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>Range</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span>
