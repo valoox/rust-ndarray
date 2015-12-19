@@ -155,6 +155,10 @@
 <span id="112">112</span>
 <span id="113">113</span>
 <span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{<span class='ident'>Range</span>, <span class='ident'>RangeFrom</span>, <span class='ident'>RangeTo</span>, <span class='ident'>RangeFull</span>};
 <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Ixs</span>};
@@ -172,16 +176,20 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// If `end` is `None`, the slice extends to the end of the axis.</span>
 <span class='doccomment'>///</span>
+<span class='doccomment'>/// See also the [`s![] macro`](macro.s!.html), a convenient way to specify</span>
+<span class='doccomment'>/// an array of `Si`.</span>
+<span class='doccomment'>///</span>
 <span class='doccomment'>/// ## Examples</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// `Si(0, None, 1)` is the full range of an axis.</span>
-<span class='doccomment'>/// Python equivalent is `[:]`.</span>
+<span class='doccomment'>/// Python equivalent is `[:]`. Macro equivalent is `s![..]`.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// `Si(a, Some(b), 2)` is every second element from `a` until `b`.</span>
-<span class='doccomment'>/// Python equivalent is `[a:b:2]`.</span>
+<span class='doccomment'>/// Python equivalent is `[a:b:2]`. Macro equivalent is `s![a..b;2]`.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// `Si(a, None, -1)` is every element, in reverse order, from `a`</span>
-<span class='doccomment'>/// until the end. Python equivalent is `[a::-1]`</span>
+<span class='doccomment'>/// `Si(a, None, -1)` is every element, from `a`</span>
+<span class='doccomment'>/// until the end, in reverse order. Python equivalent is `[a::-1]`.</span>
+<span class='doccomment'>/// Macro equivalent is `s![..;-1]`.</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Si</span>(<span class='kw'>pub</span> <span class='ident'>Ixs</span>, <span class='kw'>pub</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>, <span class='kw'>pub</span> <span class='ident'>Ixs</span>);
 
 <span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>Range</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span>

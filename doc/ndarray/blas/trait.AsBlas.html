@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `AsBlas` trait in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, AsBlas">
 
-    <title>rendarray 0.2.0-alpha.5 - ndarray::blas::AsBlas - Rust</title>
+    <title>rendarray 0.2.0-alpha.6 - ndarray::blas::AsBlas - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-440' class='srclink' href='../../src/ndarray/blas.rs.html#134-168' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-441' class='srclink' href='../../src/ndarray/blas.rs.html#136-170' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait AsBlas&lt;A, S, D&gt; {
     fn <a href='#tymethod.blas_checked' class='fnname'>blas_checked</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt;, <a class='enum' href='../../ndarray/enum.ShapeError.html' title='ndarray::ShapeError'>ShapeError</a>&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.DataOwned.html' title='ndarray::DataOwned'>DataOwned</a> + <a class='trait' href='../../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span>;
 
@@ -65,7 +65,7 @@ The result is always mutable, due to the requirement of having write
 access to update the layout either way. Breaks sharing if the array is
 an <code>Array</code>.</p>
 
-<p><strong>Errors:</strong> Produces an error if any dimension is larger than <code>i32::MAX</code>.</p>
+<p><strong>Errors:</strong> Produces an error if any dimension is larger than <code>c_int::MAX</code>.</p>
 </div></div>
             <h2 id='provided-methods'>Provided Methods</h2>
             <div class='methods'>
