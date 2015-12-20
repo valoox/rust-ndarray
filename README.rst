@@ -1,5 +1,9 @@
-rendarray
+ndarray
 =========
+
+- **Note:** CRATE NAME CHANGED TO ``ndarray``. Having package != crate ran
+  into many quirks of various tools. Changing the package name is easier for
+  everyone involved!
 
 The ``ndarray`` crate provides an N-dimensional container similar to numpy’s
 ndarray.
@@ -70,19 +74,27 @@ Crate Feature Flags
 .. |build_status| image:: https://travis-ci.org/bluss/rust-ndarray.svg?branch=master
 .. _build_status: https://travis-ci.org/bluss/rust-ndarray
 
-.. |crates| image:: http://meritbadge.herokuapp.com/rendarray
-.. _crates: https://crates.io/crates/rendarray
+.. |crates| image:: http://meritbadge.herokuapp.com/ndarray
+.. _crates: https://crates.io/crates/ndarray
 
 How to use with cargo::
 
     [dependencies]
-    rendarray = "0.2"
+    ndarray = "0.2"
 
 Recent Changes
 --------------
 
 - **Note:** At some point in a future release, the indexing type ``Ix`` will
   change to ``usize``
+
+- 0.2.0-alpha.8
+
+  - **Note:** CRATE NAME CHANGED TO ``ndarray``. Having package != crate ran
+    into many quirks of various tools. Changing the package name is easier for
+    everyone involved!
+  - Optimized ``scalar_sum()`` so that it will vectorize for the floating point
+    element case too.
 
 - 0.2.0-alpha.7
 
