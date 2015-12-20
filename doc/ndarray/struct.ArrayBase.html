@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ArrayBase` struct in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ArrayBase">
 
-    <title>rendarray 0.2.0-alpha.7 - ndarray::ArrayBase - Rust</title>
+    <title>ndarray 0.2.0-alpha.8 - ndarray::ArrayBase - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -472,6 +472,10 @@ layout (and break sharing).</p>
 <div class='docblock'><p>Transform the array into <code>shape</code>; any shape with the same number of
 elements is accepted, but the source array or view must be
 contiguous, otherwise we cannot rearrange the dimension.</p>
+
+<p><strong>Errors</strong> if the shapes don&#39;t have the same number of elements.<br>
+<strong>Errors</strong> if the input array is not c-contiguous (this will be
+slightly improved in the future).</p>
 <pre class='rust rust-example-rendered'>
 <span class='kw'>use</span> <span class='ident'>ndarray</span>::{<span class='ident'>aview1</span>, <span class='ident'>aview2</span>};
 
