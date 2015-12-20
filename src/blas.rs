@@ -169,6 +169,7 @@ pub trait AsBlas<A, S, D> {
         */
 }
 
+/// ***Requires `features = "rblas"`***
 impl<A, S, D> AsBlas<A, S, D> for ArrayBase<S, D>
     where S: Data<Elem=A>,
           D: Dimension,
@@ -203,11 +204,11 @@ impl<'a, A> Vector<A> for BlasArrayView<'a, A, Ix> {
         self.0.len() as c_int
     }
 
-    unsafe fn as_ptr(&self) -> *const A {
+    fn as_ptr(&self) -> *const A {
         self.0.ptr as *const _
     }
 
-    unsafe fn as_mut_ptr(&mut self) -> *mut A {
+    fn as_mut_ptr(&mut self) -> *mut A {
         panic!("BlasArrayView is not mutable");
     }
 
@@ -223,11 +224,11 @@ impl<'a, A> Vector<A> for BlasArrayViewMut<'a, A, Ix> {
         self.0.len() as c_int
     }
 
-    unsafe fn as_ptr(&self) -> *const A {
+    fn as_ptr(&self) -> *const A {
         self.0.ptr
     }
 
-    unsafe fn as_mut_ptr(&mut self) -> *mut A {
+    fn as_mut_ptr(&mut self) -> *mut A {
         self.0.ptr
     }
 

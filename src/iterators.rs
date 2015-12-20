@@ -1,7 +1,11 @@
 use std::marker;
 
-use super::{Dimension, Ix};
+use super::{Dimension, Ix, Ixs};
 use super::{Elements, ElementsRepr, ElementsBase, ElementsBaseMut, ElementsMut, Indexed, IndexedMut};
+use super::{
+    ArrayView,
+    ArrayViewMut,
+};
 
 /// Base for array iterators
 ///
@@ -42,7 +46,7 @@ impl<'a, A, D: Dimension> Baseiter<'a, A, D>
 impl<'a, A, D: Dimension> Baseiter<'a, A, D>
 {
     #[inline]
-    fn next(&mut self) -> Option<*mut A>
+    pub fn next(&mut self) -> Option<*mut A>
     {
         let index = match self.index {
             None => return None,
@@ -307,3 +311,101 @@ impl<'a, A, D: Dimension> Iterator for IndexedMut<'a, A, D>
     }
 }
 
+/// an iterator that traverses over all dimensions but the innermost,
+/// and yields each inner row.
+pub struct InnerIter<'a, A: 'a, D> {
+    inner_len: Ix,
+    inner_stride: Ixs,
+    iter: Baseiter<'a, A, D>,
+}
+
+pub fn new_outer<A, D>(mut v: ArrayView<A, D>) -> InnerIter<A, D>
+    where D: Dimension,
+{
+    if v.shape().len() == 0 {
+        InnerIter {
+            inner_len: 1,
+            inner_stride: 1,
+            iter: v.into_base_iter(),
+        }
+    } else {
+        // Set length of innerest dimension to 1, start iteration
+        let ndim = v.shape().len();
+        let len = v.shape()[ndim - 1];
+        let stride = v.strides()[ndim - 1];
+        v.dim.slice_mut()[ndim - 1] = 1;
+        InnerIter {
+            inner_len: len,
+            inner_stride: stride,
+            iter: v.into_base_iter(),
+        }
+    }
+}
+
+impl<'a, A, D> Iterator for InnerIter<'a, A, D>
+    where D: Dimension,
+{
+    type Item = ArrayView<'a, A, Ix>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|ptr| {
+            let view = ArrayView {
+                data: &[],
+                ptr: ptr,
+                dim: self.inner_len,
+                strides: self.inner_stride as Ix,
+            };
+            view
+        })
+    }
+}
+
+// NOTE: InnerIterMut is a mutable iterator and must not expose aliasing
+// pointers. Due to this we use an empty slice for the raw data (it's unused
+// anyway).
+/// an iterator that traverses over all dimensions but the innermost,
+/// and yields each inner row (mutable).
+pub struct InnerIterMut<'a, A: 'a, D> {
+    inner_len: Ix,
+    inner_stride: Ixs,
+    iter: Baseiter<'a, A, D>,
+}
+
+pub fn new_outer_mut<A, D>(mut v: ArrayViewMut<A, D>) -> InnerIterMut<A, D>
+    where D: Dimension,
+{
+    if v.shape().len() == 0 {
+        InnerIterMut {
+            inner_len: 1,
+            inner_stride: 1,
+            iter: v.into_base_iter(),
+        }
+    } else {
+        // Set length of innerest dimension to 1, start iteration
+        let ndim = v.shape().len();
+        let len = v.shape()[ndim - 1];
+        let stride = v.strides()[ndim - 1];
+        v.dim.slice_mut()[ndim - 1] = 1;
+        InnerIterMut {
+            inner_len: len,
+            inner_stride: stride,
+            iter: v.into_base_iter(),
+        }
+    }
+}
+
+impl<'a, A, D> Iterator for InnerIterMut<'a, A, D>
+    where D: Dimension,
+{
+    type Item = ArrayViewMut<'a, A, Ix>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|ptr| {
+            let view = ArrayViewMut {
+                data: &mut [],
+                ptr: ptr,
+                dim: self.inner_len,
+                strides: self.inner_stride as Ix,
+            };
+            view
+        })
+    }
+}
