@@ -2236,6 +2236,116 @@
 <span id="2193">2193</span>
 <span id="2194">2194</span>
 <span id="2195">2195</span>
+<span id="2196">2196</span>
+<span id="2197">2197</span>
+<span id="2198">2198</span>
+<span id="2199">2199</span>
+<span id="2200">2200</span>
+<span id="2201">2201</span>
+<span id="2202">2202</span>
+<span id="2203">2203</span>
+<span id="2204">2204</span>
+<span id="2205">2205</span>
+<span id="2206">2206</span>
+<span id="2207">2207</span>
+<span id="2208">2208</span>
+<span id="2209">2209</span>
+<span id="2210">2210</span>
+<span id="2211">2211</span>
+<span id="2212">2212</span>
+<span id="2213">2213</span>
+<span id="2214">2214</span>
+<span id="2215">2215</span>
+<span id="2216">2216</span>
+<span id="2217">2217</span>
+<span id="2218">2218</span>
+<span id="2219">2219</span>
+<span id="2220">2220</span>
+<span id="2221">2221</span>
+<span id="2222">2222</span>
+<span id="2223">2223</span>
+<span id="2224">2224</span>
+<span id="2225">2225</span>
+<span id="2226">2226</span>
+<span id="2227">2227</span>
+<span id="2228">2228</span>
+<span id="2229">2229</span>
+<span id="2230">2230</span>
+<span id="2231">2231</span>
+<span id="2232">2232</span>
+<span id="2233">2233</span>
+<span id="2234">2234</span>
+<span id="2235">2235</span>
+<span id="2236">2236</span>
+<span id="2237">2237</span>
+<span id="2238">2238</span>
+<span id="2239">2239</span>
+<span id="2240">2240</span>
+<span id="2241">2241</span>
+<span id="2242">2242</span>
+<span id="2243">2243</span>
+<span id="2244">2244</span>
+<span id="2245">2245</span>
+<span id="2246">2246</span>
+<span id="2247">2247</span>
+<span id="2248">2248</span>
+<span id="2249">2249</span>
+<span id="2250">2250</span>
+<span id="2251">2251</span>
+<span id="2252">2252</span>
+<span id="2253">2253</span>
+<span id="2254">2254</span>
+<span id="2255">2255</span>
+<span id="2256">2256</span>
+<span id="2257">2257</span>
+<span id="2258">2258</span>
+<span id="2259">2259</span>
+<span id="2260">2260</span>
+<span id="2261">2261</span>
+<span id="2262">2262</span>
+<span id="2263">2263</span>
+<span id="2264">2264</span>
+<span id="2265">2265</span>
+<span id="2266">2266</span>
+<span id="2267">2267</span>
+<span id="2268">2268</span>
+<span id="2269">2269</span>
+<span id="2270">2270</span>
+<span id="2271">2271</span>
+<span id="2272">2272</span>
+<span id="2273">2273</span>
+<span id="2274">2274</span>
+<span id="2275">2275</span>
+<span id="2276">2276</span>
+<span id="2277">2277</span>
+<span id="2278">2278</span>
+<span id="2279">2279</span>
+<span id="2280">2280</span>
+<span id="2281">2281</span>
+<span id="2282">2282</span>
+<span id="2283">2283</span>
+<span id="2284">2284</span>
+<span id="2285">2285</span>
+<span id="2286">2286</span>
+<span id="2287">2287</span>
+<span id="2288">2288</span>
+<span id="2289">2289</span>
+<span id="2290">2290</span>
+<span id="2291">2291</span>
+<span id="2292">2292</span>
+<span id="2293">2293</span>
+<span id="2294">2294</span>
+<span id="2295">2295</span>
+<span id="2296">2296</span>
+<span id="2297">2297</span>
+<span id="2298">2298</span>
+<span id="2299">2299</span>
+<span id="2300">2300</span>
+<span id="2301">2301</span>
+<span id="2302">2302</span>
+<span id="2303">2303</span>
+<span id="2304">2304</span>
+<span id="2305">2305</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span><span class='op'>=</span><span class='string'>&quot;ndarray&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_type</span><span class='op'>=</span><span class='string'>&quot;dylib&quot;</span>]</span>
@@ -2257,22 +2367,26 @@
 <span class='doccomment'>//! ## Highlights</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! - Generic N-dimensional array</span>
-<span class='doccomment'>//! - General slicing, also with steps &gt; 1, and negative indices to mean</span>
+<span class='doccomment'>//! - Slicing, also with arbitrary step size, and negative indices to mean</span>
 <span class='doccomment'>//!   elements from the end of the axis.</span>
 <span class='doccomment'>//! - There is both an easy to use copy on write array (`Array`),</span>
 <span class='doccomment'>//!   or a regular uniquely owned array (`OwnedArray`), and both can use</span>
 <span class='doccomment'>//!   read-only and read-write array views.</span>
-<span class='doccomment'>//! - Iteration and most operations are efficient on contiguous c-order arrays</span>
-<span class='doccomment'>//!   (the default layout, without any transposition or discontiguous subslicing).</span>
+<span class='doccomment'>//! - Iteration and most operations are very efficient on contiguous c-order arrays</span>
+<span class='doccomment'>//!   (the default layout, without any transposition or discontiguous subslicing),</span>
+<span class='doccomment'>//!   and on arrays where the lowest dimension is contiguous.</span>
 <span class='doccomment'>//! - Array views can be used to slice and mutate any `[T]` data.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## Status and Lookout</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! - Still iterating on the API</span>
-<span class='doccomment'>//! - Focus is on being a generic N-dimensional container</span>
-<span class='doccomment'>//! - Implements numpy striding and broadcasting</span>
-<span class='doccomment'>//! - Arithmetic operations and numerics need a rethink. They are not very</span>
-<span class='doccomment'>//!   well optimized.</span>
+<span class='doccomment'>//! - Performance status:</span>
+<span class='doccomment'>//!   + Arithmetic involving contiguous c-order arrays and contiguous lowest</span>
+<span class='doccomment'>//!     dimension arrays optimizes very well.</span>
+<span class='doccomment'>//!   + `.fold()` and `.zip_mut_with()` are the most efficient ways to</span>
+<span class='doccomment'>//!     perform single traversal and lock step traversal respectively.</span>
+<span class='doccomment'>//!   + Transposed arrays where the lowest dimension is not c-contiguous</span>
+<span class='doccomment'>//!     is still a pain point.</span>
 <span class='doccomment'>//! - There is experimental bridging to the linear algebra package `rblas`.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## Crate Feature Flags</span>
@@ -2301,6 +2415,7 @@
 
 <span class='kw'>use</span> <span class='ident'>libnum</span>::<span class='ident'>Float</span>;
 
+<span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>mem</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{<span class='ident'>Add</span>, <span class='ident'>Sub</span>, <span class='ident'>Mul</span>, <span class='ident'>Div</span>, <span class='ident'>Rem</span>, <span class='ident'>Neg</span>, <span class='ident'>Not</span>, <span class='ident'>Shr</span>, <span class='ident'>Shl</span>,
     <span class='ident'>BitAnd</span>,
@@ -2319,6 +2434,10 @@
 
 <span class='kw'>use</span> <span class='ident'>dimension</span>::<span class='ident'>stride_offset</span>;
 <span class='kw'>use</span> <span class='ident'>iterators</span>::<span class='ident'>Baseiter</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>iterators</span>::{
+    <span class='ident'>InnerIter</span>,
+    <span class='ident'>InnerIterMut</span>,
+};
 
 <span class='kw'>pub</span> <span class='kw'>mod</span> <span class='ident'>linalg</span>;
 <span class='kw'>mod</span> <span class='ident'>arraytraits</span>;
@@ -2795,12 +2914,15 @@
     <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
 {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>into_base_iter</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ElementsBase</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>into_base_iter</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Baseiter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
         <span class='kw'>unsafe</span> {
-            <span class='ident'>ElementsBase</span> { <span class='ident'>inner</span>:
-                <span class='ident'>Baseiter</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>ptr</span>, <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>clone</span>(), <span class='self'>self</span>.<span class='ident'>strides</span>.<span class='ident'>clone</span>())
-            }
+            <span class='ident'>Baseiter</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>ptr</span>, <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>clone</span>(), <span class='self'>self</span>.<span class='ident'>strides</span>.<span class='ident'>clone</span>())
         }
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>into_elements_base</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ElementsBase</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
+        <span class='ident'>ElementsBase</span> { <span class='ident'>inner</span>: <span class='self'>self</span>.<span class='ident'>into_base_iter</span>() }
     }
 
     <span class='kw'>fn</span> <span class='ident'>into_iter_</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Elements</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
@@ -2809,7 +2931,7 @@
             <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>slc</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>into_slice</span>() {
                 <span class='ident'>ElementsRepr</span>::<span class='ident'>Slice</span>(<span class='ident'>slc</span>.<span class='ident'>iter</span>())
             } <span class='kw'>else</span> {
-                <span class='ident'>ElementsRepr</span>::<span class='ident'>Counted</span>(<span class='self'>self</span>.<span class='ident'>into_base_iter</span>())
+                <span class='ident'>ElementsRepr</span>::<span class='ident'>Counted</span>(<span class='self'>self</span>.<span class='ident'>into_elements_base</span>())
             }
         }
     }
@@ -2830,12 +2952,15 @@
     <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
 {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>into_base_iter</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ElementsBaseMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>into_base_iter</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Baseiter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
         <span class='kw'>unsafe</span> {
-            <span class='ident'>ElementsBaseMut</span> { <span class='ident'>inner</span>:
-                <span class='ident'>Baseiter</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>ptr</span>, <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>clone</span>(), <span class='self'>self</span>.<span class='ident'>strides</span>.<span class='ident'>clone</span>())
-            }
+            <span class='ident'>Baseiter</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>ptr</span>, <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>clone</span>(), <span class='self'>self</span>.<span class='ident'>strides</span>.<span class='ident'>clone</span>())
         }
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>fn</span> <span class='ident'>into_elements_base</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ElementsBaseMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
+        <span class='ident'>ElementsBaseMut</span> { <span class='ident'>inner</span>: <span class='self'>self</span>.<span class='ident'>into_base_iter</span>() }
     }
 
     <span class='kw'>fn</span> <span class='ident'>into_iter_</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ElementsMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
@@ -2847,7 +2972,7 @@
                     };
                     <span class='ident'>ElementsRepr</span>::<span class='ident'>Slice</span>(<span class='ident'>slc</span>.<span class='ident'>iter_mut</span>())
                 } <span class='kw'>else</span> {
-                    <span class='ident'>ElementsRepr</span>::<span class='ident'>Counted</span>(<span class='self'>self</span>.<span class='ident'>into_base_iter</span>())
+                    <span class='ident'>ElementsRepr</span>::<span class='ident'>Counted</span>(<span class='self'>self</span>.<span class='ident'>into_elements_base</span>())
                 }
         }
     }
@@ -2964,7 +3089,7 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Iterator element type is `(D, &amp;A)`.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>indexed_iter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Indexed</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
-        <span class='ident'>Indexed</span>(<span class='self'>self</span>.<span class='ident'>elements_base</span>())
+        <span class='ident'>Indexed</span>(<span class='self'>self</span>.<span class='ident'>view</span>().<span class='ident'>into_elements_base</span>())
     }
 
     <span class='doccomment'>/// Return an iterator of mutable references to the elements of the array.</span>
@@ -2977,20 +3102,13 @@
         <span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_iter_</span>()
     }
 
-    <span class='kw'>fn</span> <span class='ident'>iter_base_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ElementsBaseMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
-        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
-    {
-        <span class='self'>self</span>.<span class='ident'>ensure_unique</span>();
-        <span class='ident'>ElementsBaseMut</span> { <span class='ident'>inner</span>: <span class='self'>self</span>.<span class='ident'>base_iter</span>() }
-    }
-
     <span class='doccomment'>/// Return an iterator of indexes and mutable references to the elements of the array.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Iterator element type is `(D, &amp;mut A)`.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>indexed_iter_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>IndexedMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
         <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
     {
-        <span class='ident'>IndexedMut</span>(<span class='self'>self</span>.<span class='ident'>iter_base_mut</span>())
+        <span class='ident'>IndexedMut</span>(<span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_elements_base</span>())
     }
 
 
@@ -3177,19 +3295,6 @@
         <span class='self'>self</span>.<span class='ident'>strides</span>.<span class='ident'>slice_mut</span>().<span class='ident'>swap</span>(<span class='ident'>ax</span>, <span class='ident'>bx</span>);
     }
 
-    <span class='doccomment'>/// Return a protoiterator</span>
-    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>base_iter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>Baseiter</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
-    {
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>Baseiter</span>::<span class='ident'>new</span>(<span class='self'>self</span>.<span class='ident'>ptr</span>, <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>clone</span>(), <span class='self'>self</span>.<span class='ident'>strides</span>.<span class='ident'>clone</span>())
-        }
-    }
-
-    <span class='kw'>fn</span> <span class='ident'>elements_base</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>ElementsBase</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
-        <span class='ident'>ElementsBase</span> { <span class='ident'>inner</span>: <span class='self'>self</span>.<span class='ident'>base_iter</span>() }
-    }
-
     <span class='doccomment'>/// Along `axis`, select the subview `index` and return an</span>
     <span class='doccomment'>/// array with that axis removed.</span>
     <span class='doccomment'>///</span>
@@ -3278,6 +3383,35 @@
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>it</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>view_mut</span>();
         <span class='ident'>dimension</span>::<span class='ident'>do_sub</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>it</span>.<span class='ident'>dim</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>it</span>.<span class='ident'>ptr</span>, <span class='kw-2'>&amp;</span><span class='ident'>it</span>.<span class='ident'>strides</span>, <span class='ident'>axis</span>, <span class='ident'>index</span>);
         <span class='ident'>it</span>.<span class='ident'>into_iter_</span>()
+    }
+
+    <span class='doccomment'>/// Return an iterator that traverses over all dimensions but the innermost,</span>
+    <span class='doccomment'>/// and yields each inner row.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Iterator element is `ArrayView&lt;A, Ix&gt;` (1D array view).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use ndarray::arr3;</span>
+    <span class='doccomment'>/// let a = arr3(&amp;[[[ 0,  1,  2],    // -- row 0, 0</span>
+    <span class='doccomment'>///                 [ 3,  4,  5]],   // -- row 0, 1</span>
+    <span class='doccomment'>///                [[ 6,  7,  8],    // -- row 1, 0</span>
+    <span class='doccomment'>///                 [ 9, 10, 11]]]); // -- row 1, 1</span>
+    <span class='doccomment'>/// // `inner_iter` yields the four inner rows of the 3D array.</span>
+    <span class='doccomment'>/// let mut row_sums = a.inner_iter().map(|v| v.scalar_sum());</span>
+    <span class='doccomment'>/// assert_eq!(row_sums.collect::&lt;Vec&lt;_&gt;&gt;(), vec![3, 12, 21, 30]);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>inner_iter</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>InnerIter</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
+        <span class='ident'>iterators</span>::<span class='ident'>new_outer</span>(<span class='self'>self</span>.<span class='ident'>view</span>())
+    }
+
+    <span class='doccomment'>/// Return an iterator that traverses over all dimensions but the innermost,</span>
+    <span class='doccomment'>/// and yields each inner row.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Iterator element is `ArrayViewView&lt;A, Ix&gt;` (1D read-write array view).</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>inner_iter_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>InnerIterMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>
+    {
+        <span class='ident'>iterators</span>::<span class='ident'>new_outer_mut</span>(<span class='self'>self</span>.<span class='ident'>view_mut</span>())
     }
 
     <span class='comment'>// Return (length, stride) for diagonal</span>
@@ -3589,10 +3723,8 @@
         })
     }
 
-    <span class='doccomment'>/// Act like a larger size and/or shape array by *broadcasting*</span>
-    <span class='doccomment'>/// into a larger shape, if possible.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Return `None` if shapes can not be broadcast together.</span>
+    <span class='attribute'>#[<span class='ident'>cfg_attr</span>(<span class='ident'>has_deprecated</span>, <span class='ident'>deprecated</span>(<span class='ident'>note</span><span class='op'>=</span><span class='string'>&quot;use .broadcast() instead&quot;</span>))]</span>
+    <span class='doccomment'>/// ***Deprecated: Use `.broadcast()` instead.***</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>broadcast_iter</span><span class='op'>&lt;</span><span class='ident'>E</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dim</span>: <span class='ident'>E</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Elements</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>E</span><span class='op'>&gt;&gt;</span>
         <span class='kw'>where</span> <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
     {
@@ -3603,8 +3735,8 @@
     <span class='kw'>fn</span> <span class='ident'>broadcast_iter_unwrap</span><span class='op'>&lt;</span><span class='ident'>E</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dim</span>: <span class='ident'>E</span>) <span class='op'>-&gt;</span> <span class='ident'>Elements</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>E</span><span class='op'>&gt;</span>
         <span class='kw'>where</span> <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
     {
-        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>broadcast_iter</span>(<span class='ident'>dim</span>.<span class='ident'>clone</span>()) {
-            <span class='prelude-val'>Some</span>(<span class='ident'>it</span>) <span class='op'>=&gt;</span> <span class='ident'>it</span>,
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>broadcast</span>(<span class='ident'>dim</span>.<span class='ident'>clone</span>()) {
+            <span class='prelude-val'>Some</span>(<span class='ident'>it</span>) <span class='op'>=&gt;</span> <span class='ident'>it</span>.<span class='ident'>into_iter</span>(),
             <span class='prelude-val'>None</span> <span class='op'>=&gt;</span> <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Could not broadcast array from shape: {:?} to: {:?}&quot;</span>,
                            <span class='self'>self</span>.<span class='ident'>shape</span>(), <span class='ident'>dim</span>.<span class='ident'>slice</span>())
         }
@@ -3614,7 +3746,8 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// **Note:** Data memory order may not correspond to the index order</span>
     <span class='doccomment'>/// of the array. Neither is the raw data slice is restricted to just the</span>
-    <span class='doccomment'>/// Array’s view.</span>
+    <span class='doccomment'>/// Array’s view.&lt;br&gt;</span>
+    <span class='doccomment'>/// **Note:** the slice may be empty.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>raw_data</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span>[<span class='ident'>A</span>] {
         <span class='self'>self</span>.<span class='ident'>data</span>.<span class='ident'>slice</span>()
     }
@@ -3623,7 +3756,8 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// **Note:** Data memory order may not correspond to the index order</span>
     <span class='doccomment'>/// of the array. Neither is the raw data slice is restricted to just the</span>
-    <span class='doccomment'>/// array’s view.</span>
+    <span class='doccomment'>/// Array’s view.&lt;br&gt;</span>
+    <span class='doccomment'>/// **Note:** the slice may be empty.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// **Note:** The data is uniquely held and nonaliased</span>
     <span class='doccomment'>/// while it is mutably borrowed.</span>
@@ -3636,6 +3770,10 @@
 
     <span class='kw'>fn</span> <span class='ident'>pointer_is_inbounds</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
         <span class='kw'>let</span> <span class='ident'>slc</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>data</span>.<span class='ident'>slice</span>();
+        <span class='kw'>if</span> <span class='ident'>slc</span>.<span class='ident'>is_empty</span>() {
+            <span class='comment'>// special case for data-less views</span>
+            <span class='kw'>return</span> <span class='boolval'>true</span>;
+        }
         <span class='kw'>let</span> <span class='ident'>ptr</span> <span class='op'>=</span> <span class='ident'>slc</span>.<span class='ident'>as_ptr</span>() <span class='kw'>as</span> <span class='op'>*</span><span class='kw-2'>mut</span> _;
         <span class='kw'>let</span> <span class='ident'>end</span> <span class='op'>=</span>  <span class='kw'>unsafe</span> {
             <span class='ident'>ptr</span>.<span class='ident'>offset</span>(<span class='ident'>slc</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>isize</span>)
@@ -3653,23 +3791,14 @@
               <span class='ident'>A</span>: <span class='ident'>Clone</span>,
               <span class='ident'>S2</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
     {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>shape</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>shape</span>() {
-            <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>rhs</span>.<span class='ident'>iter</span>()) {
-                <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>y</span>.<span class='ident'>clone</span>();
-            }
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>other_iter</span> <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>broadcast_iter_unwrap</span>(<span class='self'>self</span>.<span class='ident'>dim</span>());
-            <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>other_iter</span>) {
-                <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>y</span>.<span class='ident'>clone</span>();
-            }
-        }
+        <span class='self'>self</span>.<span class='ident'>zip_mut_with</span>(<span class='ident'>rhs</span>, <span class='op'>|</span><span class='ident'>x</span>, <span class='ident'>y</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>y</span>.<span class='ident'>clone</span>());
     }
 
     <span class='doccomment'>/// Perform an elementwise assigment to `self` from scalar `x`.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>assign_scalar</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>x</span>: <span class='kw-2'>&amp;</span><span class='ident'>A</span>)
         <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>, <span class='ident'>A</span>: <span class='ident'>Clone</span>,
     {
-        <span class='self'>self</span>.<span class='ident'>unordered_foreach_mut</span>(<span class='op'>|</span><span class='ident'>elt</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>elt</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>());
+        <span class='self'>self</span>.<span class='ident'>unordered_foreach_mut</span>(<span class='kw'>move</span> <span class='op'>|</span><span class='ident'>elt</span><span class='op'>|</span> <span class='op'>*</span><span class='ident'>elt</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>());
     }
 
     <span class='doccomment'>/// Apply closure `f` to each element in the array, in whatever</span>
@@ -3678,9 +3807,121 @@
         <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
               <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>A</span>)
     {
-        <span class='kw'>for</span> <span class='ident'>elt</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>() {
-            <span class='ident'>f</span>(<span class='ident'>elt</span>);
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>slc</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>as_slice_mut</span>() {
+            <span class='kw'>for</span> <span class='ident'>elt</span> <span class='kw'>in</span> <span class='ident'>slc</span> {
+                <span class='ident'>f</span>(<span class='ident'>elt</span>);
+            }
+            <span class='kw'>return</span>;
+        } 
+        <span class='kw'>for</span> <span class='ident'>row</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>inner_iter_mut</span>() {
+            <span class='kw'>for</span> <span class='ident'>elt</span> <span class='kw'>in</span> <span class='ident'>row</span> {
+                <span class='ident'>f</span>(<span class='ident'>elt</span>);
+            }
         }
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>zip_with_mut_same_shape</span><span class='op'>&lt;</span><span class='ident'>B</span>, <span class='ident'>S2</span>, <span class='ident'>E</span>, <span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S2</span>, <span class='ident'>E</span><span class='op'>&gt;</span>, <span class='kw-2'>mut</span> <span class='ident'>f</span>: <span class='ident'>F</span>)
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
+              <span class='ident'>S2</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>B</span><span class='op'>&gt;</span>,
+              <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
+              <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>A</span>, <span class='kw-2'>&amp;</span><span class='ident'>B</span>)
+    {
+        <span class='macro'>debug_assert_eq</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>shape</span>(), <span class='ident'>rhs</span>.<span class='ident'>shape</span>());
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>self_s</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>as_slice_mut</span>() {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>rhs_s</span>) <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>as_slice</span>() {
+                <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>min</span>(<span class='ident'>self_s</span>.<span class='ident'>len</span>(), <span class='ident'>rhs_s</span>.<span class='ident'>len</span>());
+                <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>self_s</span>[..<span class='ident'>len</span>];
+                <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>rhs_s</span>[..<span class='ident'>len</span>];
+                <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>len</span> {
+                    <span class='ident'>f</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>s</span>[<span class='ident'>i</span>], <span class='kw-2'>&amp;</span><span class='ident'>r</span>[<span class='ident'>i</span>]);
+                }
+                <span class='kw'>return</span>;
+            }
+        }
+        <span class='comment'>// otherwise, fall back to the outer iter</span>
+        <span class='self'>self</span>.<span class='ident'>zip_with_mut_outer_iter</span>(<span class='ident'>rhs</span>, <span class='ident'>f</span>);
+    }
+
+    <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>always</span>)]</span>
+    <span class='kw'>fn</span> <span class='ident'>zip_with_mut_outer_iter</span><span class='op'>&lt;</span><span class='ident'>B</span>, <span class='ident'>S2</span>, <span class='ident'>E</span>, <span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S2</span>, <span class='ident'>E</span><span class='op'>&gt;</span>, <span class='kw-2'>mut</span> <span class='ident'>f</span>: <span class='ident'>F</span>)
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
+              <span class='ident'>S2</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>B</span><span class='op'>&gt;</span>,
+              <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
+              <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>A</span>, <span class='kw-2'>&amp;</span><span class='ident'>B</span>)
+    {
+        <span class='macro'>debug_assert_eq</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>shape</span>(), <span class='ident'>rhs</span>.<span class='ident'>shape</span>());
+        <span class='comment'>// otherwise, fall back to the outer iter</span>
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>try_slices</span> <span class='op'>=</span> <span class='boolval'>true</span>;
+        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>rows</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>inner_iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>rhs</span>.<span class='ident'>inner_iter</span>());
+        <span class='kw'>for</span> (<span class='kw-2'>mut</span> <span class='ident'>s_row</span>, <span class='ident'>r_row</span>) <span class='kw'>in</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>rows</span> {
+            <span class='kw'>if</span> <span class='ident'>try_slices</span> {
+                <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>self_s</span>) <span class='op'>=</span> <span class='ident'>s_row</span>.<span class='ident'>as_slice_mut</span>() {
+                    <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>rhs_s</span>) <span class='op'>=</span> <span class='ident'>r_row</span>.<span class='ident'>as_slice</span>() {
+                        <span class='kw'>let</span> <span class='ident'>len</span> <span class='op'>=</span> <span class='ident'>cmp</span>::<span class='ident'>min</span>(<span class='ident'>self_s</span>.<span class='ident'>len</span>(), <span class='ident'>rhs_s</span>.<span class='ident'>len</span>());
+                        <span class='kw'>let</span> <span class='ident'>s</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>self_s</span>[..<span class='ident'>len</span>];
+                        <span class='kw'>let</span> <span class='ident'>r</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='ident'>rhs_s</span>[..<span class='ident'>len</span>];
+                        <span class='kw'>for</span> <span class='ident'>i</span> <span class='kw'>in</span> <span class='number'>0</span>..<span class='ident'>len</span> {
+                            <span class='ident'>f</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>s</span>[<span class='ident'>i</span>], <span class='kw-2'>&amp;</span><span class='ident'>r</span>[<span class='ident'>i</span>]);
+                        }
+                        <span class='kw'>continue</span>;
+                    }
+                }
+                <span class='ident'>try_slices</span> <span class='op'>=</span> <span class='boolval'>false</span>;
+            }
+            <span class='comment'>// FIXME: Regular .zip() is slow</span>
+            <span class='kw'>for</span> (<span class='ident'>y</span>, <span class='ident'>x</span>) <span class='kw'>in</span> <span class='ident'>s_row</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>r_row</span>) {
+                <span class='ident'>f</span>(<span class='ident'>y</span>, <span class='ident'>x</span>);
+            }
+        }
+    }
+
+    <span class='comment'>// FIXME: Guarantee the order here or not?</span>
+    <span class='doccomment'>/// Traverse two arrays in unspecified order, in lock step,</span>
+    <span class='doccomment'>/// calling the closure `f` on each element pair.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// If their shapes disagree, `rhs` is broadcast to the shape of `self`.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **Panics** if broadcasting isn’t possible.</span>
+    <span class='attribute'>#[<span class='ident'>inline</span>]</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>zip_mut_with</span><span class='op'>&lt;</span><span class='ident'>B</span>, <span class='ident'>S2</span>, <span class='ident'>E</span>, <span class='ident'>F</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S2</span>, <span class='ident'>E</span><span class='op'>&gt;</span>, <span class='kw-2'>mut</span> <span class='ident'>f</span>: <span class='ident'>F</span>)
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
+              <span class='ident'>S2</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>B</span><span class='op'>&gt;</span>,
+              <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
+              <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>A</span>, <span class='kw-2'>&amp;</span><span class='ident'>B</span>)
+    {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&amp;&amp;</span> <span class='self'>self</span>.<span class='ident'>shape</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>shape</span>() {
+            <span class='self'>self</span>.<span class='ident'>zip_with_mut_same_shape</span>(<span class='ident'>rhs</span>, <span class='ident'>f</span>);
+        } <span class='kw'>else</span> <span class='kw'>if</span> <span class='ident'>rhs</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>==</span> <span class='number'>0</span> {
+            <span class='comment'>// Skip broadcast from 0-dim array</span>
+            <span class='comment'>// FIXME: Order</span>
+            <span class='kw'>unsafe</span> {
+                <span class='kw'>let</span> <span class='ident'>rhs_elem</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='op'>*</span><span class='ident'>rhs</span>.<span class='ident'>ptr</span>;
+                <span class='kw'>let</span> <span class='ident'>f_</span> <span class='op'>=</span> <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>f</span>;
+                <span class='self'>self</span>.<span class='ident'>unordered_foreach_mut</span>(<span class='kw'>move</span> <span class='op'>|</span><span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>f_</span>(<span class='ident'>elt</span>, <span class='ident'>rhs_elem</span>));
+            }
+        } <span class='kw'>else</span> {
+            <span class='kw'>let</span> <span class='ident'>rhs_broadcast</span> <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>broadcast</span>(<span class='self'>self</span>.<span class='ident'>dim</span>()).<span class='ident'>unwrap</span>();
+            <span class='self'>self</span>.<span class='ident'>zip_with_mut_outer_iter</span>(<span class='kw-2'>&amp;</span><span class='ident'>rhs_broadcast</span>, <span class='ident'>f</span>);
+        }
+    }
+
+    <span class='doccomment'>/// Traverse the array elements in order and apply a fold,</span>
+    <span class='doccomment'>/// returning the resulting value.</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>fold</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>F</span>, <span class='ident'>B</span><span class='op'>&gt;</span>(<span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>init</span>: <span class='ident'>B</span>, <span class='kw-2'>mut</span> <span class='ident'>f</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>B</span>
+        <span class='kw'>where</span> <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='ident'>B</span>, <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>A</span>) <span class='op'>-&gt;</span> <span class='ident'>B</span>, <span class='ident'>A</span>: <span class='lifetime'>&#39;a</span>
+    {
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>slc</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>as_slice</span>() {
+            <span class='kw'>for</span> <span class='ident'>elt</span> <span class='kw'>in</span> <span class='ident'>slc</span> {
+                <span class='ident'>init</span> <span class='op'>=</span> <span class='ident'>f</span>(<span class='ident'>init</span>, <span class='ident'>elt</span>);
+            }
+            <span class='kw'>return</span> <span class='ident'>init</span>;
+        }
+        <span class='kw'>for</span> <span class='ident'>row</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>inner_iter</span>() {
+            <span class='kw'>for</span> <span class='ident'>elt</span> <span class='kw'>in</span> <span class='ident'>row</span> {
+                <span class='ident'>init</span> <span class='op'>=</span> <span class='ident'>f</span>(<span class='ident'>init</span>, <span class='ident'>elt</span>);
+            }
+        }
+        <span class='ident'>init</span>
     }
 
     <span class='doccomment'>/// Apply `f` elementwise and return a new array with</span>
@@ -3946,6 +4187,21 @@
         <span class='ident'>res</span>
     }
 
+    <span class='doccomment'>/// Return the sum of all elements in the array.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='doccomment'>/// use ndarray::arr2;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let a = arr2(&amp;[[1., 2.],</span>
+    <span class='doccomment'>///                [3., 4.]]);</span>
+    <span class='doccomment'>/// assert_eq!(a.scalar_sum(), 10.);</span>
+    <span class='doccomment'>/// ```</span>
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>scalar_sum</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>A</span>
+        <span class='kw'>where</span> <span class='ident'>A</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='ident'>Add</span><span class='op'>&lt;</span><span class='ident'>Output</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='op'>+</span> <span class='ident'>libnum</span>::<span class='ident'>Zero</span>,
+    {
+        <span class='self'>self</span>.<span class='ident'>fold</span>(<span class='ident'>A</span>::<span class='ident'>zero</span>(), <span class='op'>|</span><span class='ident'>acc</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>acc</span> <span class='op'>+</span> <span class='ident'>elt</span>.<span class='ident'>clone</span>())
+    }
+
     <span class='doccomment'>/// Return mean along `axis`.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```</span>
@@ -4142,17 +4398,9 @@
         <span class='kw'>where</span> <span class='ident'>A</span>: <span class='ident'>Clone</span> <span class='op'>+</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>trt</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>Output</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
               <span class='ident'>S2</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
     {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&amp;&amp;</span>
-            <span class='self'>self</span>.<span class='ident'>shape</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>shape</span>() {
-            <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>rhs</span>.<span class='ident'>iter</span>()) {
-                <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> (<span class='ident'>x</span>.<span class='ident'>clone</span>()). <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='ident'>y</span>.<span class='ident'>clone</span>());
-            }
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>other_iter</span> <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>broadcast_iter_unwrap</span>(<span class='self'>self</span>.<span class='ident'>dim</span>());
-            <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>other_iter</span>) {
-                <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> (<span class='ident'>x</span>.<span class='ident'>clone</span>()). <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='ident'>y</span>.<span class='ident'>clone</span>());
-            }
-        }
+        <span class='self'>self</span>.<span class='ident'>zip_mut_with</span>(<span class='ident'>rhs</span>, <span class='op'>|</span><span class='ident'>x</span>, <span class='ident'>y</span><span class='op'>|</span> {
+            <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>().<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span>(<span class='ident'>y</span>.<span class='ident'>clone</span>());
+        });
     }
 
     <span class='doccomment'>/// Perform elementwise</span>
@@ -4228,16 +4476,9 @@
     <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S2</span>, <span class='ident'>E</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     {
         <span class='comment'>// FIXME: Can we co-broadcast arrays here? And how?</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>shape</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>shape</span>() {
-            <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>rhs</span>.<span class='ident'>iter</span>()) {
-                <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>(). <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='ident'>y</span>.<span class='ident'>clone</span>());
-            }
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>other_iter</span> <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>broadcast_iter_unwrap</span>(<span class='self'>self</span>.<span class='ident'>dim</span>());
-            <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>other_iter</span>) {
-                <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>(). <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='ident'>y</span>.<span class='ident'>clone</span>());
-            }
-        }
+        <span class='self'>self</span>.<span class='ident'>zip_mut_with</span>(<span class='kw-2'>&amp;</span><span class='ident'>rhs</span>, <span class='op'>|</span><span class='ident'>x</span>, <span class='ident'>y</span><span class='op'>|</span> {
+            <span class='op'>*</span><span class='ident'>x</span> <span class='op'>=</span> <span class='ident'>x</span>.<span class='ident'>clone</span>(). <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='ident'>y</span>.<span class='ident'>clone</span>());
+        });
         <span class='self'>self</span>
     }
 }
@@ -4261,20 +4502,7 @@
     <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S2</span>, <span class='ident'>E</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>OwnedArray</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     {
         <span class='comment'>// FIXME: Can we co-broadcast arrays here? And how?</span>
-        <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>result</span> <span class='op'>=</span> <span class='ident'>Vec</span>::<span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>::<span class='ident'>with_capacity</span>(<span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>size</span>());
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>shape</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>shape</span>() {
-            <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>rhs</span>.<span class='ident'>iter</span>()) {
-                <span class='ident'>result</span>.<span class='ident'>push</span>((<span class='ident'>x</span>.<span class='ident'>clone</span>()). <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='ident'>y</span>.<span class='ident'>clone</span>()));
-            }
-        } <span class='kw'>else</span> {
-            <span class='kw'>let</span> <span class='ident'>other_iter</span> <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>broadcast_iter_unwrap</span>(<span class='self'>self</span>.<span class='ident'>dim</span>());
-            <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>other_iter</span>) {
-                <span class='ident'>result</span>.<span class='ident'>push</span>((<span class='ident'>x</span>.<span class='ident'>clone</span>()). <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span> (<span class='ident'>y</span>.<span class='ident'>clone</span>()));
-            }
-        }
-        <span class='kw'>unsafe</span> {
-            <span class='ident'>ArrayBase</span>::<span class='ident'>from_vec_dim</span>(<span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>clone</span>(), <span class='ident'>result</span>)
-        }
+        <span class='self'>self</span>.<span class='ident'>to_owned</span>().<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>mth</span>(<span class='ident'>rhs</span>.<span class='ident'>view</span>())
     }
 }
     );
@@ -4355,16 +4583,9 @@
               <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
     {
         <span class='kw'>fn</span> <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S2</span>, <span class='ident'>E</span><span class='op'>&gt;</span>) {
-            <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>shape</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>shape</span>() {
-                <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>rhs</span>.<span class='ident'>iter</span>()) {
-                    <span class='ident'>x</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>(<span class='ident'>y</span>.<span class='ident'>clone</span>());
-                }
-            } <span class='kw'>else</span> {
-                <span class='kw'>let</span> <span class='ident'>other_iter</span> <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>broadcast_iter_unwrap</span>(<span class='self'>self</span>.<span class='ident'>dim</span>());
-                <span class='kw'>for</span> (<span class='ident'>x</span>, <span class='ident'>y</span>) <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>iter_mut</span>().<span class='ident'>zip</span>(<span class='ident'>other_iter</span>) {
-                    <span class='ident'>x</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>(<span class='ident'>y</span>.<span class='ident'>clone</span>());
-                }
-            }
+            <span class='self'>self</span>.<span class='ident'>zip_mut_with</span>(<span class='ident'>rhs</span>, <span class='op'>|</span><span class='ident'>x</span>, <span class='ident'>y</span><span class='op'>|</span> {
+                <span class='ident'>x</span>.<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>method</span>(<span class='ident'>y</span>.<span class='ident'>clone</span>());
+            });
         }
     }
 
@@ -4431,7 +4652,6 @@
     <span class='ident'>Slice</span>(<span class='ident'>S</span>),
     <span class='ident'>Counted</span>(<span class='ident'>C</span>),
 }
-
 </pre>
 </section>
     <section id='search' class="content hidden"></section>

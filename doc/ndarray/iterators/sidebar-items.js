@@ -1,1 +1,1 @@
-initSidebarItems({});
+initSidebarItems({"struct":[["InnerIter","an iterator that traverses over all dimensions but the innermost, and yields each inner row."],["InnerIterMut","an iterator that traverses over all dimensions but the innermost, and yields each inner row (mutable)."]]});
