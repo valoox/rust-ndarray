@@ -271,6 +271,14 @@
 <span id="228">228</span>
 <span id="229">229</span>
 <span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
 </pre><pre class='rust '>
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;rustc-serialize&quot;</span>)]</span>
 <span class='kw'>use</span> <span class='ident'>serialize</span>::{<span class='ident'>Encodable</span>, <span class='ident'>Encoder</span>, <span class='ident'>Decodable</span>, <span class='ident'>Decoder</span>};
@@ -284,7 +292,7 @@
 };
 
 <span class='kw'>use</span> <span class='ident'>super</span>::{
-    <span class='ident'>Array</span>, <span class='ident'>Dimension</span>, <span class='ident'>Ix</span>,
+    <span class='ident'>Dimension</span>, <span class='ident'>Ix</span>,
     <span class='ident'>Elements</span>,
     <span class='ident'>ElementsMut</span>,
     <span class='ident'>ArrayBase</span>,
@@ -292,9 +300,8 @@
     <span class='ident'>ArrayViewMut</span>,
     <span class='ident'>Data</span>,
     <span class='ident'>DataMut</span>,
+    <span class='ident'>DataOwned</span>,
 };
-<span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;rustc-serialize&quot;</span>)]</span>
-<span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>DataOwned</span>;
 
 <span class='doccomment'>/// Access the element at **index**.</span>
 <span class='doccomment'>///</span>
@@ -331,11 +338,18 @@
           <span class='ident'>S</span>::<span class='ident'>Elem</span>: <span class='ident'>PartialEq</span>,
 {
     <span class='doccomment'>/// Return `true` if the array shapes and all elements of `self` and</span>
-    <span class='doccomment'>/// `other` are equal. Return `false` otherwise.</span>
-    <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>other</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S2</span>, <span class='ident'>D</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>
+    <span class='doccomment'>/// `rhs` are equal. Return `false` otherwise.</span>
+    <span class='kw'>fn</span> <span class='ident'>eq</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>rhs</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S2</span>, <span class='ident'>D</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>
     {
-        <span class='self'>self</span>.<span class='ident'>shape</span>() <span class='op'>==</span> <span class='ident'>other</span>.<span class='ident'>shape</span>() <span class='op'>&amp;&amp;</span>
-        <span class='self'>self</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>other</span>.<span class='ident'>iter</span>()).<span class='ident'>all</span>(<span class='op'>|</span>(<span class='ident'>a</span>, <span class='ident'>b</span>)<span class='op'>|</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>b</span>)
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>shape</span>() <span class='op'>!=</span> <span class='ident'>rhs</span>.<span class='ident'>shape</span>() {
+            <span class='kw'>return</span> <span class='boolval'>false</span>;
+        }
+        <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>self_s</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>as_slice</span>() {
+            <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>rhs_s</span>) <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>as_slice</span>() {
+                <span class='kw'>return</span> <span class='ident'>self_s</span> <span class='op'>==</span> <span class='ident'>rhs_s</span>;
+            }
+        }
+        <span class='self'>self</span>.<span class='ident'>iter</span>().<span class='ident'>zip</span>(<span class='ident'>rhs</span>.<span class='ident'>iter</span>()).<span class='ident'>all</span>(<span class='op'>|</span>(<span class='ident'>a</span>, <span class='ident'>b</span>)<span class='op'>|</span> <span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>b</span>)
     }
 }
 
@@ -345,11 +359,13 @@
           <span class='ident'>S</span>::<span class='ident'>Elem</span>: <span class='ident'>Eq</span>,
 { }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='ident'>FromIterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Array</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span><span class='op'>&gt;</span> <span class='ident'>FromIterator</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span>
+    <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataOwned</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>
 {
-    <span class='kw'>fn</span> <span class='ident'>from_iter</span><span class='op'>&lt;</span><span class='ident'>I</span>: <span class='ident'>IntoIterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;&gt;</span>(<span class='ident'>iterable</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='ident'>Array</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span>
+    <span class='kw'>fn</span> <span class='ident'>from_iter</span><span class='op'>&lt;</span><span class='ident'>I</span><span class='op'>&gt;</span>(<span class='ident'>iterable</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>I</span>: <span class='ident'>IntoIterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
     {
-        <span class='ident'>Array</span>::<span class='ident'>from_iter</span>(<span class='ident'>iterable</span>)
+        <span class='ident'>ArrayBase</span>::<span class='ident'>from_iter</span>(<span class='ident'>iterable</span>)
     }
 }
 

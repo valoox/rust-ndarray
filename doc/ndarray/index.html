@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ndarray` crate.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ndarray">
 
-    <title>ndarray 0.2.0-alpha.8 - ndarray - Rust</title>
+    <title>ndarray 0.2.0-alpha.9 - ndarray - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2354' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2353' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>The <code>ndarray</code> crate provides an N-dimensional container similar to numpy’s
 ndarray.</p>
 
@@ -72,7 +72,8 @@ or a regular uniquely owned array (<code>OwnedArray</code>), and both can use
 read-only and read-write array views.</li>
 <li>Iteration and most operations are very efficient on contiguous c-order arrays
 (the default layout, without any transposition or discontiguous subslicing),
-and on arrays where the lowest dimension is contiguous.</li>
+and on arrays where the lowest dimension is contiguous (contiguous block
+slicing).</li>
 <li>Array views can be used to slice and mutate any <code>[T]</code> data.</li>
 </ul>
 
@@ -128,7 +129,7 @@ is still a pain point.</li>
                         <td><a class='mod' href='linalg/index.html'
                                title='ndarray::linalg'>linalg</a></td>
                         <td class='docblock short'>
-                             <p>A few linear algebra operations on two-dimensional arrays.</p>
+                            [<em class='stab deprecated'>Deprecated</em>] <p><strong><em>Deprecated: linalg is not in good shape.</em></strong></p>
 
                         </td>
                     </tr>

@@ -318,6 +318,28 @@
 <span id="275">275</span>
 <span id="276">276</span>
 <span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Experimental BLAS (Basic Linear Algebra Subprograms) integration</span>
 <span class='doccomment'>//!</span>
@@ -359,10 +381,15 @@
 <span class='doccomment'>//! Use the methods in trait `AsBlas` to convert an array into a view that</span>
 <span class='doccomment'>//! implements rblas’ `Vector` or `Matrix` traits.</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! Blas supports strided vectors but not matrices, so they will be copied into</span>
-<span class='doccomment'>//! c-contiguous layout automatically. Blas has its own error reporting system</span>
-<span class='doccomment'>//! and will not panic on errors (that I know), instead output its own error</span>
-<span class='doccomment'>//! conditions, for example on dimension mismatch in a matrix multiplication.</span>
+<span class='doccomment'>//! Blas supports strided vectors and matrices; Matrices need to be contiguous</span>
+<span class='doccomment'>//! in their lowest dimension, so they will be copied into c-contiguous layout</span>
+<span class='doccomment'>//! automatically if needed. You should be able to use blocks sliced out</span>
+<span class='doccomment'>//! from a larger matrix without copying. Use the transpose flags in blas</span>
+<span class='doccomment'>//! instead of transposing with `ndarray`.</span>
+<span class='doccomment'>//!</span>
+<span class='doccomment'>//! Blas has its own error reporting system and will not panic on errors (that</span>
+<span class='doccomment'>//! I know), instead output its own error conditions, for example on dimension</span>
+<span class='doccomment'>//! mismatch in a matrix multiplication.</span>
 <span class='doccomment'>//!</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rblas</span>;
 
@@ -381,6 +408,7 @@
     <span class='ident'>DataMut</span>,
     <span class='ident'>DataOwned</span>,
     <span class='ident'>Dimension</span>,
+    <span class='ident'>zipsl</span>,
 };
 
 
@@ -403,8 +431,9 @@ impl&lt;&#39;a, A, D: Clone&gt; Clone for BlasArrayView&lt;&#39;a, A, D&gt; {
           <span class='ident'>D</span>: <span class='ident'>Dimension</span>
 {
     <span class='kw'>fn</span> <span class='ident'>size_check</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
-        <span class='kw'>for</span> <span class='kw-2'>&amp;</span><span class='ident'>dim</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>shape</span>() {
-            <span class='kw'>if</span> <span class='ident'>dim</span> <span class='op'>&gt;</span> (<span class='ident'>c_int</span>::<span class='ident'>max_value</span>() <span class='kw'>as</span> <span class='ident'>c_uint</span>) {
+        <span class='kw'>let</span> <span class='ident'>max</span> <span class='op'>=</span> <span class='ident'>c_int</span>::<span class='ident'>max_value</span>();
+        <span class='kw'>for</span> (<span class='kw-2'>&amp;</span><span class='ident'>dim</span>, <span class='kw-2'>&amp;</span><span class='ident'>stride</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='self'>self</span>.<span class='ident'>shape</span>(), <span class='self'>self</span>.<span class='ident'>strides</span>()) {
+            <span class='kw'>if</span> <span class='ident'>dim</span> <span class='op'>&gt;</span> <span class='ident'>max</span> <span class='kw'>as</span> <span class='ident'>c_uint</span> <span class='op'>||</span> <span class='ident'>stride</span> <span class='op'>&gt;</span> <span class='ident'>max</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ShapeError</span>::<span class='ident'>DimensionTooLarge</span>(
                     <span class='self'>self</span>.<span class='ident'>shape</span>().<span class='ident'>to_vec</span>().<span class='ident'>into_boxed_slice</span>()));
             }
@@ -414,7 +443,7 @@ impl&lt;&#39;a, A, D: Clone&gt; Clone for BlasArrayView&lt;&#39;a, A, D&gt; {
 
     <span class='kw'>fn</span> <span class='ident'>contiguous_check</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
         <span class='comment'>// FIXME: handle transposed</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_standard_layout</span>() {
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&lt;=</span> <span class='number'>1</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>strides</span>().<span class='ident'>last</span>().<span class='ident'>cloned</span>() <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>) {
             <span class='prelude-val'>Ok</span>(())
         } <span class='kw'>else</span> {
             <span class='prelude-val'>Err</span>(<span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleLayout</span>)
@@ -452,6 +481,9 @@ impl&lt;&#39;a, A, D&gt; ArrayView&lt;&#39;a, A, D&gt;
 }
 
 <span class='doccomment'>/// Convert an array into a blas friendly wrapper.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Note that `blas` suppors four different element types: `f32`, `f64`,</span>
+<span class='doccomment'>/// `Complex&lt;f32&gt;`, and `Complex&lt;f64&gt;`.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// ***Requires `features = &quot;rblas&quot;`***</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>AsBlas</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
@@ -500,8 +532,14 @@ impl&lt;&#39;a, A, D&gt; ArrayView&lt;&#39;a, A, D&gt;
               <span class='ident'>A</span>: <span class='ident'>Clone</span>,
     {
         <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>size_check</span>());
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&gt;</span> <span class='number'>1</span> {
-            <span class='self'>self</span>.<span class='ident'>ensure_standard_layout</span>();
+        <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() {
+            <span class='number'>0</span> <span class='op'>|</span> <span class='number'>1</span> <span class='op'>=&gt;</span> { }
+            <span class='number'>2</span> <span class='op'>=&gt;</span> {
+                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>strides</span>()[<span class='number'>1</span>] <span class='op'>!=</span> <span class='number'>1</span> {
+                    <span class='self'>self</span>.<span class='ident'>ensure_standard_layout</span>();
+                }
+            }
+            <span class='ident'>_n</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>ensure_standard_layout</span>(),
         }
         <span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_matrix_mut</span>()
     }
@@ -581,11 +619,17 @@ impl&lt;&#39;a, A&gt; Matrix&lt;A&gt; for BlasArrayView&lt;&#39;a, A, (Ix, Ix)&g
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, (<span class='ident'>Ix</span>, <span class='ident'>Ix</span>)<span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>rows</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
-        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>dim</span>().<span class='number'>1</span> <span class='kw'>as</span> <span class='ident'>c_int</span>
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>dim</span>().<span class='number'>0</span> <span class='kw'>as</span> <span class='ident'>c_int</span>
     }
 
     <span class='kw'>fn</span> <span class='ident'>cols</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
-        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>dim</span>().<span class='number'>0</span> <span class='kw'>as</span> <span class='ident'>c_int</span>
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>dim</span>().<span class='number'>1</span> <span class='kw'>as</span> <span class='ident'>c_int</span>
+    }
+
+    <span class='comment'>// leading dimension == stride between each row</span>
+    <span class='kw'>fn</span> <span class='ident'>lead_dim</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
+        <span class='macro'>debug_assert_eq</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>strides</span>()[<span class='number'>1</span>], <span class='number'>1</span>);
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>strides</span>()[<span class='number'>0</span>] <span class='kw'>as</span> <span class='ident'>c_int</span>
     }
 
     <span class='kw'>fn</span> <span class='ident'>as_ptr</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>A</span> {

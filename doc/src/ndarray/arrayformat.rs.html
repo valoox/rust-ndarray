@@ -169,6 +169,18 @@
 <span id="126">126</span>
 <span id="127">127</span>
 <span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>super</span>::{
@@ -246,53 +258,65 @@
 }
 
 <span class='comment'>// NOTE: We can impl other fmt traits here</span>
+<span class='doccomment'>/// Format the array using `Display` and apply the formatting parameters used</span>
+<span class='doccomment'>/// to each element.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// The array is shown in multiline style, unless the alternate form </span>
+<span class='doccomment'>/// is used, `{:#}`.</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='ident'>fmt</span>::<span class='ident'>Display</span>, <span class='ident'>S</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Display</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
-    <span class='doccomment'>/// Format the array using `Display` and apply the formatting parameters used</span>
-    <span class='doccomment'>/// to each element.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The array is shown in multiline style, unless the alternate form </span>
-    <span class='doccomment'>/// is used -- i.e. `{:#}`.</span>
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
     }
 }
 
+<span class='doccomment'>/// Format the array using `Debug` and apply the formatting parameters used</span>
+<span class='doccomment'>/// to each element.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// The array is shown in multiline style, unless the alternate form </span>
+<span class='doccomment'>/// is used, `{:#}`.</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='ident'>fmt</span>::<span class='ident'>Debug</span>, <span class='ident'>S</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>Debug</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
-    <span class='doccomment'>/// Format the array using `Debug` and apply the formatting parameters used</span>
-    <span class='doccomment'>/// to each element.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The array is shown in multiline style, unless the alternate form </span>
-    <span class='doccomment'>/// is used -- i.e. `{:#}`.</span>
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
     }
 }
 
+<span class='doccomment'>/// Format the array using `LowerExp` and apply the formatting parameters used</span>
+<span class='doccomment'>/// to each element.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// The array is shown in multiline style, unless the alternate form</span>
+<span class='doccomment'>/// is used, `{:#e}`.</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='ident'>fmt</span>::<span class='ident'>LowerExp</span>, <span class='ident'>S</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>LowerExp</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
-    <span class='doccomment'>/// Format the array using `LowerExp` and apply the formatting parameters used</span>
-    <span class='doccomment'>/// to each element.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The array is shown in multiline style, unless the alternate form</span>
-    <span class='doccomment'>/// is used -- i.e. `{:#e}`.</span>
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
     }
 }
 
+<span class='doccomment'>/// Format the array using `UpperExp` and apply the formatting parameters used</span>
+<span class='doccomment'>/// to each element.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// The array is shown in multiline style, unless the alternate form</span>
+<span class='doccomment'>/// is used, `{:#E}`.</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='ident'>fmt</span>::<span class='ident'>UpperExp</span>, <span class='ident'>S</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>UpperExp</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
-    <span class='doccomment'>/// Format the array using `UpperExp` and apply the formatting parameters used</span>
-    <span class='doccomment'>/// to each element.</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// The array is shown in multiline style, unless the alternate form</span>
-    <span class='doccomment'>/// is used -- i.e. `{:#E}`.</span>
+    <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
+        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
+    }
+}
+<span class='doccomment'>/// Format the array using `LowerHex` and apply the formatting parameters used</span>
+<span class='doccomment'>/// to each element.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// The array is shown in multiline style, unless the alternate form</span>
+<span class='doccomment'>/// is used, `{:#x}`.</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='ident'>fmt</span>::<span class='ident'>LowerHex</span>, <span class='ident'>S</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span> <span class='ident'>fmt</span>::<span class='ident'>LowerHex</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+    <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
+{
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
         <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
     }
