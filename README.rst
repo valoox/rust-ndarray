@@ -1,7 +1,7 @@
 ndarray
 =========
 
-- **Note:** CRATE NAME CHANGED TO ``ndarray``. Having package != crate ran
+- **Note:** PACKAGE NAME CHANGED TO ``ndarray``. Having package != crate ran
   into many quirks of various tools. Changing the package name is easier for
   everyone involved!
 
@@ -33,7 +33,8 @@ Highlights
   elements from the end of the axis.
 - Iteration and most operations are very efficient on contiguous c-order arrays
   (the default layout, without any transposition or discontiguous subslicing).
-  and on arrays where the lowest dimension is contiguous.
+  and on arrays where the lowest dimension is contiguous (contiguous block
+  slicing).
 - Array views can be used to slice and mutate any ``[T]`` data.
 
 Status and Lookout
@@ -88,9 +89,15 @@ Recent Changes
 - **Note:** At some point in a future release, the indexing type ``Ix`` will
   change to ``usize``
 
+- 0.2.0-alpha.9
+
+  - Support strided matrices in ``rblas`` bridge, and fix a bug with
+    non square matrices.
+  - Deprecated all of module ``linalg``.
+
 - 0.2.0-alpha.8
 
-  - **Note:** CRATE NAME CHANGED TO ``ndarray``. Having package != crate ran
+  - **Note:** PACKAGE NAME CHANGED TO ``ndarray``. Having package != crate ran
     into many quirks of various tools. Changing the package name is easier for
     everyone involved!
   - Optimized ``scalar_sum()`` so that it will vectorize for the floating point
