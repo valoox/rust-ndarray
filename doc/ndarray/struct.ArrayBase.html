@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ArrayBase` struct in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ArrayBase">
 
-    <title>ndarray 0.2.0-alpha.9 - ndarray::ArrayBase - Rust</title>
+    <title>ndarray 0.2.0 - ndarray::ArrayBase - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1331' class='srclink' href='../src/ndarray/lib.rs.html#304-314' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1331' class='srclink' href='../src/ndarray/lib.rs.html#303-313' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ArrayBase&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> {
     // some fields omitted
 }</pre><div class='docblock'><p>An <em>N</em>-dimensional array.</p>
@@ -123,7 +123,7 @@ specify the slicing argument, so it will be used in all examples.</p>
 <span class='comment'>// 2 submatrices of 2 rows with 3 elements per row, means a shape of `[2, 2, 3]`.</span>
 
 <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>arr3</span>(<span class='kw-2'>&amp;</span>[[[ <span class='number'>1</span>,  <span class='number'>2</span>,  <span class='number'>3</span>],     <span class='comment'>// -- 2 rows  \_</span>
-                [ <span class='number'>4</span>,  <span class='number'>5</span>,  <span class='number'>6</span>]],    <span class='comment'>// --         /  </span>
+                [ <span class='number'>4</span>,  <span class='number'>5</span>,  <span class='number'>6</span>]],    <span class='comment'>// --         /</span>
                [[ <span class='number'>7</span>,  <span class='number'>8</span>,  <span class='number'>9</span>],     <span class='comment'>//            \_ 2 submatrices</span>
                 [<span class='number'>10</span>, <span class='number'>11</span>, <span class='number'>12</span>]]]);  <span class='comment'>//            /</span>
 <span class='comment'>//  3 columns ..../.../.../</span>
@@ -145,7 +145,7 @@ specify the slicing argument, so it will be used in all examples.</p>
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>b</span>.<span class='ident'>shape</span>(), <span class='kw-2'>&amp;</span>[<span class='number'>2</span>, <span class='number'>1</span>, <span class='number'>3</span>]);
 
 <span class='comment'>// Let’s create a slice with</span>
-<span class='comment'>// </span>
+<span class='comment'>//</span>
 <span class='comment'>// - Both submatrices of the greatest dimension: `..`</span>
 <span class='comment'>// - The last row in each submatrix: `-1..`</span>
 <span class='comment'>// - Row elements in reverse order: `..;-1`</span>
@@ -170,7 +170,7 @@ one axis from the array. Subview methods include <code>.subview()</code>,
                 [ <span class='number'>4</span>,  <span class='number'>5</span>,  <span class='number'>6</span>]],   <span class='comment'>// /</span>
                [[ <span class='number'>7</span>,  <span class='number'>8</span>,  <span class='number'>9</span>],    <span class='comment'>// \ axis 0, submatrix 1</span>
                 [<span class='number'>10</span>, <span class='number'>11</span>, <span class='number'>12</span>]]]); <span class='comment'>// /</span>
-        <span class='comment'>//        \ </span>
+        <span class='comment'>//        \</span>
         <span class='comment'>//         axis 2, column 0</span>
 
 <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>a</span>.<span class='ident'>shape</span>(), <span class='kw-2'>&amp;</span>[<span class='number'>2</span>, <span class='number'>2</span>, <span class='number'>3</span>]);
@@ -325,6 +325,19 @@ element per axis.</p>
 </div><h4 id='method.get' class='method'><code>fn <a href='#method.get' class='fnname'>get</a>(&amp;self, index: D) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;A&gt;</code></h4>
 <div class='docblock'><p>Return a reference to the element at <code>index</code>, or return <code>None</code>
 if the index is out of bounds.</p>
+
+<p>Arrays also support indexing syntax: <code>array[index]</code>.</p>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>arr2</span>;
+
+<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>, <span class='number'>2.</span>],
+               [<span class='number'>3.</span>, <span class='number'>4.</span>]]);
+
+<span class='macro'>assert</span><span class='macro'>!</span>(
+    <span class='ident'>a</span>.<span class='ident'>get</span>((<span class='number'>0</span>, <span class='number'>1</span>)) <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='kw-2'>&amp;</span><span class='number'>2.</span>) <span class='op'>&amp;&amp;</span>
+    <span class='ident'>a</span>.<span class='ident'>get</span>((<span class='number'>0</span>, <span class='number'>2</span>)) <span class='op'>==</span> <span class='prelude-val'>None</span> <span class='op'>&amp;&amp;</span>
+    <span class='ident'>a</span>[(<span class='number'>0</span>, <span class='number'>1</span>)] <span class='op'>==</span> <span class='number'>2.</span>
+);</pre>
 </div><h4 id='method.at' class='method'><code>fn <a href='#method.at' class='fnname'>at</a>(&amp;self, index: D) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;A&gt;</code></h4>
 <div class='stability'><em class='stab deprecated'>Deprecated<p>: use .get() instead</p>
 </em></div><div class='docblock'><p><strong><em>Deprecated: use .get(i)</em></strong></p>
@@ -356,6 +369,9 @@ if the index is out of bounds.</p>
 </div><h4 id='method.swap_axes' class='method'><code>fn <a href='#method.swap_axes' class='fnname'>swap_axes</a>(&amp;mut self, ax: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, bx: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
 <div class='docblock'><p>Swap axes <code>ax</code> and <code>bx</code>.</p>
 
+<p>This does not move any data, it just adjusts the array’s dimensions
+and strides.</p>
+
 <p><strong>Panics</strong> if the axes are out of bounds.</p>
 <pre class='rust rust-example-rendered'>
 <span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>arr2</span>;
@@ -377,7 +393,7 @@ array with that axis removed.</p>
 
 <span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>, <span class='number'>2.</span>],    <span class='comment'>// -- axis 0, row 0</span>
                [<span class='number'>3.</span>, <span class='number'>4.</span>],    <span class='comment'>// -- axis 0, row 1</span>
-               [<span class='number'>5.</span>, <span class='number'>6.</span>]]);  <span class='comment'>// -- axis 0, row 2 </span>
+               [<span class='number'>5.</span>, <span class='number'>6.</span>]]);  <span class='comment'>// -- axis 0, row 2</span>
 <span class='comment'>//               \   \</span>
 <span class='comment'>//                \   axis 1, column 1</span>
 <span class='comment'>//                 axis 1, column 0</span>
@@ -649,7 +665,7 @@ if <code>self</code> is <em>M</em> × <em>N</em>, then <code>rhs</code> is <em>N
 </div></div><h3 class='impl'><code>impl&lt;A, S, D&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p><em>In-place</em> arithmetic operations.</p>
 </div><div class='impl-items'><h4 id='method.iadd' class='method'><code>fn <a href='#method.iadd' class='fnname'>iadd</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Addition
+addition
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -658,12 +674,12 @@ Addition
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.iadd_scalar' class='method'><code>fn <a href='#method.iadd_scalar' class='fnname'>iadd_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Addition
+addition
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.isub' class='method'><code>fn <a href='#method.isub' class='fnname'>isub</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Subtraction
+subtraction
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -672,12 +688,12 @@ Subtraction
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.isub_scalar' class='method'><code>fn <a href='#method.isub_scalar' class='fnname'>isub_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Subtraction
+subtraction
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.imul' class='method'><code>fn <a href='#method.imul' class='fnname'>imul</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Multiplication
+multiplication
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -686,12 +702,12 @@ Multiplication
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.imul_scalar' class='method'><code>fn <a href='#method.imul_scalar' class='fnname'>imul_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Multiplication
+multiplication
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.idiv' class='method'><code>fn <a href='#method.idiv' class='fnname'>idiv</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Divsion
+division
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -700,12 +716,12 @@ Divsion
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.idiv_scalar' class='method'><code>fn <a href='#method.idiv_scalar' class='fnname'>idiv_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Divsion
+division
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.irem' class='method'><code>fn <a href='#method.irem' class='fnname'>irem</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Rem.html' title='core::ops::Rem'>Rem</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Remainder
+remainder
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -714,12 +730,12 @@ Remainder
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.irem_scalar' class='method'><code>fn <a href='#method.irem_scalar' class='fnname'>irem_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Rem.html' title='core::ops::Rem'>Rem</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Remainder
+remainder
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.ibitand' class='method'><code>fn <a href='#method.ibitand' class='fnname'>ibitand</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html' title='core::ops::BitAnd'>BitAnd</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Bit and
+bit and
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -728,12 +744,12 @@ Bit and
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.ibitand_scalar' class='method'><code>fn <a href='#method.ibitand_scalar' class='fnname'>ibitand_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html' title='core::ops::BitAnd'>BitAnd</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Bit and
+bit and
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.ibitor' class='method'><code>fn <a href='#method.ibitor' class='fnname'>ibitor</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOr.html' title='core::ops::BitOr'>BitOr</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Bit or
+bit or
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -742,12 +758,12 @@ Bit or
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.ibitor_scalar' class='method'><code>fn <a href='#method.ibitor_scalar' class='fnname'>ibitor_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOr.html' title='core::ops::BitOr'>BitOr</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Bit or
+bit or
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.ibitxor' class='method'><code>fn <a href='#method.ibitxor' class='fnname'>ibitxor</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXor.html' title='core::ops::BitXor'>BitXor</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Bit xor
+bit xor
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -756,12 +772,12 @@ Bit xor
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.ibitxor_scalar' class='method'><code>fn <a href='#method.ibitxor_scalar' class='fnname'>ibitxor_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXor.html' title='core::ops::BitXor'>BitXor</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Bit xor
+bit xor
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.ishl' class='method'><code>fn <a href='#method.ishl' class='fnname'>ishl</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shl.html' title='core::ops::Shl'>Shl</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Left shift
+left shift
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -770,12 +786,12 @@ Left shift
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.ishl_scalar' class='method'><code>fn <a href='#method.ishl_scalar' class='fnname'>ishl_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shl.html' title='core::ops::Shl'>Shl</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Left shift
+left shift
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.ishr' class='method'><code>fn <a href='#method.ishr' class='fnname'>ishr</a>&lt;E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, S2&gt;(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shr.html' title='core::ops::Shr'>Shr</a>&lt;A, Output=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Right shift
+right shift
  between <code>self</code> and <code>rhs</code>,
  <em>in place</em>.</p>
 
@@ -784,7 +800,7 @@ Right shift
 <p><strong>Panics</strong> if broadcasting isn’t possible.</p>
 </div><h4 id='method.ishr_scalar' class='method'><code>fn <a href='#method.ishr_scalar' class='fnname'>ishr_scalar</a>(&amp;mut self, x: &amp;A) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shr.html' title='core::ops::Shr'>Shr</a>&lt;A, Output=A&gt;</span></code></h4>
 <div class='docblock'><p>Perform elementwise
-Right shift
+right shift
  between <code>self</code> and the scalar <code>x</code>,
  <em>in place</em>.</p>
 </div><h4 id='method.ineg' class='method'><code>fn <a href='#method.ineg' class='fnname'>ineg</a>(&amp;mut self) <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Neg.html' title='core::ops::Neg'>Neg</a>&lt;Output=A&gt;</span></code></h4>
@@ -851,9 +867,9 @@ is used, <code>{:#x}</code>.</p>
 </div><div class='impl-items'><h4 id='method.blas_checked' class='method'><code>fn <a href='../ndarray/blas/trait.AsBlas.html#method.blas_checked' class='fnname'>blas_checked</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt;, <a class='enum' href='../ndarray/enum.ShapeError.html' title='ndarray::ShapeError'>ShapeError</a>&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataOwned.html' title='ndarray::DataOwned'>DataOwned</a> + <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span></code></h4>
 <h4 id='method.blas' class='method'><code>fn <a href='../ndarray/blas/trait.AsBlas.html#method.blas' class='fnname'>blas</a>(&amp;mut self) -&gt; <a class='struct' href='../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataOwned.html' title='ndarray::DataOwned'>DataOwned</a>&lt;Elem=A&gt; + <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span></code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Addition
+addition
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -861,9 +877,9 @@ Addition
 </div><div class='impl-items'><h4 id='assoc_type.Output-1' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.add' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html#method.add' class='fnname'>add</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Addition
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+addition
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -871,9 +887,9 @@ Addition
 </div><div class='impl-items'><h4 id='assoc_type.Output-2' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.add-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html#method.add' class='fnname'>add</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Subtraction
+subtraction
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -881,9 +897,9 @@ Subtraction
 </div><div class='impl-items'><h4 id='assoc_type.Output-3' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.sub' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html#method.sub' class='fnname'>sub</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Subtraction
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+subtraction
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -891,9 +907,9 @@ Subtraction
 </div><div class='impl-items'><h4 id='assoc_type.Output-4' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.sub-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html#method.sub' class='fnname'>sub</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Multiplication
+multiplication
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -901,9 +917,9 @@ Multiplication
 </div><div class='impl-items'><h4 id='assoc_type.Output-5' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.mul' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html#method.mul' class='fnname'>mul</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Multiplication
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+multiplication
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -911,9 +927,9 @@ Multiplication
 </div><div class='impl-items'><h4 id='assoc_type.Output-6' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.mul-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html#method.mul' class='fnname'>mul</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Divsion
+division
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -921,9 +937,9 @@ Divsion
 </div><div class='impl-items'><h4 id='assoc_type.Output-7' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.div' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html#method.div' class='fnname'>div</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Divsion
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+division
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -931,9 +947,9 @@ Divsion
 </div><div class='impl-items'><h4 id='assoc_type.Output-8' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.div-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html#method.div' class='fnname'>div</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Rem.html' title='core::ops::Rem'>Rem</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Rem.html' title='core::ops::Rem'>Rem</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Remainder
+remainder
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -941,9 +957,9 @@ Remainder
 </div><div class='impl-items'><h4 id='assoc_type.Output-9' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.rem' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Rem.html#method.rem' class='fnname'>rem</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Rem.html' title='core::ops::Rem'>Rem</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Rem.html' title='core::ops::Rem'>Rem</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Remainder
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+remainder
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -951,9 +967,9 @@ Remainder
 </div><div class='impl-items'><h4 id='assoc_type.Output-10' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.rem-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Rem.html#method.rem' class='fnname'>rem</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html' title='core::ops::BitAnd'>BitAnd</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html' title='core::ops::BitAnd'>BitAnd</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Bit and
+bit and
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -961,9 +977,9 @@ Bit and
 </div><div class='impl-items'><h4 id='assoc_type.Output-11' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.bitand' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html#method.bitand' class='fnname'>bitand</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html' title='core::ops::BitAnd'>BitAnd</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html' title='core::ops::BitAnd'>BitAnd</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Bit and
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+bit and
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -971,9 +987,9 @@ Bit and
 </div><div class='impl-items'><h4 id='assoc_type.Output-12' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.bitand-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAnd.html#method.bitand' class='fnname'>bitand</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOr.html' title='core::ops::BitOr'>BitOr</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOr.html' title='core::ops::BitOr'>BitOr</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Bit or
+bit or
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -981,9 +997,9 @@ Bit or
 </div><div class='impl-items'><h4 id='assoc_type.Output-13' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.bitor' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOr.html#method.bitor' class='fnname'>bitor</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOr.html' title='core::ops::BitOr'>BitOr</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOr.html' title='core::ops::BitOr'>BitOr</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Bit or
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+bit or
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -991,9 +1007,9 @@ Bit or
 </div><div class='impl-items'><h4 id='assoc_type.Output-14' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.bitor-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOr.html#method.bitor' class='fnname'>bitor</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXor.html' title='core::ops::BitXor'>BitXor</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXor.html' title='core::ops::BitXor'>BitXor</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Bit xor
+bit xor
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1001,9 +1017,9 @@ Bit xor
 </div><div class='impl-items'><h4 id='assoc_type.Output-15' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.bitxor' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXor.html#method.bitxor' class='fnname'>bitxor</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXor.html' title='core::ops::BitXor'>BitXor</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXor.html' title='core::ops::BitXor'>BitXor</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Bit xor
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+bit xor
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1011,9 +1027,9 @@ Bit xor
 </div><div class='impl-items'><h4 id='assoc_type.Output-16' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.bitxor-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXor.html#method.bitxor' class='fnname'>bitxor</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shl.html' title='core::ops::Shl'>Shl</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shl.html' title='core::ops::Shl'>Shl</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Left shift
+left shift
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1021,9 +1037,9 @@ Left shift
 </div><div class='impl-items'><h4 id='assoc_type.Output-17' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.shl' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Shl.html#method.shl' class='fnname'>shl</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shl.html' title='core::ops::Shl'>Shl</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shl.html' title='core::ops::Shl'>Shl</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Left shift
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+left shift
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1031,9 +1047,9 @@ Left shift
 </div><div class='impl-items'><h4 id='assoc_type.Output-18' class='type'><code>type Output = <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 <h4 id='method.shl-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Shl.html#method.shl' class='fnname'>shl</a>(self, rhs: &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shr.html' title='core::ops::Shr'>Shr</a>&lt;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shr.html' title='core::ops::Shr'>Shr</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Right shift
+right shift
  between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+ and return the result (based on <code>self</code>).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1041,9 +1057,9 @@ Right shift
 </div><div class='impl-items'><h4 id='assoc_type.Output-19' class='type'><code>type Output = <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 <h4 id='method.shr' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Shr.html#method.shr' class='fnname'>shr</a>(self, rhs: <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
 </div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shr.html' title='core::ops::Shr'>Shr</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for &amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Shr.html' title='core::ops::Shr'>Shr</a>&lt;A, Output=A&gt;, S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform elementwise
-Right shift
- between <code>self</code> and <code>rhs</code>,
- and return the result.</p>
+right shift
+ between references <code>self</code> and <code>rhs</code>,
+ and return the result as a new <code>OwnedArray</code>.</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1054,7 +1070,7 @@ Right shift
 <h4 id='method.neg' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Neg.html#method.neg' class='fnname'>neg</a>(self) -&gt; Self</code></h4>
 </div><h3 class='impl'><code>impl&lt;A, S, D&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Not.html' title='core::ops::Not'>Not</a> for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Not.html' title='core::ops::Not'>Not</a>&lt;Output=A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='impl-items'><h4 id='assoc_type.Output-22' class='type'><code>type Output = Self</code></h4>
 <h4 id='method.not' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Not.html#method.not' class='fnname'>not</a>(self) -&gt; Self</code></h4>
-</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.AddAssign.html' title='core::ops::AddAssign'>AddAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.AddAssign.html' title='core::ops::AddAssign'>AddAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Implement <code>self += rhs</code> as elementwise addition (in place).</p>
+</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.AddAssign.html' title='core::ops::AddAssign'>AddAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.AddAssign.html' title='core::ops::AddAssign'>AddAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform <code>self += rhs</code> as elementwise addition (in place).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1062,7 +1078,7 @@ Right shift
 
 <p><strong>Requires <code>feature = &quot;assign_ops&quot;</code></strong></p>
 </div><div class='impl-items'><h4 id='method.add_assign' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.AddAssign.html#method.add_assign' class='fnname'>add_assign</a>(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;)</code></h4>
-</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.SubAssign.html' title='core::ops::SubAssign'>SubAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.SubAssign.html' title='core::ops::SubAssign'>SubAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Implement <code>self -= rhs</code> as elementwise subtraction (in place).</p>
+</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.SubAssign.html' title='core::ops::SubAssign'>SubAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.SubAssign.html' title='core::ops::SubAssign'>SubAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform <code>self -= rhs</code> as elementwise subtraction (in place).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1070,7 +1086,7 @@ Right shift
 
 <p><strong>Requires <code>feature = &quot;assign_ops&quot;</code></strong></p>
 </div><div class='impl-items'><h4 id='method.sub_assign' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.SubAssign.html#method.sub_assign' class='fnname'>sub_assign</a>(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;)</code></h4>
-</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.MulAssign.html' title='core::ops::MulAssign'>MulAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.MulAssign.html' title='core::ops::MulAssign'>MulAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Implement <code>self *= rhs</code> as elementwise multiplication (in place).</p>
+</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.MulAssign.html' title='core::ops::MulAssign'>MulAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.MulAssign.html' title='core::ops::MulAssign'>MulAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform <code>self *= rhs</code> as elementwise multiplication (in place).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1078,7 +1094,7 @@ Right shift
 
 <p><strong>Requires <code>feature = &quot;assign_ops&quot;</code></strong></p>
 </div><div class='impl-items'><h4 id='method.mul_assign' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.MulAssign.html#method.mul_assign' class='fnname'>mul_assign</a>(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;)</code></h4>
-</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.DivAssign.html' title='core::ops::DivAssign'>DivAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.DivAssign.html' title='core::ops::DivAssign'>DivAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Implement <code>self /= rhs</code> as elementwise division (in place).</p>
+</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.DivAssign.html' title='core::ops::DivAssign'>DivAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.DivAssign.html' title='core::ops::DivAssign'>DivAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform <code>self /= rhs</code> as elementwise division (in place).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1086,7 +1102,7 @@ Right shift
 
 <p><strong>Requires <code>feature = &quot;assign_ops&quot;</code></strong></p>
 </div><div class='impl-items'><h4 id='method.div_assign' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.DivAssign.html#method.div_assign' class='fnname'>div_assign</a>(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;)</code></h4>
-</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.RemAssign.html' title='core::ops::RemAssign'>RemAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.RemAssign.html' title='core::ops::RemAssign'>RemAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Implement <code>self %= rhs</code> as elementwise remainder (in place).</p>
+</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.RemAssign.html' title='core::ops::RemAssign'>RemAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.RemAssign.html' title='core::ops::RemAssign'>RemAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform <code>self %= rhs</code> as elementwise remainder (in place).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1094,7 +1110,7 @@ Right shift
 
 <p><strong>Requires <code>feature = &quot;assign_ops&quot;</code></strong></p>
 </div><div class='impl-items'><h4 id='method.rem_assign' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.RemAssign.html#method.rem_assign' class='fnname'>rem_assign</a>(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;)</code></h4>
-</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAndAssign.html' title='core::ops::BitAndAssign'>BitAndAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAndAssign.html' title='core::ops::BitAndAssign'>BitAndAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Implement <code>self &amp;= rhs</code> as elementwise bit and (in place).</p>
+</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAndAssign.html' title='core::ops::BitAndAssign'>BitAndAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAndAssign.html' title='core::ops::BitAndAssign'>BitAndAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform <code>self &amp;= rhs</code> as elementwise bit and (in place).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1102,7 +1118,7 @@ Right shift
 
 <p><strong>Requires <code>feature = &quot;assign_ops&quot;</code></strong></p>
 </div><div class='impl-items'><h4 id='method.bitand_assign' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.BitAndAssign.html#method.bitand_assign' class='fnname'>bitand_assign</a>(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;)</code></h4>
-</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOrAssign.html' title='core::ops::BitOrAssign'>BitOrAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOrAssign.html' title='core::ops::BitOrAssign'>BitOrAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Implement <code>self |= rhs</code> as elementwise bit or (in place).</p>
+</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOrAssign.html' title='core::ops::BitOrAssign'>BitOrAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOrAssign.html' title='core::ops::BitOrAssign'>BitOrAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform <code>self |= rhs</code> as elementwise bit or (in place).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
@@ -1110,7 +1126,7 @@ Right shift
 
 <p><strong>Requires <code>feature = &quot;assign_ops&quot;</code></strong></p>
 </div><div class='impl-items'><h4 id='method.bitor_assign' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.BitOrAssign.html#method.bitor_assign' class='fnname'>bitor_assign</a>(&amp;mut self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;)</code></h4>
-</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXorAssign.html' title='core::ops::BitXorAssign'>BitXorAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXorAssign.html' title='core::ops::BitXorAssign'>BitXorAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Implement <code>self ^= rhs</code> as elementwise bit xor (in place).</p>
+</div><h3 class='impl'><code>impl&lt;'a, A, S, S2, D, E&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXorAssign.html' title='core::ops::BitXorAssign'>BitXorAssign</a>&lt;&amp;'a <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, E&gt;&gt; for <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.BitXorAssign.html' title='core::ops::BitXorAssign'>BitXorAssign</a>&lt;A&gt;, S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>&lt;Elem=A&gt;, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;, D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a>, E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Perform <code>self ^= rhs</code> as elementwise bit xor (in place).</p>
 
 <p>If their shapes disagree, <code>rhs</code> is broadcast to the shape of <code>self</code>.</p>
 
