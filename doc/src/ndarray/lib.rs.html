@@ -2422,11 +2422,6 @@
 <span id="2379">2379</span>
 <span id="2380">2380</span>
 <span id="2381">2381</span>
-<span id="2382">2382</span>
-<span id="2383">2383</span>
-<span id="2384">2384</span>
-<span id="2385">2385</span>
-<span id="2386">2386</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span><span class='op'>=</span><span class='string'>&quot;ndarray&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>has_deprecated</span>, <span class='ident'>feature</span>(<span class='ident'>deprecated</span>))]</span>
@@ -2563,39 +2558,23 @@
 <span class='doccomment'>/// [`ArrayView`]: type.ArrayView.html</span>
 <span class='doccomment'>/// [`ArrayViewMut`]: type.ArrayViewMut.html</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// ## `Array`</span>
+<span class='doccomment'>/// ## `Array` and `OwnedArray`</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// `Array&lt;A, D&gt;` is a an array with reference counted data and copy-on-write</span>
-<span class='doccomment'>/// mutability.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// The `Array` is both a view and a shared owner of its data. Some methods,</span>
-<span class='doccomment'>/// for example [`slice()`](#method.slice), merely change the view of the data,</span>
-<span class='doccomment'>/// while methods like [`iadd()`](#method.iadd) allow mutating the element</span>
-<span class='doccomment'>/// values.</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Calling a method for mutating elements, for example</span>
-<span class='doccomment'>/// [`get_mut()`](#method.get_mut), [`iadd()`](#method.iadd) or</span>
-<span class='doccomment'>/// [`iter_mut()`](#method.iter_mut) will break sharing and require a clone of</span>
-<span class='doccomment'>/// the data (if it is not uniquely held).</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ## Method Conventions</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// Methods mutating the view or array elements in place use an *i* prefix,</span>
-<span class='doccomment'>/// for example `slice` vs. `islice` and `add` vs `iadd`.</span>
+<span class='doccomment'>/// `OwnedArray` owns the underlying array elements directly (just like</span>
+<span class='doccomment'>/// a `Vec`), while [`Array`](type.Array.html) is a an array with reference</span>
+<span class='doccomment'>/// counted data. `Array` can act both as an owner or as a view in that regard.</span>
+<span class='doccomment'>/// Sharing requires that it uses copy-on-write for mutable operations.</span>
+<span class='doccomment'>/// Calling a method for mutating elements on `Array`, for example</span>
+<span class='doccomment'>/// [`view_mut()`](#method.view_mut) or [`get_mut()`](#method.get_mut),</span>
+<span class='doccomment'>/// will break sharing and require a clone of the data (if it is not uniquely held).</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Note that all `ArrayBase` variants can change their view (slicing) of the</span>
-<span class='doccomment'>/// data freely, even when the data can’t be mutated.</span>
+<span class='doccomment'>/// data freely, even when their data can’t be mutated.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// ## Indexing</span>
+<span class='doccomment'>/// ## Indexing and Dimension</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Array indexes are represented by the types `Ix` and `Ixs`</span>
 <span class='doccomment'>/// (signed). ***Note: A future version will switch from `u32` to `usize`.***</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// ## Slicing</span>
-<span class='doccomment'>///</span>
-<span class='doccomment'>/// You can use slicing to create a view of a subset of the data in</span>
-<span class='doccomment'>/// the array. Slicing methods include `.slice()`, `.islice()`,</span>
-<span class='doccomment'>/// `.slice_mut()`.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The dimensionality of the array determines the number of *axes*, for example</span>
 <span class='doccomment'>/// a 2D array has two axes. These are listed in “big endian” order, so that</span>
@@ -2603,6 +2582,17 @@
 <span class='doccomment'>/// rapidly varying index is the last.</span>
 <span class='doccomment'>/// For the 2D array this means that indices are `(row, column)`, and the order of</span>
 <span class='doccomment'>/// the elements is *(0, 0), (0, 1), (0, 2), ... (1, 0), (1, 1), (1, 2) ...* etc.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// The number of axes for an array is fixed by the `D` parameter: `Ix` for</span>
+<span class='doccomment'>/// a 1D array, `(Ix, Ix)` for a 2D array etc. The `D` type is also used</span>
+<span class='doccomment'>/// for element indices in `.get()` and `array[index]`. The dimension type `Vec&lt;Ix&gt;`</span>
+<span class='doccomment'>/// allows a dynamic number of axes.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ## Slicing</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// You can use slicing to create a view of a subset of the data in</span>
+<span class='doccomment'>/// the array. Slicing methods include `.slice()`, `.islice()`,</span>
+<span class='doccomment'>/// `.slice_mut()`.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The slicing specification is passed as a function argument as a fixed size</span>
 <span class='doccomment'>/// array with elements of type [`Si`] with fields `Si(begin, end, stride)`,</span>
@@ -3503,7 +3493,7 @@
     <span class='doccomment'>/// Return an iterator that traverses over all dimensions but the innermost,</span>
     <span class='doccomment'>/// and yields each inner row.</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// Iterator element is `ArrayViewView&lt;A, Ix&gt;` (1D read-write array view).</span>
+    <span class='doccomment'>/// Iterator element is `ArrayViewMut&lt;A, Ix&gt;` (1D read-write array view).</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>inner_iter_mut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>InnerIterMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
         <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>
     {

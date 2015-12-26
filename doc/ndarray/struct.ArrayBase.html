@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1331' class='srclink' href='../src/ndarray/lib.rs.html#303-313' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1331' class='srclink' href='../src/ndarray/lib.rs.html#298-308' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ArrayBase&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> {
     // some fields omitted
 }</pre><div class='docblock'><p>An <em>N</em>-dimensional array.</p>
@@ -65,35 +65,21 @@ cannot grow or shrink, but can be sliced into views of parts of its data.</p>
 <p>Type aliases <a href="type.Array.html"><code>Array</code></a>, <a href="type.OwnedArray.html"><code>OwnedArray</code></a>, <a href="type.ArrayView.html"><code>ArrayView</code></a>, and <a href="type.ArrayViewMut.html"><code>ArrayViewMut</code></a> refer
 to <code>ArrayBase</code> with different types for the data storage.</p>
 
-<h2 id='array' class='section-header'><a href='#array'><code>Array</code></a></h2>
-<p><code>Array&lt;A, D&gt;</code> is a an array with reference counted data and copy-on-write
-mutability.</p>
-
-<p>The <code>Array</code> is both a view and a shared owner of its data. Some methods,
-for example <a href="#method.slice"><code>slice()</code></a>, merely change the view of the data,
-while methods like <a href="#method.iadd"><code>iadd()</code></a> allow mutating the element
-values.</p>
-
-<p>Calling a method for mutating elements, for example
-<a href="#method.get_mut"><code>get_mut()</code></a>, <a href="#method.iadd"><code>iadd()</code></a> or
-<a href="#method.iter_mut"><code>iter_mut()</code></a> will break sharing and require a clone of
-the data (if it is not uniquely held).</p>
-
-<h2 id='method-conventions' class='section-header'><a href='#method-conventions'>Method Conventions</a></h2>
-<p>Methods mutating the view or array elements in place use an <em>i</em> prefix,
-for example <code>slice</code> vs. <code>islice</code> and <code>add</code> vs <code>iadd</code>.</p>
+<h2 id='array-and-ownedarray' class='section-header'><a href='#array-and-ownedarray'><code>Array</code> and <code>OwnedArray</code></a></h2>
+<p><code>OwnedArray</code> owns the underlying array elements directly (just like
+a <code>Vec</code>), while <a href="type.Array.html"><code>Array</code></a> is a an array with reference
+counted data. <code>Array</code> can act both as an owner or as a view in that regard.
+Sharing requires that it uses copy-on-write for mutable operations.
+Calling a method for mutating elements on <code>Array</code>, for example
+<a href="#method.view_mut"><code>view_mut()</code></a> or <a href="#method.get_mut"><code>get_mut()</code></a>,
+will break sharing and require a clone of the data (if it is not uniquely held).</p>
 
 <p>Note that all <code>ArrayBase</code> variants can change their view (slicing) of the
-data freely, even when the data can’t be mutated.</p>
+data freely, even when their data can’t be mutated.</p>
 
-<h2 id='indexing' class='section-header'><a href='#indexing'>Indexing</a></h2>
+<h2 id='indexing-and-dimension' class='section-header'><a href='#indexing-and-dimension'>Indexing and Dimension</a></h2>
 <p>Array indexes are represented by the types <code>Ix</code> and <code>Ixs</code>
 (signed). <strong><em>Note: A future version will switch from <code>u32</code> to <code>usize</code>.</em></strong></p>
-
-<h2 id='slicing' class='section-header'><a href='#slicing'>Slicing</a></h2>
-<p>You can use slicing to create a view of a subset of the data in
-the array. Slicing methods include <code>.slice()</code>, <code>.islice()</code>,
-<code>.slice_mut()</code>.</p>
 
 <p>The dimensionality of the array determines the number of <em>axes</em>, for example
 a 2D array has two axes. These are listed in “big endian” order, so that
@@ -101,6 +87,16 @@ the greatest dimension is listed first, the lowest dimension with the most
 rapidly varying index is the last.
 For the 2D array this means that indices are <code>(row, column)</code>, and the order of
 the elements is <em>(0, 0), (0, 1), (0, 2), ... (1, 0), (1, 1), (1, 2) ...</em> etc.</p>
+
+<p>The number of axes for an array is fixed by the <code>D</code> parameter: <code>Ix</code> for
+a 1D array, <code>(Ix, Ix)</code> for a 2D array etc. The <code>D</code> type is also used
+for element indices in <code>.get()</code> and <code>array[index]</code>. The dimension type <code>Vec&lt;Ix&gt;</code>
+allows a dynamic number of axes.</p>
+
+<h2 id='slicing' class='section-header'><a href='#slicing'>Slicing</a></h2>
+<p>You can use slicing to create a view of a subset of the data in
+the array. Slicing methods include <code>.slice()</code>, <code>.islice()</code>,
+<code>.slice_mut()</code>.</p>
 
 <p>The slicing specification is passed as a function argument as a fixed size
 array with elements of type <a href="struct.Si.html"><code>Si</code></a> with fields <code>Si(begin, end, stride)</code>,
@@ -444,7 +440,7 @@ and yields each inner row.</p>
 <div class='docblock'><p>Return an iterator that traverses over all dimensions but the innermost,
 and yields each inner row.</p>
 
-<p>Iterator element is <code>ArrayViewView&lt;A, Ix&gt;</code> (1D read-write array view).</p>
+<p>Iterator element is <code>ArrayViewMut&lt;A, Ix&gt;</code> (1D read-write array view).</p>
 </div><h4 id='method.diag_iter' class='method'><code>fn <a href='#method.diag_iter' class='fnname'>diag_iter</a>(&amp;self) -&gt; <a class='struct' href='../ndarray/struct.Elements.html' title='ndarray::Elements'>Elements</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;</code></h4>
 <div class='docblock'><p>Return an iterator over the diagonal elements of the array.</p>
 
