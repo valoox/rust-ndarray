@@ -72,13 +72,13 @@ fn test_index()
     }
 
     for ((i, j), a) in Indexes::new((2, 3)).zip(A.iter()) {
-        assert_eq!(*a, A[(i, j)]);
+        assert_eq!(*a, A[[i, j]]);
     }
 
     let vi = A.slice(&[Si(1, None, 1), Si(0, None, 2)]);
     let mut it = vi.iter();
     for ((i, j), x) in Indexes::new((1, 2)).zip(it.by_ref()) {
-        assert_eq!(*x, vi[(i, j)]);
+        assert_eq!(*x, vi[[i, j]]);
     }
     assert!(it.next().is_none());
 }
@@ -93,10 +93,10 @@ fn test_add()
 
     let B = A.clone();
     A.iadd(&B);
-    assert_eq!(A[(0,0)], 0);
-    assert_eq!(A[(0,1)], 2);
-    assert_eq!(A[(1,0)], 4);
-    assert_eq!(A[(1,1)], 6);
+    assert_eq!(A[[0, 0]], 0);
+    assert_eq!(A[[0, 1]], 2);
+    assert_eq!(A[[1, 0]], 4);
+    assert_eq!(A[[1, 1]], 6);
 }
 
 #[test]
@@ -156,16 +156,18 @@ fn test_negative_stride_rcarray()
 fn test_cow()
 {
     let mut mat = Array::<isize, _>::zeros((2,2));
-    mat[(0, 0)] = 1;
+    mat[[0, 0]] = 1;
     let n = mat.clone();
-    mat[(0, 1)] = 2;
-    mat[(1, 0)] = 3;
-    mat[(1, 1)] = 4;
-    assert_eq!(mat[(0,0)], 1);
-    assert_eq!(mat[(0,1)], 2);
-    assert_eq!(n[(0,0)], 1);
-    assert_eq!(n[(0,1)], 0);
-    let mut rev = mat.reshape(4).slice(&[Si(0, None, -1)]);
+    mat[[0, 1]] = 2;
+    mat[[1, 0]] = 3;
+    mat[[1, 1]] = 4;
+    assert_eq!(mat[[0, 0]], 1);
+    assert_eq!(mat[[0, 1]], 2);
+    assert_eq!(n[[0, 0]], 1);
+    assert_eq!(n[[0, 1]], 0);
+    assert_eq!(n.get((0, 1)), Some(&0));
+    let mut rev = mat.reshape(4);
+    rev.islice(&[Si(0, None, -1)]);
     assert_eq!(rev[0], 4);
     assert_eq!(rev[1], 3);
     assert_eq!(rev[2], 2);
@@ -200,14 +202,14 @@ fn test_sub()
 #[test]
 fn diag()
 {
-    let d = arr2(&[[1., 2., 3.0f32]]).diag();
+    let d = arr2(&[[1., 2., 3.0f32]]).into_diag();
     assert_eq!(d.dim(), 1);
     let a = arr2(&[[1., 2., 3.0f32], [0., 0., 0.]]);
-    let d = a.view().diag();
+    let d = a.view().into_diag();
     assert_eq!(d.dim(), 2);
-    let d = arr2::<f32, _>(&[[]]).diag();
+    let d = arr2::<f32, _>(&[[]]).into_diag();
     assert_eq!(d.dim(), 0);
-    let d = Array::<f32, _>::zeros(()).diag();
+    let d = Array::<f32, _>::zeros(()).into_diag();
     assert_eq!(d.dim(), 1);
 }
 
@@ -264,19 +266,6 @@ fn assign()
         v.assign_scalar(&0);
     }
     assert_eq!(a, arr2(&[[0, 0], [3, 4]]));
-}
-
-#[test]
-fn dyn_dimension()
-{
-    let a = arr2(&[[1., 2.], [3., 4.0]]).reshape(vec![2, 2]);
-    assert_eq!(&a - &a, Array::zeros(vec![2, 2]));
-
-    let mut dim = vec![1; 1024];
-    dim[16] = 4;
-    dim[17] = 3;
-    let z = Array::<f32, _>::zeros(dim.clone());
-    assert_eq!(z.shape(), &dim[..]);
 }
 
 #[test]
@@ -476,6 +465,12 @@ fn assign_ops()
     a -= &b;
     a -= &b;
     assert_eq!(a, arr2(&[[0., -1.,], [1., 0.]]));
+
+    a += 1.;
+    assert_eq!(a, arr2(&[[1., 0.,], [2., 1.]]));
+    a *= 10.;
+    a /= 5.;
+    assert_eq!(a, arr2(&[[2., 0.,], [4., 2.]]));
 }
 
 #[test]
@@ -551,4 +546,41 @@ fn char_array()
     // test compilation & basics of non-numerical array
     let cc = Array::from_iter("alphabet".chars()).reshape((4, 2));
     assert!(cc.subview(1, 0) == Array::from_iter("apae".chars()));
+}
+
+#[test]
+fn scalar_ops() {
+    let a = OwnedArray::<i32, _>::zeros((5, 5));
+    let b = &a + 1;
+    let c = (&a + &a + 2) - 3;
+    println!("{:?}", b);
+    println!("{:?}", c);
+
+    let a = OwnedArray::<f32, _>::zeros((2, 2));
+    let b = (1. + a) * 3.;
+    assert_eq!(b, arr2(&[[3., 3.], [3., 3.]]));
+
+    let a = arr1(&[false, true, true]);
+    let b = &a ^ true;
+    let c = true ^ &a;
+    assert_eq!(b, c);
+    assert_eq!(true & &a, a);
+    assert_eq!(b, arr1(&[true, false, false]));
+    assert_eq!(true ^ &a, !a);
+
+    let zero = OwnedArray::<f32, _>::zeros((2, 2));
+    let one = &zero + 1.;
+    assert_eq!(0. * &one, zero);
+    assert_eq!(&one * 0., zero);
+    assert_eq!((&one + &one).scalar_sum(), 8.);
+    assert_eq!(&one / 2., 0.5 * &one);
+    assert_eq!(&one % 1., zero);
+
+    let zero = OwnedArray::<i32, _>::zeros((2, 2));
+    let one = &zero + 1;
+    assert_eq!(one.clone() << 3, 8 * &one);
+    assert_eq!(3 << one.clone() , 6 * &one);
+
+    assert_eq!(&one << 3, 8 * &one);
+    assert_eq!(3 << &one , 6 * &one);
 }

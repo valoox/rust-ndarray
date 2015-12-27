@@ -66,6 +66,7 @@ extern crate itertools as it;
 extern crate num as libnum;
 
 use libnum::Float;
+use libnum::Complex;
 
 use std::cmp;
 use std::mem;
@@ -80,6 +81,7 @@ use std::slice::{self, Iter, IterMut};
 use it::ZipSlices;
 
 pub use dimension::{Dimension, RemoveAxis};
+pub use dimension::NdIndex;
 pub use indexes::Indexes;
 pub use shape_error::ShapeError;
 pub use si::{Si, S};
@@ -110,9 +112,9 @@ mod shape_error;
 // NOTE: In theory, the whole library should compile
 // and pass tests even if you change Ix and Ixs.
 /// Array index type
-pub type Ix = u32;
+pub type Ix = usize;
 /// Array index type (signed)
-pub type Ixs = i32;
+pub type Ixs = isize;
 
 /// An *N*-dimensional array.
 ///
@@ -272,6 +274,32 @@ pub type Ixs = i32;
 /// since it is *in place*, it cannot remove the collapsed axis. It becomes
 /// an axis of length 1.
 ///
+/// ## Arithmetic Operations
+///
+/// Arrays support all arithmetic operations the same way: they apply elementwise.
+///
+/// Since the trait implementations are hard to overview, here is a summary.
+///
+/// Let `A` be an array or view of any kind. Let `B` be a mutable
+/// array (that is, either `OwnedArray`, `Array`, or `ArrayViewMut`)
+/// The following combinations of operands
+/// are supported for an arbitrary binary operator denoted by `@`.
+///
+/// - `&A @ &A` which produces a new `OwnedArray`
+/// - `B @ A` which consumes `B`, updates it with the result, and returns it
+/// - `B @ &A` which consumes `B`, updates it with the result, and returns it
+/// - `B @= &A` which performs an arithmetic operation in place
+///   (requires `features = "assign_ops"`)
+///
+/// The trait [`Scalar`](trait.Scalar.html) marks types that can be used in arithmetic
+/// with arrays directly. For a scalar `K` the following combinations of operands
+/// are supported (scalar can be on either side).
+///
+/// - `&A @ K` or `K @ &A` which produces a new `OwnedArray`
+/// - `B @ K` or `K @ B` which consumes `B`, updates it with the result and returns it
+/// - `B @= K` which performs an arithmetic operation in place
+///   (requires `features = "assign_ops"`)
+///
 /// ## Broadcasting
 ///
 /// Arrays support limited *broadcasting*, where arithmetic operations with
@@ -316,10 +344,13 @@ pub unsafe trait Data {
 /// Array’s writable inner representation.
 pub unsafe trait DataMut : Data {
     fn slice_mut(&mut self) -> &mut [Self::Elem];
+    #[inline]
     fn ensure_unique<D>(&mut ArrayBase<Self, D>)
         where Self: Sized, D: Dimension
     {
     }
+    #[inline]
+    fn is_unique(&mut self) -> bool { true }
 }
 
 /// Clone an Array’s storage.
@@ -356,6 +387,10 @@ unsafe impl<A> DataMut for Rc<Vec<A>> where A: Clone {
         unsafe {
             self_.ptr = rvec.as_mut_ptr().offset(our_off);
         }
+    }
+
+    fn is_unique(&mut self) -> bool {
+        Rc::get_mut(self).is_some()
     }
 }
 
@@ -666,6 +701,11 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         }
     }
 
+    /// Return the number of dimensions (axes) in the array
+    pub fn ndim(&self) -> usize {
+        self.dim.ndim()
+    }
+
     /// Return a read-only view of the array
     pub fn view(&self) -> ArrayView<A, D> {
         debug_assert!(self.pointer_is_inbounds());
@@ -772,10 +812,9 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     ///
     /// **Panics** if an index is out of bounds or stride is zero.<br>
     /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
-    pub fn slice(&self, indexes: &D::SliceArg) -> Self
-        where S: DataShared
+    pub fn slice(&self, indexes: &D::SliceArg) -> ArrayView<A, D>
     {
-        let mut arr = self.clone();
+        let mut arr = self.view();
         arr.islice(indexes);
         arr
     }
@@ -797,20 +836,11 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         }
     }
 
-    /// Return an iterator over a sliced view.
-    ///
-    /// [`D::SliceArg`] is typically a fixed size array of `Si`, with one
-    /// element per axis.
-    ///
-    /// [`D::SliceArg`]: trait.Dimension.html#associatedtype.SliceArg
-    ///
-    /// **Panics** if an index is out of bounds or stride is zero.<br>
-    /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
+    /// ***Deprecated: Use `.slice()` instead.***
+    #[cfg_attr(has_deprecated, deprecated(note="use .slice() instead"))]
     pub fn slice_iter(&self, indexes: &D::SliceArg) -> Elements<A, D>
     {
-        let mut it = self.view();
-        it.islice(indexes);
-        it.into_iter_()
+        self.slice(indexes).into_iter()
     }
 
     /// Return a sliced read-write view of the array.
@@ -852,12 +882,15 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// assert!(
     ///     a.get((0, 1)) == Some(&2.) &&
     ///     a.get((0, 2)) == None &&
-    ///     a[(0, 1)] == 2.
+    ///     a[(0, 1)] == 2. &&
+    ///     a[[0, 1]] == 2.
     /// );
     /// ```
-    pub fn get(&self, index: D) -> Option<&A> {
+    pub fn get<I>(&self, index: I) -> Option<&A>
+        where I: NdIndex<Dim=D>,
+    {
         let ptr = self.ptr;
-        self.dim.stride_offset_checked(&self.strides, &index)
+        index.index_checked(&self.dim, &self.strides)
             .map(move |offset| unsafe {
                 &*ptr.offset(offset)
             })
@@ -871,12 +904,13 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
 
     /// Return a mutable reference to the element at `index`, or return `None`
     /// if the index is out of bounds.
-    pub fn get_mut(&mut self, index: D) -> Option<&mut A>
+    pub fn get_mut<I>(&mut self, index: I) -> Option<&mut A>
         where S: DataMut,
+              I: NdIndex<Dim=D>,
     {
         self.ensure_unique();
         let ptr = self.ptr;
-        self.dim.stride_offset_checked(&self.strides, &index)
+        index.index_checked(&self.dim, &self.strides)
             .map(move |offset| unsafe {
                 &mut *ptr.offset(offset)
             })
@@ -919,7 +953,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     pub unsafe fn uget_mut(&mut self, index: D) -> &mut A
         where S: DataMut
     {
-        //debug_assert!(Rc::get_mut(&mut self.data).is_some());
+        debug_assert!(self.data.is_unique());
         debug_assert!(self.dim.stride_offset_checked(&self.strides, &index).is_some());
         let off = Dimension::stride_offset(&index, &self.strides);
         &mut *self.ptr.offset(off)
@@ -1086,47 +1120,38 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         return (len, stride)
     }
 
-    /// Return an iterator over the diagonal elements of the array.
+    /// Return an view of the diagonal elements of the array.
     ///
     /// The diagonal is simply the sequence indexed by *(0, 0, .., 0)*,
     /// *(1, 1, ..., 1)* etc as long as all axes have elements.
-    pub fn diag_iter(&self) -> Elements<A, Ix>
+    pub fn diag(&self) -> ArrayView<A, Ix>
     {
-        let (len, stride) = self.diag_params();
-        let view = ArrayBase {
-            data: self.raw_data(),
-            ptr: self.ptr,
-            dim: len,
-            strides: stride as Ix,
-        };
-        view.into_iter_()
-    }
-
-    /// Return the diagonal as a one-dimensional array.
-    pub fn diag(&self) -> ArrayBase<S, Ix>
-        where S: DataShared,
-    {
-        let (len, stride) = self.diag_params();
-        ArrayBase {
-            data: self.data.clone(),
-            ptr: self.ptr,
-            dim: len,
-            strides: stride as Ix,
-        }
+        self.view().into_diag()
     }
 
     /// Return a read-write view over the diagonal elements of the array.
     pub fn diag_mut(&mut self) -> ArrayViewMut<A, Ix>
         where S: DataMut,
     {
-        self.ensure_unique();
+        self.view_mut().into_diag()
+    }
+
+    /// Return the diagonal as a one-dimensional array.
+    pub fn into_diag(self) -> ArrayBase<S, Ix>
+    {
         let (len, stride) = self.diag_params();
-        ArrayViewMut {
+        ArrayBase {
+            data: self.data,
             ptr: self.ptr,
-            data: self.raw_data_mut(),
             dim: len,
             strides: stride as Ix,
         }
+    }
+
+    /// ***Deprecated: use `.diag()`***
+    #[cfg_attr(has_deprecated, deprecated(note="use .diag() instead"))]
+    pub fn diag_iter(&self) -> Elements<A, Ix> {
+        self.diag().into_iter()
     }
 
     /// ***Deprecated: use `.diag_mut()`***
@@ -1136,7 +1161,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     {
         self.diag_mut().into_iter_()
     }
-
 
     /// Make the array unshared.
     ///
@@ -1237,8 +1261,10 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     ///               [3., 4.]])
     /// );
     /// ```
-    pub fn reshape<E: Dimension>(&self, shape: E) -> ArrayBase<S, E>
-        where S: DataShared + DataOwned, A: Clone,
+    pub fn reshape<E>(&self, shape: E) -> ArrayBase<S, E>
+        where S: DataShared + DataOwned,
+              A: Clone,
+              E: Dimension,
     {
         if shape.size() != self.dim.size() {
             panic!("Incompatible shapes in reshape, attempted from: {:?}, to: {:?}",
@@ -2182,6 +2208,36 @@ impl_binary_op_inherent!(Shr, shr, ishr, ishr_scalar, "right shift");
 
 }
 
+/// Elements that can be used as direct operands in arithmetic with arrays.
+///
+/// This trait ***does not*** limit which elements can be stored in an `ArrayBase`.
+///
+/// `Scalar` simply determines which types are applicable for direct operator
+/// overloading, e.g. `B @ K` or `B @= K`  where `B` is a mutable array,
+/// `K` a scalar, and `@` arbitrary arithmetic operator that the scalar supports.
+///
+/// Left hand side operands must instead be implemented one by one (it does not
+/// involve the `Scalar` trait). Scalar left hand side operations: `K @ &A`
+/// and `K @ B`, are implemented for the primitive numerical types and for
+/// `Complex<f32>, Complex<f64>`.
+///
+/// Non-`Scalar` types can still participate in arithmetic as array elements in
+/// in array-array operations.
+pub trait Scalar { }
+impl Scalar for bool { }
+impl Scalar for i8 { }
+impl Scalar for u8 { }
+impl Scalar for i16 { }
+impl Scalar for u16 { }
+impl Scalar for i32 { }
+impl Scalar for u32 { }
+impl Scalar for i64 { }
+impl Scalar for u64 { }
+impl Scalar for f32 { }
+impl Scalar for f64 { }
+impl Scalar for Complex<f32> { }
+impl Scalar for Complex<f64> { }
+
 macro_rules! impl_binary_op(
     ($trt:ident, $mth:ident, $doc:expr) => (
 /// Perform elementwise
@@ -2200,9 +2256,30 @@ impl<A, S, S2, D, E> $trt<ArrayBase<S2, E>> for ArrayBase<S, D>
           E: Dimension,
 {
     type Output = ArrayBase<S, D>;
-    fn $mth (mut self, rhs: ArrayBase<S2, E>) -> ArrayBase<S, D>
+    fn $mth(self, rhs: ArrayBase<S2, E>) -> ArrayBase<S, D>
     {
-        // FIXME: Can we co-broadcast arrays here? And how?
+        self.$mth(&rhs)
+    }
+}
+
+/// Perform elementwise
+#[doc=$doc]
+/// between `self` and reference `rhs`,
+/// and return the result (based on `self`).
+///
+/// If their shapes disagree, `rhs` is broadcast to the shape of `self`.
+///
+/// **Panics** if broadcasting isn’t possible.
+impl<'a, A, S, S2, D, E> $trt<&'a ArrayBase<S2, E>> for ArrayBase<S, D>
+    where A: Clone + $trt<A, Output=A>,
+          S: DataMut<Elem=A>,
+          S2: Data<Elem=A>,
+          D: Dimension,
+          E: Dimension,
+{
+    type Output = ArrayBase<S, D>;
+    fn $mth (mut self, rhs: &ArrayBase<S2, E>) -> ArrayBase<S, D>
+    {
         self.zip_mut_with(&rhs, |x, y| {
             *x = x.clone(). $mth (y.clone());
         });
@@ -2232,12 +2309,87 @@ impl<'a, A, S, S2, D, E> $trt<&'a ArrayBase<S2, E>> for &'a ArrayBase<S, D>
         self.to_owned().$mth(rhs.view())
     }
 }
+
+/// Perform elementwise
+#[doc=$doc]
+/// between `self` and the scalar `x`,
+/// and return the result (based on `self`).
+impl<A, S, D, B> $trt<B> for ArrayBase<S, D>
+    where A: Clone + $trt<B, Output=A>,
+          S: DataMut<Elem=A>,
+          D: Dimension,
+          B: Clone + Scalar,
+{
+    type Output = ArrayBase<S, D>;
+    fn $mth (mut self, x: B) -> ArrayBase<S, D>
+    {
+        self.unordered_foreach_mut(move |elt| {
+            *elt = elt.clone().$mth(x.clone());
+        });
+        self
+    }
+}
+
+/// Perform elementwise
+#[doc=$doc]
+/// between the reference `self` and the scalar `x`,
+/// and return the result as a new `OwnedArray`.
+impl<'a, A, S, D, B> $trt<B> for &'a ArrayBase<S, D>
+    where A: Clone + $trt<B, Output=A>,
+          S: Data<Elem=A>,
+          D: Dimension,
+          B: Clone + Scalar,
+{
+    type Output = OwnedArray<A, D>;
+    fn $mth(self, x: B) -> OwnedArray<A, D>
+    {
+        self.to_owned().$mth(x)
+    }
+}
     );
 );
+
+macro_rules! impl_scalar_op {
+    ($scalar:ty, $trt:ident, $mth:ident, $doc:expr) => (
+// these have no doc -- they are not visible in rustdoc
+// Perform elementwise
+// between the scalar `self` and array `rhs`,
+// and return the result (based on `self`).
+impl<S, D> $trt<ArrayBase<S, D>> for $scalar
+    where S: DataMut<Elem=$scalar>,
+          D: Dimension,
+{
+    type Output = ArrayBase<S, D>;
+    fn $mth (self, mut rhs: ArrayBase<S, D>) -> ArrayBase<S, D>
+    {
+        rhs.unordered_foreach_mut(move |elt| {
+            *elt = self.$mth(*elt);
+        });
+        rhs
+    }
+}
+
+// Perform elementwise
+// between the scalar `self` and array `rhs`,
+// and return the result as a new `OwnedArray`.
+impl<'a, S, D> $trt<&'a ArrayBase<S, D>> for $scalar
+    where S: Data<Elem=$scalar>,
+          D: Dimension,
+{
+    type Output = OwnedArray<$scalar, D>;
+    fn $mth (self, rhs: &ArrayBase<S, D>) -> OwnedArray<$scalar, D>
+    {
+        self.$mth(rhs.to_owned())
+    }
+}
+    );
+}
+
 
 mod arithmetic_ops {
     use super::*;
     use std::ops::*;
+    use libnum::Complex;
 
     impl_binary_op!(Add, add, "addition");
     impl_binary_op!(Sub, sub, "subtraction");
@@ -2249,6 +2401,55 @@ mod arithmetic_ops {
     impl_binary_op!(BitXor, bitxor, "bit xor");
     impl_binary_op!(Shl, shl, "left shift");
     impl_binary_op!(Shr, shr, "right shift");
+
+    macro_rules! all_scalar_ops {
+        ($int_scalar:ty) => (
+            impl_scalar_op!($int_scalar, Add, add, "addition");
+            impl_scalar_op!($int_scalar, Sub, sub, "subtraction");
+            impl_scalar_op!($int_scalar, Mul, mul, "multiplication");
+            impl_scalar_op!($int_scalar, Div, div, "division");
+            impl_scalar_op!($int_scalar, Rem, rem, "remainder");
+            impl_scalar_op!($int_scalar, BitAnd, bitand, "bit and");
+            impl_scalar_op!($int_scalar, BitOr, bitor, "bit or");
+            impl_scalar_op!($int_scalar, BitXor, bitxor, "bit xor");
+            impl_scalar_op!($int_scalar, Shl, shl, "left shift");
+            impl_scalar_op!($int_scalar, Shr, shr, "right shift");
+        );
+    }
+    all_scalar_ops!(i8);
+    all_scalar_ops!(u8);
+    all_scalar_ops!(i16);
+    all_scalar_ops!(u16);
+    all_scalar_ops!(i32);
+    all_scalar_ops!(u32);
+    all_scalar_ops!(i64);
+    all_scalar_ops!(u64);
+
+    impl_scalar_op!(bool, BitAnd, bitand, "bit and");
+    impl_scalar_op!(bool, BitOr, bitor, "bit or");
+    impl_scalar_op!(bool, BitXor, bitxor, "bit xor");
+
+    impl_scalar_op!(f32, Add, add, "addition");
+    impl_scalar_op!(f32, Sub, sub, "subtraction");
+    impl_scalar_op!(f32, Mul, mul, "multiplication");
+    impl_scalar_op!(f32, Div, div, "division");
+    impl_scalar_op!(f32, Rem, rem, "remainder");
+
+    impl_scalar_op!(f64, Add, add, "addition");
+    impl_scalar_op!(f64, Sub, sub, "subtraction");
+    impl_scalar_op!(f64, Mul, mul, "multiplication");
+    impl_scalar_op!(f64, Div, div, "division");
+    impl_scalar_op!(f64, Rem, rem, "remainder");
+
+    impl_scalar_op!(Complex<f32>, Add, add, "addition");
+    impl_scalar_op!(Complex<f32>, Sub, sub, "subtraction");
+    impl_scalar_op!(Complex<f32>, Mul, mul, "multiplication");
+    impl_scalar_op!(Complex<f32>, Div, div, "division");
+
+    impl_scalar_op!(Complex<f64>, Add, add, "addition");
+    impl_scalar_op!(Complex<f64>, Sub, sub, "subtraction");
+    impl_scalar_op!(Complex<f64>, Mul, mul, "multiplication");
+    impl_scalar_op!(Complex<f64>, Div, div, "division");
 
     impl<A, S, D> Neg for ArrayBase<S, D>
         where A: Clone + Neg<Output=A>,
@@ -2281,20 +2482,9 @@ mod arithmetic_ops {
 mod assign_ops {
     use super::*;
 
-    use std::ops::{
-        AddAssign,
-        SubAssign,
-        MulAssign,
-        DivAssign,
-        RemAssign,
-        BitAndAssign,
-        BitOrAssign,
-        BitXorAssign,
-    };
-
-
     macro_rules! impl_assign_op {
         ($trt:ident, $method:ident, $doc:expr) => {
+    use std::ops::$trt;
 
     #[doc=$doc]
     /// If their shapes disagree, `rhs` is broadcast to the shape of `self`.
@@ -2312,6 +2502,21 @@ mod assign_ops {
         fn $method(&mut self, rhs: &ArrayBase<S2, E>) {
             self.zip_mut_with(rhs, |x, y| {
                 x.$method(y.clone());
+            });
+        }
+    }
+
+    #[doc=$doc]
+    /// **Requires `feature = "assign_ops"`**
+    impl<A, S, D, B> $trt<B> for ArrayBase<S, D>
+        where A: $trt<B>,
+              S: DataMut<Elem=A>,
+              D: Dimension,
+              B: Clone + Scalar,
+    {
+        fn $method(&mut self, rhs: B) {
+            self.unordered_foreach_mut(move |elt| {
+                elt.$method(rhs.clone());
             });
         }
     }

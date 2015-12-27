@@ -254,6 +254,7 @@ unsafe impl Dimension for Ix {
     }
 
     /// Return stride offset for this dimension and index.
+    #[inline]
     fn stride_offset_checked(&self, stride: &Ix, index: &Ix) -> Option<isize>
     {
         if *index < *self {
@@ -309,6 +310,7 @@ unsafe impl Dimension for (Ix, Ix) {
     }
 
     /// Return stride offset for this dimension and index.
+    #[inline]
     fn stride_offset_checked(&self, strides: &(Ix, Ix), index: &(Ix, Ix)) -> Option<isize>
     {
         let (m, n) = *self;
@@ -357,42 +359,25 @@ unsafe impl Dimension for (Ix, Ix, Ix) {
     }
 }
 
-unsafe impl Dimension for (Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 4];
-    #[inline]
-    fn ndim(&self) -> usize { 4 } }
-unsafe impl Dimension for (Ix, Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 5];
-    #[inline]
-    fn ndim(&self) -> usize { 5 } }
-unsafe impl Dimension for (Ix, Ix, Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 6];
-    #[inline]
-    fn ndim(&self) -> usize { 6 } }
-unsafe impl Dimension for (Ix, Ix, Ix, Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 7];
-    #[inline]
-    fn ndim(&self) -> usize { 7 } }
-unsafe impl Dimension for (Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 8];
-    #[inline]
-    fn ndim(&self) -> usize { 8 } }
-unsafe impl Dimension for (Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 9];
-    #[inline]
-    fn ndim(&self) -> usize { 9 } }
-unsafe impl Dimension for (Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 10];
-    #[inline]
-    fn ndim(&self) -> usize { 10 } }
-unsafe impl Dimension for (Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 11];
-    #[inline]
-    fn ndim(&self) -> usize { 11 } }
-unsafe impl Dimension for (Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix) {
-    type SliceArg = [Si; 12];
-    #[inline]
-    fn ndim(&self) -> usize { 12 } }
+macro_rules! large_dim {
+    ($n:expr, $($ix:ident),+) => (
+        unsafe impl Dimension for ($($ix),+) {
+            type SliceArg = [Si; $n];
+            #[inline]
+            fn ndim(&self) -> usize { $n }
+        }
+    )
+}
+
+large_dim!(4, Ix, Ix, Ix, Ix);
+large_dim!(5, Ix, Ix, Ix, Ix, Ix);
+large_dim!(6, Ix, Ix, Ix, Ix, Ix, Ix);
+large_dim!(7, Ix, Ix, Ix, Ix, Ix, Ix, Ix);
+large_dim!(8, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix);
+large_dim!(9, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix);
+large_dim!(10, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix);
+large_dim!(11, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix);
+large_dim!(12, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix);
 
 /// Vec<Ix> is a "dynamic" index, pretty hard to use when indexing,
 /// and memory wasteful, but it allows an arbitrary and dynamic number of axes.
@@ -459,3 +444,87 @@ impl RemoveAxis for Vec<Ix>
     }
 }
 
+/// A tuple or fixed size array that can be used to index an array.
+///
+/// ```
+/// use ndarray::arr2;
+///
+/// let mut a = arr2(&[[0, 1], [0, 0]]);
+/// a[[1, 1]] = 1;
+/// assert_eq!(a[[0, 1]], 1);
+/// assert_eq!(a[[1, 1]], 1);
+/// ```
+///
+/// **Note** the blanket implementation that's not visible in rustdoc:
+/// `impl<D> NdIndex for D where D: Dimension { ... }`
+pub unsafe trait NdIndex {
+    type Dim: Dimension;
+    #[doc(hidden)]
+    fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize>;
+}
+
+unsafe impl<D> NdIndex for D where D: Dimension {
+    type Dim = D;
+    fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize> {
+        dim.stride_offset_checked(strides, self)
+    }
+}
+
+unsafe impl NdIndex for [Ix; 0] {
+    type Dim = ();
+    #[inline]
+    fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize> {
+        dim.stride_offset_checked(strides, &())
+    }
+}
+
+unsafe impl NdIndex for [Ix; 1] {
+    type Dim = Ix;
+    #[inline]
+    fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize> {
+        dim.stride_offset_checked(strides, &self[0])
+    }
+}
+
+unsafe impl NdIndex for [Ix; 2] {
+    type Dim = (Ix, Ix);
+    #[inline]
+    fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize> {
+        let index = (self[0], self[1]);
+        dim.stride_offset_checked(strides, &index)
+    }
+}
+
+unsafe impl NdIndex for [Ix; 3] {
+    type Dim = (Ix, Ix, Ix);
+    #[inline]
+    fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize> {
+        let index = (self[0], self[1], self[2]);
+        dim.stride_offset_checked(strides, &index)
+    }
+}
+
+unsafe impl NdIndex for [Ix; 4] {
+    type Dim = (Ix, Ix, Ix, Ix);
+    #[inline]
+    fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize> {
+        let index = (self[0], self[1], self[2], self[3]);
+        dim.stride_offset_checked(strides, &index)
+    }
+}
+
+unsafe impl<'a> NdIndex for &'a [Ix] {
+    type Dim = Vec<Ix>;
+    fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize> {
+        let mut offset = 0;
+        for ((&d, &i), &s) in zipsl(zipsl(&dim[..], &self[..]),
+                                    strides.slice())
+        {
+            if i >= d {
+                return None;
+            }
+            offset += stride_offset(i, s);
+        }
+        Some(offset)
+    }
+}
