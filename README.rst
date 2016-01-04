@@ -8,8 +8,9 @@ ndarray
 The ``ndarray`` crate provides an N-dimensional container similar to numpy’s
 ndarray. Requires Rust 1.5.
 
-Please read the `API documentation here`__
+Please read the `API documentation here (0.2)`__ `(master)`__
 
+__ http://bluss.github.io/rust-ndarray/0.2/
 __ http://bluss.github.io/rust-ndarray/
 
 |build_status|_ |crates|_
@@ -84,6 +85,15 @@ How to use with cargo::
 
 Recent Changes
 --------------
+
+- 0.3.0-alpha.2
+
+  - Improve the strided last dimension case in ``zip_mut_with`` slightly
+    (affects all binary operations).
+  - Add ``.row(i), .column(i)`` for 2D arrays.
+  - Deprecate ``.row_iter(), .col_iter()``.
+  - Add method ``.dot()`` for computing the dot product between two 1D arrays.
+
 
 - 0.3.0-alpha.1
 

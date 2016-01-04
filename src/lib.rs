@@ -1,6 +1,6 @@
 #![crate_name="ndarray"]
 #![cfg_attr(has_deprecated, feature(deprecated))]
-#![doc(html_root_url = "http://bluss.github.io/rust-ndarray/doc/")]
+#![doc(html_root_url = "http://bluss.github.io/rust-ndarray/master/")]
 
 //! The `ndarray` crate provides an N-dimensional container similar to numpy’s
 //! ndarray.
@@ -106,6 +106,7 @@ pub mod blas;
 mod dimension;
 mod indexes;
 mod iterators;
+mod numeric_util;
 mod si;
 mod shape_error;
 
@@ -118,13 +119,13 @@ pub type Ixs = isize;
 
 /// An *N*-dimensional array.
 ///
-/// The array is a general container of elements. It can be of numerical use
-/// too, supporting all mathematical operators by applying them elementwise.  It
-/// cannot grow or shrink, but can be sliced into views of parts of its data.
+/// The array is a general container of elements. It cannot grow or shrink, but
+/// can be sliced into subsets of its data.
+/// The array supports arithmetic operations by applying them elementwise.
 ///
 /// The `ArrayBase<S, D>` is parameterized by:
 ///
-/// - `S` for the data storage
+/// - `S` for the data container
 /// - `D` for the number of dimensions
 ///
 /// Type aliases [`Array`], [`OwnedArray`], [`ArrayView`], and [`ArrayViewMut`] refer
@@ -150,8 +151,7 @@ pub type Ixs = isize;
 ///
 /// ## Indexing and Dimension
 ///
-/// Array indexes are represented by the types `Ix` and `Ixs`
-/// (signed). ***Note: A future version will switch from `u32` to `usize`.***
+/// Array indexes are represented by the types `Ix` and `Ixs` (signed).
 ///
 /// The dimensionality of the array determines the number of *axes*, for example
 /// a 2D array has two axes. These are listed in “big endian” order, so that
@@ -477,8 +477,12 @@ pub type Array<A, D> = ArrayBase<Rc<Vec<A>>, D>;
 pub type OwnedArray<A, D> = ArrayBase<Vec<A>, D>;
 
 /// A lightweight array view.
+///
+/// `ArrayView` implements `IntoIterator`.
 pub type ArrayView<'a, A, D> = ArrayBase<&'a [A], D>;
 /// A lightweight read-write array view.
+///
+/// `ArrayViewMut` implements `IntoIterator`.
 pub type ArrayViewMut<'a, A, D> = ArrayBase<&'a mut [A], D>;
 
 impl<S: DataClone, D: Clone> Clone for ArrayBase<S, D>
@@ -834,6 +838,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         unsafe {
             self.ptr = self.ptr.offset(offset);
         }
+        debug_assert!(self.pointer_is_inbounds());
     }
 
     /// ***Deprecated: Use `.slice()` instead.***
@@ -1308,9 +1313,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         where E: Dimension
     {
         if shape.size() != self.dim.size() {
-            return Err(ShapeError::IncompatibleShapes(
-                    self.dim.slice().to_vec().into_boxed_slice(),
-                    shape.slice().to_vec().into_boxed_slice()));
+            return Err(Self::incompatible_shapes(&self.dim, &shape));
         }
         // Check if contiguous, if not => copy all, else just adapt strides
         if self.is_standard_layout() {
@@ -1323,6 +1326,16 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         } else {
             Err(ShapeError::IncompatibleLayout)
         }
+    }
+
+    #[inline(never)]
+    #[cold]
+    fn incompatible_shapes<E>(a: &D, b: &E) -> ShapeError
+        where E: Dimension,
+    {
+        ShapeError::IncompatibleShapes(
+            a.slice().to_vec().into_boxed_slice(),
+            b.slice().to_vec().into_boxed_slice())
     }
 
     /// Act like a larger size and/or shape array by *broadcasting*
@@ -1564,9 +1577,10 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
                 }
                 try_slices = false;
             }
-            // FIXME: Regular .zip() is slow
-            for (y, x) in s_row.iter_mut().zip(r_row) {
-                f(y, x);
+            unsafe {
+                for i in 0..s_row.len() {
+                    f(s_row.uget_mut(i), r_row.uget(i))
+                }
             }
         }
     }
@@ -1628,11 +1642,12 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// ```
     /// use ndarray::arr2;
     ///
-    /// let a = arr2(&[[1., 2.],
-    ///                [3., 4.]]);
+    /// let a = arr2(&[[ 0., 1.],
+    ///                [-1., 2.]]);
     /// assert!(
-    ///     a.map(|&x| (x / 2.) as i32)
-    ///     == arr2(&[[0, 1], [1, 2]])
+    ///     a.map(|x| *x >= 1.0)
+    ///     == arr2(&[[false, true],
+    ///               [false, true]])
     /// );
     /// ```
     pub fn map<'a, B, F>(&'a self, mut f: F) -> OwnedArray<B, D>
@@ -1995,6 +2010,35 @@ impl<A, S, D> ArrayBase<S, D>
     }
 }
 
+impl<A, S> ArrayBase<S, Ix>
+    where S: Data<Elem=A>,
+{
+    /// Compute the dot product of one dimensional arrays.
+    ///
+    /// The dot product is a sum of the elementwise products (no conjugation
+    /// of complex operands, and thus not their inner product).
+    ///
+    /// **Panics** if the arrays are not of the same length.
+    pub fn dot<S2>(&self, rhs: &ArrayBase<S2, Ix>) -> A
+        where S2: Data<Elem=A>,
+              A: Clone + Add<Output=A> + Mul<Output=A> + libnum::Zero,
+    {
+        assert_eq!(self.len(), rhs.len());
+        if let Some(self_s) = self.as_slice() {
+            if let Some(rhs_s) = rhs.as_slice() {
+                return numeric_util::unrolled_dot(self_s, rhs_s);
+            }
+        }
+        let mut sum = A::zero();
+        for i in 0..self.len() {
+            unsafe {
+                sum = sum.clone() + self.uget(i).clone() * rhs.uget(i).clone();
+            }
+        }
+        sum
+    }
+}
+
 impl<A, S> ArrayBase<S, (Ix, Ix)>
     where S: Data<Elem=A>,
 {
@@ -2011,9 +2055,24 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
         view.into_iter_()
     }
 
-    /// Return an iterator over the elements of row `index`.
+    /// Return an array view of row `index`.
     ///
     /// **Panics** if `index` is out of bounds.
+    pub fn row(&self, index: Ix) -> ArrayView<A, Ix>
+    {
+        self.view().subview(0, index)
+    }
+
+    /// Return an array view of column `index`.
+    ///
+    /// **Panics** if `index` is out of bounds.
+    pub fn column(&self, index: Ix) -> ArrayView<A, Ix>
+    {
+        self.view().subview(1, index)
+    }
+
+    #[cfg_attr(has_deprecated, deprecated(note="use .row() instead"))]
+    /// ***Deprecated: Use `.row()` instead.***
     pub fn row_iter(&self, index: Ix) -> Elements<A, Ix>
     {
         let (m, n) = self.dim;
@@ -2024,9 +2083,8 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
         }
     }
 
-    /// Return an iterator over the elements of column `index`.
-    ///
-    /// **Panics** if `index` is out of bounds.
+    #[cfg_attr(has_deprecated, deprecated(note="use .column() instead"))]
+    /// ***Deprecated: Use `.column()` instead.***
     pub fn col_iter(&self, index: Ix) -> Elements<A, Ix>
     {
         let (m, n) = self.dim;
@@ -2239,7 +2297,7 @@ impl Scalar for Complex<f32> { }
 impl Scalar for Complex<f64> { }
 
 macro_rules! impl_binary_op(
-    ($trt:ident, $mth:ident, $doc:expr) => (
+    ($trt:ident, $mth:ident, $imth:ident, $imth_scalar:ident, $doc:expr) => (
 /// Perform elementwise
 #[doc=$doc]
 /// between `self` and `rhs`,
@@ -2280,9 +2338,7 @@ impl<'a, A, S, S2, D, E> $trt<&'a ArrayBase<S2, E>> for ArrayBase<S, D>
     type Output = ArrayBase<S, D>;
     fn $mth (mut self, rhs: &ArrayBase<S2, E>) -> ArrayBase<S, D>
     {
-        self.zip_mut_with(&rhs, |x, y| {
-            *x = x.clone(). $mth (y.clone());
-        });
+        self.$imth(rhs);
         self
     }
 }
@@ -2391,16 +2447,16 @@ mod arithmetic_ops {
     use std::ops::*;
     use libnum::Complex;
 
-    impl_binary_op!(Add, add, "addition");
-    impl_binary_op!(Sub, sub, "subtraction");
-    impl_binary_op!(Mul, mul, "multiplication");
-    impl_binary_op!(Div, div, "division");
-    impl_binary_op!(Rem, rem, "remainder");
-    impl_binary_op!(BitAnd, bitand, "bit and");
-    impl_binary_op!(BitOr, bitor, "bit or");
-    impl_binary_op!(BitXor, bitxor, "bit xor");
-    impl_binary_op!(Shl, shl, "left shift");
-    impl_binary_op!(Shr, shr, "right shift");
+    impl_binary_op!(Add, add, iadd, iadd_scalar, "addition");
+    impl_binary_op!(Sub, sub, isub, isub_scalar, "subtraction");
+    impl_binary_op!(Mul, mul, imul, imul_scalar, "multiplication");
+    impl_binary_op!(Div, div, idiv, idiv_scalar, "division");
+    impl_binary_op!(Rem, rem, irem, irem_scalar, "remainder");
+    impl_binary_op!(BitAnd, bitand, ibitand, ibitand_scalar, "bit and");
+    impl_binary_op!(BitOr, bitor, ibitor, ibitor_scalar, "bit or");
+    impl_binary_op!(BitXor, bitxor, ibitxor, ibitxor_scalar, "bit xor");
+    impl_binary_op!(Shl, shl, ishl, ishl_scalar, "left shift");
+    impl_binary_op!(Shr, shr, ishr, ishr_scalar, "right shift");
 
     macro_rules! all_scalar_ops {
         ($int_scalar:ty) => (

@@ -181,7 +181,7 @@ fn sum_2d_cutout_by_row(bench: &mut test::Bencher)
     bench.iter(|| {
         let mut sum = 0;
         for row in 0..a.shape()[0] {
-            for &elt in a.row_iter(row) {
+            for &elt in a.row(row) {
                 sum += elt;
             }
         }
@@ -230,7 +230,7 @@ fn sum_2d_transpose_by_row(bench: &mut test::Bencher)
     bench.iter(|| {
         let mut sum = 0;
         for row in 0..a.shape()[0] {
-            for &elt in a.row_iter(row) {
+            for &elt in a.row(row) {
                 sum += elt;
             }
         }
@@ -319,6 +319,18 @@ fn add_2d_broadcast_0_to_2(bench: &mut test::Bencher)
 }
 
 #[bench]
+fn add_2d_transposed(bench: &mut test::Bencher)
+{
+    let mut a = OwnedArray::<i32, _>::zeros((64, 64));
+    a.swap_axes(0, 1);
+    let b = OwnedArray::<i32, _>::zeros((64, 64));
+    let bv = b.view();
+    bench.iter(|| {
+        let _x = black_box(a.view_mut() + bv);
+    });
+}
+
+#[bench]
 fn assign_scalar_2d_large(bench: &mut test::Bencher)
 {
     let a = OwnedArray::zeros((64, 64));
@@ -367,7 +379,7 @@ fn bench_iter_diag(bench: &mut test::Bencher)
 fn bench_row_iter(bench: &mut test::Bencher)
 {
     let a = OwnedArray::<f32, _>::zeros((1024, 1024));
-    let it = a.row_iter(17);
+    let it = a.row(17);
     bench.iter(|| for elt in it.clone() { black_box(elt); })
 }
 
@@ -375,7 +387,7 @@ fn bench_row_iter(bench: &mut test::Bencher)
 fn bench_col_iter(bench: &mut test::Bencher)
 {
     let a = OwnedArray::<f32, _>::zeros((1024, 1024));
-    let it = a.col_iter(17);
+    let it = a.column(17);
     bench.iter(|| for elt in it.clone() { black_box(elt); })
 }
 
@@ -443,4 +455,19 @@ fn equality(bench: &mut test::Bencher)
     let a = OwnedArray::<i32, _>::zeros((64, 64));
     let b = OwnedArray::<i32, _>::zeros((64, 64));
     bench.iter(|| a == b);
+}
+
+#[bench]
+fn dot(bench: &mut test::Bencher)
+{
+    let a = OwnedArray::<f32, _>::zeros(256);
+    let b = OwnedArray::<f32, _>::zeros(256);
+    bench.iter(|| a.dot(&b));
+}
+
+#[bench]
+fn means(bench: &mut test::Bencher) {
+    let a = OwnedArray::from_iter(0..100_000i64);
+    let a = a.into_shape((100, 1000)).unwrap();
+    bench.iter(|| a.mean(0));
 }
