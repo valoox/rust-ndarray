@@ -39,10 +39,8 @@ Highlights
 
 - Slicing, also with arbitrary step size, and negative indices to mean
   elements from the end of the axis.
-- Iteration and most operations are very efficient on contiguous c-order arrays
-  (the default layout, without any transposition or discontiguous subslicing).
-  and on arrays where the lowest dimension is contiguous (contiguous block
-  slicing).
+- Iteration and most operations are efficient on arrays with contgiuous
+  innermost dimension.
 - Array views can be used to slice and mutate any ``[T]`` data.
 
 Status and Lookout
@@ -51,12 +49,9 @@ Status and Lookout
 - Still iterating on the API
 - Performance status:
 
-  + Arithmetic involving contiguous c-order arrays and contiguous lowest
-    dimension arrays optimizes very well.
+  + Arithmetic involving arrays of contiguous inner dimension optimizes very well.
   + `.fold()` and `.zip_mut_with()` are the most efficient ways to
     perform single traversal and lock step traversal respectively.
-  + Transposed arrays where the lowest dimension is not c-contiguous
-    is still a pain point.
 
 - There is experimental bridging to the linear algebra package ``rblas``.
 
@@ -85,6 +80,13 @@ How to use with cargo::
 
 Recent Changes
 --------------
+
+- 0.3.0-alpha.3
+
+  - ``.subview()`` changed to return an array view, also added ``into_subview()``.
+  - Add ``.outer_iter()`` and ``.outer_iter_mut()`` for iteration along the
+    greatest axis of the array. Views also implement ``into_outer_iter()`` for
+    “lifetime preserving” iterators.
 
 - 0.3.0-alpha.2
 
