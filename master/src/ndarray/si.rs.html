@@ -158,6 +158,12 @@
 <span id="115">115</span>
 <span id="116">116</span>
 <span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{<span class='ident'>Range</span>, <span class='ident'>RangeFrom</span>, <span class='ident'>RangeTo</span>, <span class='ident'>RangeFull</span>};
 <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Ixs</span>};
@@ -189,6 +195,9 @@
 <span class='doccomment'>/// `Si(a, None, -1)` is every element, from `a`</span>
 <span class='doccomment'>/// until the end, in reverse order. Python equivalent is `[a::-1]`.</span>
 <span class='doccomment'>/// Macro equivalent is `s![a..;-1]`.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// The constant [`S`] is a shorthand for the full range of an axis.</span>
+<span class='doccomment'>/// [`S`]: constant.S.html</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Si</span>(<span class='kw'>pub</span> <span class='ident'>Ixs</span>, <span class='kw'>pub</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>, <span class='kw'>pub</span> <span class='ident'>Ixs</span>);
 
 <span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>Range</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span>
@@ -231,6 +240,9 @@
 <span class='doccomment'>/// `s![]` takes a list of ranges, separated by comma, with optional strides</span>
 <span class='doccomment'>/// that are separated from the range by a semicolon.</span>
 <span class='doccomment'>/// It is converted into a slice argument with type `&amp;[Si; n]`.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// For example, if an array has two axes, the slice argument is passed as</span>
+<span class='doccomment'>/// type `&amp;[Si; 2]`.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// For example `s![a..b;c, d..e]`</span>
 <span class='doccomment'>/// is equivalent to `&amp;[Si(a, Some(b), c), Si(d, Some(e), 1)]`.</span>

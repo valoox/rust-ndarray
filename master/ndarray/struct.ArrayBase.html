@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ArrayBase` struct in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ArrayBase">
 
-    <title>ndarray 0.3.0-alpha.2 - ndarray::ArrayBase - Rust</title>
+    <title>ndarray 0.3.0-alpha.3 - ndarray::ArrayBase - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1425' class='srclink' href='../src/ndarray/lib.rs.html#326-336' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1499' class='srclink' href='../src/ndarray/lib.rs.html#314-324' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ArrayBase&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> {
     // some fields omitted
 }</pre><div class='docblock'><p>An <em>N</em>-dimensional array.</p>
@@ -97,15 +97,9 @@ allows a dynamic number of axes.</p>
 the array. Slicing methods include <code>.slice()</code>, <code>.islice()</code>,
 <code>.slice_mut()</code>.</p>
 
-<p>The slicing specification is passed as a function argument as a fixed size
-array with elements of type <a href="struct.Si.html"><code>Si</code></a> with fields <code>Si(begin, end, stride)</code>,
-where the values are signed integers, and <code>end</code> is an <code>Option&lt;Ixs&gt;</code>.
-The constant <a href="constant.S.html"><code>S</code></a> is a shorthand for the full range of an axis.
-For example, if the array has two axes, the slice argument is passed as
-type <code>&amp;[Si; 2]</code>.</p>
-
-<p>The macro <a href="macro.s!.html"><code>s![]</code></a> is however a much more convenient way to
-specify the slicing argument, so it will be used in all examples.</p>
+<p>The slicing argument can be passed using the macro <a href="macro.s!.html"><code>s![]</code></a>,
+which will be used in all examples. (The explicit form is a reference
+to a fixed size array of <a href="struct.Si.html"><code>Si</code></a>; see its docs for more information.)</p>
 <pre class='rust rust-example-rendered'>
 <span class='comment'>// import the s![] macro</span>
 <span class='attribute'>#[<span class='ident'>macro_use</span>(<span class='ident'>s</span>)]</span>
@@ -403,9 +397,9 @@ and strides.</p>
 <span class='macro'>assert</span><span class='macro'>!</span>(
     <span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>], [<span class='number'>2.</span>], [<span class='number'>3.</span>]])
 );</pre>
-</div><h4 id='method.subview' class='method'><code>fn <a href='#method.subview' class='fnname'>subview</a>(&amp;self, axis: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D::Smaller&gt; <span class='where'>where D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a>, S: <a class='trait' href='../ndarray/trait.DataShared.html' title='ndarray::DataShared'>DataShared</a></span></code></h4>
-<div class='docblock'><p>Along <code>axis</code>, select the subview <code>index</code> and return an
-array with that axis removed.</p>
+</div><h4 id='method.subview' class='method'><code>fn <a href='#method.subview' class='fnname'>subview</a>(&amp;self, axis: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='type' href='../ndarray/type.ArrayView.html' title='ndarray::ArrayView'>ArrayView</a>&lt;A, D::Smaller&gt; <span class='where'>where D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a></span></code></h4>
+<div class='docblock'><p>Along <code>axis</code>, select the subview <code>index</code> and return a
+view with that axis removed.</p>
 
 <p>See <a href="#subviews"><em>Subviews</em></a> for full documentation.</p>
 
@@ -428,6 +422,11 @@ array with that axis removed.</p>
 and select the subview of <code>index</code> along that axis.</p>
 
 <p><strong>Panics</strong> if <code>index</code> is past the length of the axis.</p>
+</div><h4 id='method.into_subview' class='method'><code>fn <a href='#method.into_subview' class='fnname'>into_subview</a>(self, axis: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D::Smaller&gt; <span class='where'>where D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a></span></code></h4>
+<div class='docblock'><p>Along <code>axis</code>, select the subview <code>index</code> and return <code>self</code>
+with that axis removed.</p>
+
+<p>See <a href="#method.subview"><code>.subview()</code></a> and <a href="#subviews"><em>Subviews</em></a> for full documentation.</p>
 </div><h4 id='method.subview_mut' class='method'><code>fn <a href='#method.subview_mut' class='fnname'>subview_mut</a>(&amp;mut self, axis: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='type' href='../ndarray/type.ArrayViewMut.html' title='ndarray::ArrayViewMut'>ArrayViewMut</a>&lt;A, D::Smaller&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a></span></code></h4>
 <div class='docblock'><p>Along <code>axis</code>, select the subview <code>index</code> and return a read-write view
 with the axis removed.</p>
@@ -467,6 +466,29 @@ and yields each inner row.</p>
 and yields each inner row.</p>
 
 <p>Iterator element is <code>ArrayViewMut&lt;A, Ix&gt;</code> (1D read-write array view).</p>
+</div><h4 id='method.outer_iter' class='method'><code>fn <a href='#method.outer_iter' class='fnname'>outer_iter</a>(&amp;self) -&gt; <a class='struct' href='../ndarray/struct.OuterIter.html' title='ndarray::OuterIter'>OuterIter</a>&lt;A, D::Smaller&gt; <span class='where'>where D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a></span></code></h4>
+<div class='docblock'><p>Return an iterator that traverses over the outermost dimension
+and yields each subview.</p>
+
+<p>For example, in a 2 × 2 × 3 array, the iterator element
+is a 2 × 3 subview (and there are 2 in total).</p>
+
+<p>Iterator element is <code>ArrayView&lt;A, D::Smaller&gt;</code> (read-only array view).</p>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>arr3</span>;
+<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>arr3</span>(<span class='kw-2'>&amp;</span>[[[ <span class='number'>0</span>,  <span class='number'>1</span>,  <span class='number'>2</span>],    <span class='comment'>// \ axis 0, submatrix 0</span>
+                [ <span class='number'>3</span>,  <span class='number'>4</span>,  <span class='number'>5</span>]],   <span class='comment'>// /</span>
+               [[ <span class='number'>6</span>,  <span class='number'>7</span>,  <span class='number'>8</span>],    <span class='comment'>// \ axis 0, submatrix 1</span>
+                [ <span class='number'>9</span>, <span class='number'>10</span>, <span class='number'>11</span>]]]); <span class='comment'>// /</span>
+<span class='comment'>// `outer_iter` yields the two submatrices along axis 0.</span>
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>iter</span> <span class='op'>=</span> <span class='ident'>a</span>.<span class='ident'>outer_iter</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>iter</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>(), <span class='ident'>a</span>.<span class='ident'>subview</span>(<span class='number'>0</span>, <span class='number'>0</span>));
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>iter</span>.<span class='ident'>next</span>().<span class='ident'>unwrap</span>(), <span class='ident'>a</span>.<span class='ident'>subview</span>(<span class='number'>0</span>, <span class='number'>1</span>));</pre>
+</div><h4 id='method.outer_iter_mut' class='method'><code>fn <a href='#method.outer_iter_mut' class='fnname'>outer_iter_mut</a>(&amp;mut self) -&gt; <a class='struct' href='../ndarray/struct.OuterIterMut.html' title='ndarray::OuterIterMut'>OuterIterMut</a>&lt;A, D::Smaller&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a></span></code></h4>
+<div class='docblock'><p>Return an iterator that traverses over the outermost dimension
+and yields each subview.</p>
+
+<p>Iterator element is <code>ArrayViewMut&lt;A, D::Smaller&gt;</code> (read-write array view).</p>
 </div><h4 id='method.diag' class='method'><code>fn <a href='#method.diag' class='fnname'>diag</a>(&amp;self) -&gt; <a class='type' href='../ndarray/type.ArrayView.html' title='ndarray::ArrayView'>ArrayView</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;</code></h4>
 <div class='docblock'><p>Return an view of the diagonal elements of the array.</p>
 
@@ -550,11 +572,11 @@ axes that are to be repeated.</p>
 
 <p>The broadcasting documentation for Numpy has more information.</p>
 <pre class='rust rust-example-rendered'>
-<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>arr1</span>;
+<span class='kw'>use</span> <span class='ident'>ndarray</span>::{<span class='ident'>aview1</span>, <span class='ident'>aview2</span>};
 
 <span class='macro'>assert</span><span class='macro'>!</span>(
-    <span class='ident'>arr1</span>(<span class='kw-2'>&amp;</span>[<span class='number'>1.</span>, <span class='number'>0.</span>]).<span class='ident'>broadcast</span>((<span class='number'>10</span>, <span class='number'>2</span>)).<span class='ident'>unwrap</span>().<span class='ident'>dim</span>()
-    <span class='op'>==</span> (<span class='number'>10</span>, <span class='number'>2</span>)
+    <span class='ident'>aview1</span>(<span class='kw-2'>&amp;</span>[<span class='number'>1.</span>, <span class='number'>0.</span>]).<span class='ident'>broadcast</span>((<span class='number'>10</span>, <span class='number'>2</span>)).<span class='ident'>unwrap</span>()
+    <span class='op'>==</span> <span class='ident'>aview2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>, <span class='number'>0.</span>]; <span class='number'>10</span>])
 );</pre>
 </div><h4 id='method.broadcast_iter' class='method'><code>fn <a href='#method.broadcast_iter' class='fnname'>broadcast_iter</a>&lt;E&gt;(&amp;self, dim: E) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../ndarray/struct.Elements.html' title='ndarray::Elements'>Elements</a>&lt;A, E&gt;&gt; <span class='where'>where E: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h4>
 <div class='stability'><em class='stab deprecated'>Deprecated<p>: use .broadcast() instead</p>
