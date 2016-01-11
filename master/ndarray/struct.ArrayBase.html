@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ArrayBase` struct in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ArrayBase">
 
-    <title>ndarray 0.3.0-alpha.3 - ndarray::ArrayBase - Rust</title>
+    <title>ndarray 0.3.0-alpha.4 - ndarray::ArrayBase - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1499' class='srclink' href='../src/ndarray/lib.rs.html#314-324' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1544' class='srclink' href='../src/ndarray/lib.rs.html#314-324' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ArrayBase&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> {
     // some fields omitted
 }</pre><div class='docblock'><p>An <em>N</em>-dimensional array.</p>
@@ -308,18 +308,15 @@ without any copying.</p>
 </div><h4 id='method.slice' class='method'><code>fn <a href='#method.slice' class='fnname'>slice</a>(&amp;self, indexes: &amp;D::SliceArg) -&gt; <a class='type' href='../ndarray/type.ArrayView.html' title='ndarray::ArrayView'>ArrayView</a>&lt;A, D&gt;</code></h4>
 <div class='docblock'><p>Return a sliced array.</p>
 
-<p>See <a href="#slicing"><em>Slicing</em></a> for full documentation.</p>
-
-<p><a href="trait.Dimension.html#associatedtype.SliceArg"><code>D::SliceArg</code></a> is typically a fixed size array of <code>Si</code>, with one
-element per axis.</p>
+<p>See <a href="#slicing"><em>Slicing</em></a> for full documentation.
+See also <a href="trait.Dimension.html#associatedtype.SliceArg"><code>D::SliceArg</code></a>.</p>
 
 <p><strong>Panics</strong> if an index is out of bounds or stride is zero.<br>
 (<strong>Panics</strong> if <code>D</code> is <code>Vec</code> and <code>indexes</code> does not match the number of array axes.)</p>
 </div><h4 id='method.islice' class='method'><code>fn <a href='#method.islice' class='fnname'>islice</a>(&amp;mut self, indexes: &amp;D::SliceArg)</code></h4>
 <div class='docblock'><p>Slice the array’s view in place.</p>
 
-<p><a href="trait.Dimension.html#associatedtype.SliceArg"><code>D::SliceArg</code></a> is typically a fixed size array of <code>Si</code>, with one
-element per axis.</p>
+<p>See also <a href="trait.Dimension.html#associatedtype.SliceArg"><code>D::SliceArg</code></a>.</p>
 
 <p><strong>Panics</strong> if an index is out of bounds or stride is zero.<br>
 (<strong>Panics</strong> if <code>D</code> is <code>Vec</code> and <code>indexes</code> does not match the number of array axes.)</p>
@@ -329,8 +326,7 @@ element per axis.</p>
 </div><h4 id='method.slice_mut' class='method'><code>fn <a href='#method.slice_mut' class='fnname'>slice_mut</a>(&amp;mut self, indexes: &amp;D::SliceArg) -&gt; <a class='type' href='../ndarray/type.ArrayViewMut.html' title='ndarray::ArrayViewMut'>ArrayViewMut</a>&lt;A, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a></span></code></h4>
 <div class='docblock'><p>Return a sliced read-write view of the array.</p>
 
-<p><a href="trait.Dimension.html#associatedtype.SliceArg"><code>D::SliceArg</code></a> is typically a fixed size array of <code>Si</code>, with one
-element per axis.</p>
+<p>See also <a href="trait.Dimension.html#associatedtype.SliceArg"><code>D::SliceArg</code></a>.</p>
 
 <p><strong>Panics</strong> if an index is out of bounds or stride is zero.<br>
 (<strong>Panics</strong> if <code>D</code> is <code>Vec</code> and <code>indexes</code> does not match the number of array axes.)</p>
@@ -667,7 +663,7 @@ the results.</p>
 );</pre>
 
 <p><strong>Panics</strong> if <code>axis</code> is out of bounds.</p>
-</div><h4 id='method.allclose' class='method'><code>fn <a href='#method.allclose' class='fnname'>allclose</a>&lt;S2&gt;(&amp;self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, D&gt;, tol: A) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> <span class='where'>where A: <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.Float.html' title='num::traits::Float'>Float</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html' title='core::cmp::PartialOrd'>PartialOrd</a>, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
+</div><h4 id='method.allclose' class='method'><code>fn <a href='#method.allclose' class='fnname'>allclose</a>&lt;S2&gt;(&amp;self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S2, D&gt;, tol: A) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a> <span class='where'>where A: <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.Float.html' title='num::traits::Float'>Float</a>, S2: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=A&gt;</span></code></h4>
 <div class='docblock'><p>Return <code>true</code> if the arrays&#39; elementwise differences are all within
 the given absolute tolerance.<br>
 Return <code>false</code> otherwise, or if the shapes disagree.</p>
@@ -692,7 +688,7 @@ of complex operands, and thus not their inner product).</p>
 </div><h4 id='method.col_iter' class='method'><code>fn <a href='#method.col_iter' class='fnname'>col_iter</a>(&amp;self, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='struct' href='../ndarray/struct.Elements.html' title='ndarray::Elements'>Elements</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;</code></h4>
 <div class='stability'><em class='stab deprecated'>Deprecated<p>: use .column() instead</p>
 </em></div><div class='docblock'><p><strong><em>Deprecated: Use <code>.column()</code> instead.</em></strong></p>
-</div><h4 id='method.mat_mul' class='method'><code>fn <a href='#method.mat_mul' class='fnname'>mat_mul</a>(&amp;self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>)</a>&gt;) -&gt; <a class='type' href='../ndarray/type.Array.html' title='ndarray::Array'>Array</a>&lt;A, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>)</a>&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> + <a class='trait' href='../ndarray/linalg/trait.Ring.html' title='ndarray::linalg::Ring'>Ring</a></span></code></h4>
+</div><h4 id='method.mat_mul' class='method'><code>fn <a href='#method.mat_mul' class='fnname'>mat_mul</a>(&amp;self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>)</a>&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>)</a>&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> + <a class='trait' href='../ndarray/linalg/trait.Ring.html' title='ndarray::linalg::Ring'>Ring</a></span></code></h4>
 <div class='docblock'><p>Perform matrix multiplication of rectangular arrays <code>self</code> and <code>rhs</code>.</p>
 
 <p>The array sizes must agree in the way that
@@ -713,7 +709,7 @@ if <code>self</code> is <em>M</em> × <em>N</em>, then <code>rhs</code> is <em>N
     <span class='ident'>a</span>.<span class='ident'>mat_mul</span>(<span class='kw-2'>&amp;</span><span class='ident'>b</span>) <span class='op'>==</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>5.</span>, <span class='number'>8.</span>],
                             [<span class='number'>2.</span>, <span class='number'>3.</span>]])
 );</pre>
-</div><h4 id='method.mat_mul_col' class='method'><code>fn <a href='#method.mat_mul_col' class='fnname'>mat_mul_col</a>(&amp;self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;) -&gt; <a class='type' href='../ndarray/type.Array.html' title='ndarray::Array'>Array</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> + <a class='trait' href='../ndarray/linalg/trait.Ring.html' title='ndarray::linalg::Ring'>Ring</a></span></code></h4>
+</div><h4 id='method.mat_mul_col' class='method'><code>fn <a href='#method.mat_mul_col' class='fnname'>mat_mul_col</a>(&amp;self, rhs: &amp;<a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt; <span class='where'>where A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> + <a class='trait' href='../ndarray/linalg/trait.Ring.html' title='ndarray::linalg::Ring'>Ring</a></span></code></h4>
 <div class='docblock'><p>Perform the matrix multiplication of the rectangular array <code>self</code> and
 column vector <code>rhs</code>.</p>
 
