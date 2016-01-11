@@ -39,7 +39,7 @@ Highlights
 
 - Slicing, also with arbitrary step size, and negative indices to mean
   elements from the end of the axis.
-- Iteration and most operations are efficient on arrays with contgiuous
+- Iteration and most operations are efficient on arrays with contiguous
   innermost dimension.
 - Array views can be used to slice and mutate any ``[T]`` data.
 
@@ -80,6 +80,15 @@ How to use with cargo::
 
 Recent Changes
 --------------
+
+- 0.3.0-alpha.4
+
+  - Shrink array view structs by removing their redundant slice field (see #45).
+    Changed the definition of the view ``type`` aliases.
+  - ``.mat_mul()`` and ``.mat_mul_col()`` now return ``OwnedArray``.
+    Use ``.into_shared()`` if you need an ``Array``.
+  - impl ExactSizeIterator where possible for iterators.
+  - impl DoubleEndedIterator for ``.outer_iter()`` (and _mut).
 
 - 0.3.0-alpha.3
 

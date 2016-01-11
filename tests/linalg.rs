@@ -1,4 +1,4 @@
-#![allow(non_snake_case)]
+#![allow(non_snake_case, deprecated)]
 
 extern crate ndarray;
 
@@ -37,7 +37,7 @@ fn chol()
     let b = Array::linspace(0f32, 8., 9).reshape((3, 3));
     let mut bt = b.clone();
     bt.swap_axes(0, 1);
-    let bpd = bt.mat_mul(&b);
+    let bpd = bt.mat_mul(&b).into_shared();
     println!("bpd=\n{:?}", bpd);
     let chol = ndarray::linalg::cholesky(bpd);
     println!("chol=\n{:.8?}", chol);
@@ -92,7 +92,7 @@ fn lst_squares()
 fn mat_mul() {
     // smoke test, a big matrix multiplication of uneven size
     let (n, m) = (45, 33);
-    let mut a = Array::linspace(0., ((n * m) - 1) as f32, n as usize * m as usize ).reshape((n, m));
+    let a = Array::linspace(0., ((n * m) - 1) as f32, n as usize * m as usize ).reshape((n, m));
     let b = ndarray::linalg::eye(m);
     assert_eq!(a.mat_mul(&b), a);
     let c = ndarray::linalg::eye(n);

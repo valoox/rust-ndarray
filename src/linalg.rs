@@ -48,7 +48,6 @@ impl ComplexField for f64
     fn sqrt_real(self) -> f64 { self.sqrt() }
 }
 
-#[cfg(not(nocomplex))]
 impl<A: Num + Float> ComplexField for Complex<A>
 {
     #[inline]
@@ -110,9 +109,9 @@ pub fn least_squares<A: ComplexField>(a: &Mat<A>, b: &Col<A>) -> Col<A>
         }
     }
 
-    let aT_a = aT.mat_mul(a);
+    let aT_a = aT.mat_mul(a).into_shared();
     let mut L = cholesky(aT_a);
-    let rhs = aT.mat_mul_col(b);
+    let rhs = aT.mat_mul_col(b).into_shared();
 
     // Solve L z = aT b
     let z = subst_fw(&L, &rhs);
