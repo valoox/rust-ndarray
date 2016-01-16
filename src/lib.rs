@@ -273,6 +273,10 @@ pub type Ixs = isize;
 /// since it is *in place*, it cannot remove the collapsed axis. It becomes
 /// an axis of length 1.
 ///
+/// `.outer_iter()` is an iterator of every subview along the zeroth (outer)
+/// axis, while `.axis_iter()` is an iterator of every subview along a
+/// specific axis.
+///
 /// ## Arithmetic Operations
 ///
 /// Arrays support all arithmetic operations the same way: they apply elementwise.
@@ -335,6 +339,10 @@ pub struct ArrayBase<S, D> where S: Data {
 }
 
 /// Array’s inner representation.
+///
+/// ***Note:*** `Data` is not an extension interface at this point.
+/// Traits in Rust can serve many different roles. This trait is public because
+/// it is used as a bound on public methods.
 pub unsafe trait Data {
     type Elem;
     fn slice(&self) -> &[Self::Elem];
@@ -1223,6 +1231,39 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
               D: RemoveAxis,
     {
         iterators::new_outer_iter_mut(self.view_mut())
+    }
+
+    /// Return an iterator that traverses over `axis`
+    /// and yields each subview along it.
+    ///
+    /// For example, in a 2 × 2 × 3 array, with `axis` equal to 1,
+    /// the iterator element
+    /// is a 2 × 3 subview (and there are 2 in total).
+    ///
+    /// Iterator element is `ArrayView<A, D::Smaller>` (read-only array view).
+    ///
+    /// See [*Subviews*](#subviews) for full documentation.
+    ///
+    /// **Panics** if `axis` is out of bounds.
+    pub fn axis_iter(&self, axis: usize) -> OuterIter<A, D::Smaller>
+        where D: RemoveAxis
+    {
+        iterators::new_axis_iter(self.view(), axis)
+    }
+
+
+    /// Return an iterator that traverses over `axis`
+    /// and yields each mutable subview along it.
+    ///
+    /// Iterator element is `ArrayViewMut<A, D::Smaller>`
+    /// (read-write array view).
+    ///
+    /// **Panics** if `axis` is out of bounds.
+    pub fn axis_iter_mut(&mut self, axis: usize) -> OuterIterMut<A, D::Smaller>
+        where S: DataMut,
+              D: RemoveAxis,
+    {
+        iterators::new_axis_iter_mut(self.view_mut(), axis)
     }
 
     // Return (length, stride) for diagonal
@@ -2148,12 +2189,30 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
         self.subview(0, index)
     }
 
+    /// Return a mutable array view of row `index`.
+    ///
+    /// **Panics** if `index` is out of bounds.
+    pub fn row_mut(&mut self, index: Ix) -> ArrayViewMut<A, Ix>
+        where S: DataMut
+    {
+        self.subview_mut(0, index)
+    }
+
     /// Return an array view of column `index`.
     ///
     /// **Panics** if `index` is out of bounds.
     pub fn column(&self, index: Ix) -> ArrayView<A, Ix>
     {
         self.subview(1, index)
+    }
+
+    /// Return a mutable array view of column `index`.
+    ///
+    /// **Panics** if `index` is out of bounds.
+    pub fn column_mut(&mut self, index: Ix) -> ArrayViewMut<A, Ix>
+        where S: DataMut
+    {
+        self.subview_mut(1, index)
     }
 
     #[cfg_attr(has_deprecated, deprecated(note="use .row() instead"))]

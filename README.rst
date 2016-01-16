@@ -79,7 +79,12 @@ How to use with cargo::
 Recent Changes
 --------------
 
-- 0.3.0
+- 0.3.1
+
+  - Add ``.row_mut()``, ``.column_mut()``
+  - Add ``.axis_iter()``, ``.axis_iter_mut()``
+
+- **0.3.0**
 
   - Second round of API & consistency update is done
   - 0.3.0 highlight: **Index type** ``Ix`` **changed to** ``usize``.
