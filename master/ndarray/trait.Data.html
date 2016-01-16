@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `Data` trait in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, Data">
 
-    <title>ndarray 0.3.0 - ndarray::Data - Rust</title>
+    <title>ndarray 0.3.1 - ndarray::Data - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,11 +46,15 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1547' class='srclink' href='../src/ndarray/lib.rs.html#338-341' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1558' class='srclink' href='../src/ndarray/lib.rs.html#346-349' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub unsafe trait Data {
     type Elem;
     fn <a href='#tymethod.slice' class='fnname'>slice</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>Self::<a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Elem</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>;
 }</pre><div class='docblock'><p>Array’s inner representation.</p>
+
+<p><strong><em>Note:</em></strong> <code>Data</code> is not an extension interface at this point.
+Traits in Rust can serve many different roles. This trait is public because
+it is used as a bound on public methods.</p>
 </div>
             <h2 id='associated-types'>Associated Types</h2>
             <div class='methods'>

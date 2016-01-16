@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ArrayBase` struct in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ArrayBase">
 
-    <title>ndarray 0.3.0 - ndarray::ArrayBase - Rust</title>
+    <title>ndarray 0.3.1 - ndarray::ArrayBase - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1540' class='srclink' href='../src/ndarray/lib.rs.html#325-335' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1551' class='srclink' href='../src/ndarray/lib.rs.html#329-339' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ArrayBase&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> {
     // some fields omitted
 }</pre><div class='docblock'><p>An <em>N</em>-dimensional array.</p>
@@ -190,6 +190,10 @@ one axis from the array. Subview methods include <code>.subview()</code>,
 <p><code>.isubview()</code> modifies the view in the same way as <code>subview()</code>, but
 since it is <em>in place</em>, it cannot remove the collapsed axis. It becomes
 an axis of length 1.</p>
+
+<p><code>.outer_iter()</code> is an iterator of every subview along the zeroth (outer)
+axis, while <code>.axis_iter()</code> is an iterator of every subview along a
+specific axis.</p>
 
 <h2 id='arithmetic-operations' class='section-header'><a href='#arithmetic-operations'>Arithmetic Operations</a></h2>
 <p>Arrays support all arithmetic operations the same way: they apply elementwise.</p>
@@ -496,6 +500,27 @@ is a 2 × 3 subview (and there are 2 in total).</p>
 and yields each subview.</p>
 
 <p>Iterator element is <code>ArrayViewMut&lt;A, D::Smaller&gt;</code> (read-write array view).</p>
+</div><h4 id='method.axis_iter' class='method'><code>fn <a href='#method.axis_iter' class='fnname'>axis_iter</a>(&amp;self, axis: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../ndarray/struct.OuterIter.html' title='ndarray::OuterIter'>OuterIter</a>&lt;A, D::Smaller&gt; <span class='where'>where D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a></span></code></h4>
+<div class='docblock'><p>Return an iterator that traverses over <code>axis</code>
+and yields each subview along it.</p>
+
+<p>For example, in a 2 × 2 × 3 array, with <code>axis</code> equal to 1,
+the iterator element
+is a 2 × 3 subview (and there are 2 in total).</p>
+
+<p>Iterator element is <code>ArrayView&lt;A, D::Smaller&gt;</code> (read-only array view).</p>
+
+<p>See <a href="#subviews"><em>Subviews</em></a> for full documentation.</p>
+
+<p><strong>Panics</strong> if <code>axis</code> is out of bounds.</p>
+</div><h4 id='method.axis_iter_mut' class='method'><code>fn <a href='#method.axis_iter_mut' class='fnname'>axis_iter_mut</a>(&amp;mut self, axis: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../ndarray/struct.OuterIterMut.html' title='ndarray::OuterIterMut'>OuterIterMut</a>&lt;A, D::Smaller&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a></span></code></h4>
+<div class='docblock'><p>Return an iterator that traverses over <code>axis</code>
+and yields each mutable subview along it.</p>
+
+<p>Iterator element is <code>ArrayViewMut&lt;A, D::Smaller&gt;</code>
+(read-write array view).</p>
+
+<p><strong>Panics</strong> if <code>axis</code> is out of bounds.</p>
 </div><h4 id='method.diag' class='method'><code>fn <a href='#method.diag' class='fnname'>diag</a>(&amp;self) -&gt; <a class='type' href='../ndarray/type.ArrayView.html' title='ndarray::ArrayView'>ArrayView</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;</code></h4>
 <div class='docblock'><p>Return an view of the diagonal elements of the array.</p>
 
@@ -689,8 +714,16 @@ of complex operands, and thus not their inner product).</p>
 <div class='docblock'><p>Return an array view of row <code>index</code>.</p>
 
 <p><strong>Panics</strong> if <code>index</code> is out of bounds.</p>
+</div><h4 id='method.row_mut' class='method'><code>fn <a href='#method.row_mut' class='fnname'>row_mut</a>(&amp;mut self, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='type' href='../ndarray/type.ArrayViewMut.html' title='ndarray::ArrayViewMut'>ArrayViewMut</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a></span></code></h4>
+<div class='docblock'><p>Return a mutable array view of row <code>index</code>.</p>
+
+<p><strong>Panics</strong> if <code>index</code> is out of bounds.</p>
 </div><h4 id='method.column' class='method'><code>fn <a href='#method.column' class='fnname'>column</a>(&amp;self, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='type' href='../ndarray/type.ArrayView.html' title='ndarray::ArrayView'>ArrayView</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;</code></h4>
 <div class='docblock'><p>Return an array view of column <code>index</code>.</p>
+
+<p><strong>Panics</strong> if <code>index</code> is out of bounds.</p>
+</div><h4 id='method.column_mut' class='method'><code>fn <a href='#method.column_mut' class='fnname'>column_mut</a>(&amp;mut self, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='type' href='../ndarray/type.ArrayViewMut.html' title='ndarray::ArrayViewMut'>ArrayViewMut</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a></span></code></h4>
+<div class='docblock'><p>Return a mutable array view of column <code>index</code>.</p>
 
 <p><strong>Panics</strong> if <code>index</code> is out of bounds.</p>
 </div><h4 id='method.row_iter' class='method'><code>fn <a href='#method.row_iter' class='fnname'>row_iter</a>(&amp;self, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='struct' href='../ndarray/struct.Elements.html' title='ndarray::Elements'>Elements</a>&lt;A, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;</code></h4>
