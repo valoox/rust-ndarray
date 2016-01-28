@@ -56,7 +56,7 @@ extern crate serde;
 #[cfg(feature = "rustc-serialize")]
 extern crate rustc_serialize as serialize;
 
-extern crate itertools as it;
+extern crate itertools;
 extern crate num as libnum;
 
 use libnum::Float;
@@ -73,21 +73,27 @@ use std::rc::Rc;
 use std::slice::{self, Iter, IterMut};
 use std::marker::PhantomData;
 
-use it::ZipSlices;
+use itertools::ZipSlices;
 
-pub use dimension::{Dimension, RemoveAxis};
+pub use dimension::{
+    Dimension,
+    RemoveAxis,
+};
+
 pub use dimension::NdIndex;
 pub use indexes::Indexes;
 pub use shape_error::ShapeError;
+pub use stride_error::StrideError;
 pub use si::{Si, S};
 
-use dimension::stride_offset;
 use iterators::Baseiter;
 pub use iterators::{
     InnerIter,
     InnerIterMut,
     OuterIter,
     OuterIterMut,
+    AxisChunksIter,
+    AxisChunksIterMut,
 };
 
 #[allow(deprecated)]
@@ -103,9 +109,11 @@ pub mod blas;
 mod dimension;
 mod indexes;
 mod iterators;
+mod linspace;
 mod numeric_util;
 mod si;
 mod shape_error;
+mod stride_error;
 
 // NOTE: In theory, the whole library should compile
 // and pass tests even if you change Ix and Ixs.
@@ -171,6 +179,11 @@ pub type Ixs = isize;
 /// a 1D array, `(Ix, Ix)` for a 2D array etc. The `D` type is also used
 /// for element indices in `.get()` and `array[index]`. The dimension type `Vec<Ix>`
 /// allows a dynamic number of axes.
+///
+/// The default memory order of an array is *row major* order, where each
+/// row is contiguous in memory. 
+/// A *column major* (a.k.a. fortran) memory order array has
+/// columns (or, in general, the outermost axis) with contiguous elements.
 ///
 /// ## Slicing
 ///
@@ -383,7 +396,7 @@ unsafe impl<A> DataMut for Rc<Vec<A>> where A: Clone {
         }
         if self_.dim.size() <= self_.data.len() / 2 {
             unsafe {
-                *self_ = Array::from_vec_dim(self_.dim.clone(),
+                *self_ = Array::from_vec_dim_unchecked(self_.dim.clone(),
                                             self_.iter().map(|x| x.clone()).collect());
             }
             return;
@@ -530,7 +543,7 @@ impl<S> ArrayBase<S, Ix>
     /// Create a one-dimensional array from a vector (no allocation needed).
     pub fn from_vec(v: Vec<S::Elem>) -> ArrayBase<S, Ix> {
         unsafe {
-            Self::from_vec_dim(v.len() as Ix, v)
+            Self::from_vec_dim_unchecked(v.len() as Ix, v)
         }
     }
 
@@ -544,19 +557,8 @@ impl<S> ArrayBase<S, Ix>
     pub fn linspace<F>(start: F, end: F, n: usize) -> ArrayBase<S, Ix>
         where S: Data<Elem=F>,
               F: libnum::Float,
-              usize: it::misc::ToFloat<F>,
     {
-        Self::from_iter(it::linspace(start, end, n))
-    }
-
-    /// Create a one-dimensional array from interval `[start, end)`
-    #[cfg_attr(has_deprecated, deprecated(note="use ArrayBase::linspace() instead"))]
-    pub fn range(start: f32, end: f32) -> ArrayBase<S, Ix>
-        where S: Data<Elem=f32>,
-    {
-        let n = (end - start) as usize;
-        let span = if n > 0 { (n - 1) as f32 } else { 0. };
-        Self::linspace(start, start + span, n)
+        Self::from_iter(linspace::linspace(start, end, n))
     }
 }
 
@@ -565,6 +567,8 @@ impl<S, A> ArrayBase<S, (Ix, Ix)>
     where S: DataOwned<Elem=A>,
 {
     /// Create an identity matrix of size `n` (square 2D array).
+    ///
+    /// **Panics** if `n * n` would overflow usize.
     pub fn eye(n: Ix) -> ArrayBase<S, (Ix, Ix)>
         where S: DataMut,
               A: Clone + libnum::Zero + libnum::One,
@@ -584,6 +588,8 @@ impl<S, A, D> ArrayBase<S, D>
 {
     /// Create an array with copies of `elem`, dimension `dim`.
     ///
+    /// **Panics** if the number of elements in `dim` would overflow usize.
+    ///
     /// ```
     /// use ndarray::Array;
     /// use ndarray::arr3;
@@ -599,34 +605,92 @@ impl<S, A, D> ArrayBase<S, D>
     /// ```
     pub fn from_elem(dim: D, elem: A) -> ArrayBase<S, D> where A: Clone
     {
-        let v = vec![elem; dim.size()];
+        // Note: We don't need to check the case of a size between
+        // isize::MAX -> usize::MAX; in this case, the vec constructor itself
+        // panics.
+        let size = dim.size_checked().expect("Shape too large: overflow in size");
+        let v = vec![elem; size];
         unsafe {
-            Self::from_vec_dim(dim, v)
+            Self::from_vec_dim_unchecked(dim, v)
+        }
+    }
+
+    /// Create an array with copies of `elem`, dimension `dim` and fortran
+    /// memory order.
+    ///
+    /// **Panics** if the number of elements would overflow usize.
+    ///
+    /// ```
+    /// use ndarray::Array;
+    /// use ndarray::arr3;
+    ///
+    /// let a = Array::from_elem_f((2, 2, 2), 1.);
+    ///
+    /// assert!(
+    ///     a == arr3(&[[[1., 1.],
+    ///                  [1., 1.]],
+    ///                 [[1., 1.],
+    ///                  [1., 1.]]])
+    /// );
+    /// assert!(a.strides() == &[1, 2, 4]);
+    /// ```
+    pub fn from_elem_f(dim: D, elem: A) -> ArrayBase<S, D> where A: Clone
+    {
+        let size = dim.size_checked().expect("Shape too large: overflow in size");
+        let v = vec![elem; size];
+        unsafe {
+            Self::from_vec_dim_unchecked_f(dim, v)
         }
     }
 
     /// Create an array with zeros, dimension `dim`.
+    ///
+    /// **Panics** if the number of elements in `dim` would overflow usize.
     pub fn zeros(dim: D) -> ArrayBase<S, D> where A: Clone + libnum::Zero
     {
         Self::from_elem(dim, libnum::zero())
     }
 
+    /// Create an array with zeros, dimension `dim` and fortran memory order.
+    ///
+    /// **Panics** if the number of elements in `dim` would overflow usize.
+    pub fn zeros_f(dim: D) -> ArrayBase<S, D> where A: Clone + libnum::Zero
+    {
+        Self::from_elem_f(dim, libnum::zero())
+    }
+
     /// Create an array with default values, dimension `dim`.
+    ///
+    /// **Panics** if the number of elements in `dim` would overflow usize.
     pub fn default(dim: D) -> ArrayBase<S, D>
         where A: Default
     {
         let v = (0..dim.size()).map(|_| A::default()).collect();
         unsafe {
-            Self::from_vec_dim(dim, v)
+            Self::from_vec_dim_unchecked(dim, v)
+        }
+    }
+
+    /// Create an array from a vector (with no allocation needed).
+    ///
+    /// **Errors** if `dim` does not correspond to the number of elements
+    /// in `v`.
+    pub fn from_vec_dim(dim: D, v: Vec<A>) -> Result<ArrayBase<S, D>, ShapeError>
+    {
+        if dim.size_checked() != Some(v.len()) {
+            return Err(Self::incompatible_shapes(&dim, &v.len()));
+        }
+        unsafe {
+            Ok(Self::from_vec_dim_unchecked(dim, v))
         }
     }
 
     /// Create an array from a vector (with no allocation needed).
     ///
     /// Unsafe because dimension is unchecked, and must be correct.
-    pub unsafe fn from_vec_dim(dim: D, mut v: Vec<A>) -> ArrayBase<S, D>
+    pub unsafe fn from_vec_dim_unchecked(dim: D, mut v: Vec<A>) -> ArrayBase<S, D>
     {
-        debug_assert!(dim.size() == v.len());
+        debug_assert!(dim.size_checked() == Some(v.len()));
         ArrayBase {
             ptr: v.as_mut_ptr(),
             data: DataOwned::new(v),
@@ -634,6 +698,56 @@ impl<S, A, D> ArrayBase<S, D>
             dim: dim
         }
     }
+
+    /// Create an array from a vector (with no allocation needed),
+    /// using fortran memory order to interpret the data.
+    ///
+    /// Unsafe because dimension is unchecked, and must be correct.
+    pub unsafe fn from_vec_dim_unchecked_f(dim: D, mut v: Vec<A>) -> ArrayBase<S, D>
+    {
+        debug_assert!(dim.size_checked() == Some(v.len()));
+        ArrayBase {
+            ptr: v.as_mut_ptr(),
+            data: DataOwned::new(v),
+            strides: dim.fortran_strides(),
+            dim: dim
+        }
+    }
+
+    /// Create an array from a vector and interpret it according to the
+    /// provided dimensions and strides. No allocation needed.
+    ///
+    /// Checks whether `dim` and `strides` are compatible with the vector's
+    /// length, returning an `Err` if not compatible.
+    ///
+    /// **Errors** if strides and dimensions can point out of bounds of `v`.<br>
+    /// **Errors** if strides allow multiple indices to point to the same element.
+    pub fn from_vec_dim_stride(dim: D, strides: D, v: Vec<A>)
+        -> Result<ArrayBase<S, D>, StrideError>
+    {
+        dimension::can_index_slice(&v, &dim, &strides).map(|_| {
+            unsafe {
+                Self::from_vec_dim_stride_unchecked(dim, strides, v)
+            }
+        })
+    }
+
+    /// Create an array from a vector and interpret it according to the
+    /// provided dimensions and strides. No allocation needed.
+    ///
+    /// Unsafe because dimension and strides are unchecked.
+    pub unsafe fn from_vec_dim_stride_unchecked(dim: D, strides: D, mut v: Vec<A>)
+        -> ArrayBase<S, D>
+    {
+        debug_assert!(dimension::can_index_slice(&v, &dim, &strides).is_ok());
+        ArrayBase {
+            ptr: v.as_mut_ptr(),
+            data: DataOwned::new(v),
+            strides: strides,
+            dim: dim
+        }
+    }
+
 }
 
 
@@ -664,6 +778,40 @@ impl<'a, A, D> ArrayView<'a, A, D>
             dim: dim,
             strides: strides,
         }
+    }
+
+    /// Create an `ArrayView` borrowing its data from a slice.
+    ///
+    /// Checks whether `dim` and `strides` are compatible with the slice's
+    /// length, returning an `Err` if not compatible.
+    ///
+    /// ```
+    /// use ndarray::ArrayView;
+    /// use ndarray::arr3;
+    ///
+    /// let s = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    /// let a = ArrayView::from_slice_dim_stride((2, 3, 2),
+    ///                                          (1, 4, 2),
+    ///                                          s).unwrap();
+    ///
+    /// assert!(
+    ///     a == arr3(&[[[0, 2],
+    ///                  [4, 6],
+    ///                  [8, 10]],
+    ///                 [[1, 3],
+    ///                  [5, 7],
+    ///                  [9, 11]]])
+    /// );
+    /// assert!(a.strides() == &[1, 4, 2]);
+    /// ```
+    pub fn from_slice_dim_stride(dim: D, strides: D, s: &'a [A])
+        -> Result<Self, StrideError>
+    {
+        dimension::can_index_slice(s, &dim, &strides).map(|_| {
+            unsafe {
+                Self::new_(s.as_ptr(), dim, strides)
+            }
+        })
     }
 
     #[inline]
@@ -721,6 +869,41 @@ impl<'a, A, D> ArrayViewMut<'a, A, D>
             dim: dim,
             strides: strides,
         }
+    }
+
+    /// Create an `ArrayView` borrowing its data from a slice.
+    ///
+    /// Checks whether `dim` and `strides` are compatible with the slice's
+    /// length, returning an `Err` if not compatible.
+    ///
+    /// ```
+    /// use ndarray::ArrayViewMut;
+    /// use ndarray::arr3;
+    ///
+    /// let s = &mut [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    /// let mut a = ArrayViewMut::from_slice_dim_stride((2, 3, 2),
+    ///                                                 (1, 4, 2),
+    ///                                                 s).unwrap();
+    ///
+    /// a[[0, 0, 0]] = 1;
+    /// assert!(
+    ///     a == arr3(&[[[1, 2],
+    ///                  [4, 6],
+    ///                  [8, 10]],
+    ///                 [[1, 3],
+    ///                  [5, 7],
+    ///                  [9, 11]]])
+    /// );
+    /// assert!(a.strides() == &[1, 4, 2]);
+    /// ```
+    pub fn from_slice_dim_stride(dim: D, strides: D, s: &'a mut [A])
+        -> Result<Self, StrideError>
+    {
+        dimension::can_index_slice(s, &dim, &strides).map(|_| {
+            unsafe {
+                Self::new_(s.as_mut_ptr(), dim, strides)
+            }
+        })
     }
 
     #[inline]
@@ -827,7 +1010,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
             self.iter().cloned().collect()
         };
         unsafe {
-            ArrayBase::from_vec_dim(self.dim.clone(), data)
+            ArrayBase::from_vec_dim_unchecked(self.dim.clone(), data)
         }
     }
 
@@ -861,13 +1044,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         self.view().into_iter_()
     }
 
-    /// Return an iterator of references to the elements of the array.
-    ///
-    /// Iterator element type is `(D, &A)`.
-    pub fn indexed_iter(&self) -> Indexed<A, D> {
-        Indexed(self.view().into_elements_base())
-    }
-
     /// Return an iterator of mutable references to the elements of the array.
     ///
     /// Iterator element type is `&mut A`.
@@ -876,6 +1052,13 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     {
         self.ensure_unique();
         self.view_mut().into_iter_()
+    }
+
+    /// Return an iterator of indexes and references to the elements of the array.
+    ///
+    /// Iterator element type is `(D, &A)`.
+    pub fn indexed_iter(&self) -> Indexed<A, D> {
+        Indexed(self.view().into_elements_base())
     }
 
     /// Return an iterator of indexes and mutable references to the elements of the array.
@@ -904,30 +1087,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         arr
     }
 
-    /// Slice the array’s view in place.
-    ///
-    /// See also [`D::SliceArg`].
-    ///
-    /// [`D::SliceArg`]: trait.Dimension.html#associatedtype.SliceArg
-    ///
-    /// **Panics** if an index is out of bounds or stride is zero.<br>
-    /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
-    pub fn islice(&mut self, indexes: &D::SliceArg)
-    {
-        let offset = Dimension::do_slices(&mut self.dim, &mut self.strides, indexes);
-        unsafe {
-            self.ptr = self.ptr.offset(offset);
-        }
-        debug_assert!(self.pointer_is_inbounds());
-    }
-
-    /// ***Deprecated: Use `.slice()` instead.***
-    #[cfg_attr(has_deprecated, deprecated(note="use .slice() instead"))]
-    pub fn slice_iter(&self, indexes: &D::SliceArg) -> Elements<A, D>
-    {
-        self.slice(indexes).into_iter()
-    }
-
     /// Return a sliced read-write view of the array.
     ///
     /// See also [`D::SliceArg`].
@@ -944,12 +1103,21 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         arr
     }
 
-    /// ***Deprecated: use `.slice_mut()`***
-    #[cfg_attr(has_deprecated, deprecated(note="use .slice_mut() instead"))]
-    pub fn slice_iter_mut(&mut self, indexes: &D::SliceArg) -> ElementsMut<A, D>
-        where S: DataMut,
+    /// Slice the array’s view in place.
+    ///
+    /// See also [`D::SliceArg`].
+    ///
+    /// [`D::SliceArg`]: trait.Dimension.html#associatedtype.SliceArg
+    ///
+    /// **Panics** if an index is out of bounds or stride is zero.<br>
+    /// (**Panics** if `D` is `Vec` and `indexes` does not match the number of array axes.)
+    pub fn islice(&mut self, indexes: &D::SliceArg)
     {
-        self.slice_mut(indexes).into_iter()
+        let offset = Dimension::do_slices(&mut self.dim, &mut self.strides, indexes);
+        unsafe {
+            self.ptr = self.ptr.offset(offset);
+        }
+        debug_assert!(self.pointer_is_inbounds());
     }
 
     /// Return a reference to the element at `index`, or return `None`
@@ -980,12 +1148,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
             })
     }
 
-    /// ***Deprecated: use .get(i)***
-    #[cfg_attr(has_deprecated, deprecated(note="use .get() instead"))]
-    pub fn at(&self, index: D) -> Option<&A> {
-        self.get(index)
-    }
-
     /// Return a mutable reference to the element at `index`, or return `None`
     /// if the index is out of bounds.
     pub fn get_mut<I>(&mut self, index: I) -> Option<&mut A>
@@ -1000,14 +1162,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
             })
     }
 
-    /// ***Deprecated: use .get_mut(i)***
-    #[cfg_attr(has_deprecated, deprecated(note="use .get_mut() instead"))]
-    pub fn at_mut(&mut self, index: D) -> Option<&mut A>
-        where S: DataMut,
-    {
-        self.get_mut(index)
-    }
-
     /// Perform *unchecked* array indexing.
     ///
     /// Return a reference to the element at `index`.
@@ -1018,13 +1172,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         debug_assert!(self.dim.stride_offset_checked(&self.strides, &index).is_some());
         let off = Dimension::stride_offset(&index, &self.strides);
         &*self.ptr.offset(off)
-    }
-
-    /// ***Deprecated: use `.uget()`***
-    #[cfg_attr(has_deprecated, deprecated(note="use .uget() instead"))]
-    #[inline]
-    pub unsafe fn uchk_at(&self, index: D) -> &A {
-        self.uget(index)
     }
 
     /// Perform *unchecked* array indexing.
@@ -1041,15 +1188,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         debug_assert!(self.dim.stride_offset_checked(&self.strides, &index).is_some());
         let off = Dimension::stride_offset(&index, &self.strides);
         &mut *self.ptr.offset(off)
-    }
-
-    /// ***Deprecated: use `.uget_mut()`***
-    #[cfg_attr(has_deprecated, deprecated(note="use .uget_mut() instead"))]
-    #[inline]
-    pub unsafe fn uchk_at_mut(&mut self, index: D) -> &mut A
-        where S: DataMut
-    {
-        self.uget_mut(index)
     }
 
     /// Swap axes `ax` and `bx`.
@@ -1101,33 +1239,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         self.view().into_subview(axis, index)
     }
 
-    /// Collapse dimension `axis` into length one,
-    /// and select the subview of `index` along that axis.
-    ///
-    /// **Panics** if `index` is past the length of the axis.
-    pub fn isubview(&mut self, axis: usize, index: Ix)
-    {
-        dimension::do_sub(&mut self.dim, &mut self.ptr, &self.strides, axis, index)
-    }
-
-    /// Along `axis`, select the subview `index` and return `self`
-    /// with that axis removed.
-    ///
-    /// See [`.subview()`](#method.subview) and [*Subviews*](#subviews) for full documentation.
-    pub fn into_subview(mut self, axis: usize, index: Ix) -> ArrayBase<S, <D as RemoveAxis>::Smaller>
-        where D: RemoveAxis,
-    {
-        self.isubview(axis, index);
-        // don't use reshape -- we always know it will fit the size,
-        // and we can use remove_axis on the strides as well
-        ArrayBase {
-            data: self.data,
-            ptr: self.ptr,
-            dim: self.dim.remove_axis(axis),
-            strides: self.strides.remove_axis(axis),
-        }
-    }
-
     /// Along `axis`, select the subview `index` and return a read-write view
     /// with the axis removed.
     ///
@@ -1154,15 +1265,31 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         self.view_mut().into_subview(axis, index)
     }
 
-    /// ***Deprecated: use `.subview_mut()`***
-    #[cfg_attr(has_deprecated, deprecated(note="use .subview_mut() instead"))]
-    pub fn sub_iter_mut(&mut self, axis: usize, index: Ix)
-        -> ElementsMut<A, D>
-        where S: DataMut,
+    /// Collapse dimension `axis` into length one,
+    /// and select the subview of `index` along that axis.
+    ///
+    /// **Panics** if `index` is past the length of the axis.
+    pub fn isubview(&mut self, axis: usize, index: Ix)
     {
-        let mut it = self.view_mut();
-        dimension::do_sub(&mut it.dim, &mut it.ptr, &it.strides, axis, index);
-        it.into_iter_()
+        dimension::do_sub(&mut self.dim, &mut self.ptr, &self.strides, axis, index)
+    }
+
+    /// Along `axis`, select the subview `index` and return `self`
+    /// with that axis removed.
+    ///
+    /// See [`.subview()`](#method.subview) and [*Subviews*](#subviews) for full documentation.
+    pub fn into_subview(mut self, axis: usize, index: Ix) -> ArrayBase<S, <D as RemoveAxis>::Smaller>
+        where D: RemoveAxis,
+    {
+        self.isubview(axis, index);
+        // don't use reshape -- we always know it will fit the size,
+        // and we can use remove_axis on the strides as well
+        ArrayBase {
+            data: self.data,
+            ptr: self.ptr,
+            dim: self.dim.remove_axis(axis),
+            strides: self.strides.remove_axis(axis),
+        }
     }
 
     /// Return an iterator that traverses over all dimensions but the innermost,
@@ -1266,6 +1393,48 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         iterators::new_axis_iter_mut(self.view_mut(), axis)
     }
 
+    /// Return an iterator that traverses over `axis` by chunks of `size`,
+    /// yielding non-overlapping views along that axis.
+    ///
+    /// Iterator element is `ArrayView<A, D>`
+    ///
+    /// The last view may have less elements if `size` does not divide
+    /// the axis' dimension.
+    ///
+    /// **Panics** if `axis` is out of bounds.
+    ///
+    /// ```
+    /// use ndarray::Array;
+    /// use ndarray::arr3;
+    ///
+    /// let a = Array::from_iter(0..28).reshape((2, 7, 2));
+    /// let mut iter = a.axis_chunks_iter(1, 2);
+    ///
+    /// // first iteration yields a 2 × 2 × 2 view
+    /// assert_eq!(iter.next().unwrap(),
+    ///            arr3(&[[[0, 1], [2, 3]], [[14, 15], [16, 17]]]));
+    ///
+    /// // however the last element is a 2 × 1 × 2 view since 7 % 2 == 1
+    /// assert_eq!(iter.next_back().unwrap(), arr3(&[[[12, 13]], [[26, 27]]]));
+    /// ```
+    pub fn axis_chunks_iter(&self, axis: usize, size: usize) -> AxisChunksIter<A, D>
+    {
+        iterators::new_chunk_iter(self.view(), axis, size)
+    }
+
+    /// Return an iterator that traverses over `axis` by chunks of `size`,
+    /// yielding non-overlapping mutable subviews along that axis.
+    ///
+    /// Iterator element is `ArrayViewMut<A, D>`
+    ///
+    /// **Panics** if `axis` is out of bounds.
+    pub fn axis_chunks_iter_mut(&mut self, axis: usize, size: usize)
+        -> AxisChunksIterMut<A, D>
+        where S: DataMut,
+    {
+        iterators::new_chunk_iter_mut(self.view_mut(), axis, size)
+    }
+
     // Return (length, stride) for diagonal
     fn diag_params(&self) -> (Ix, Ixs)
     {
@@ -1303,20 +1472,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
             dim: len,
             strides: stride as Ix,
         }
-    }
-
-    /// ***Deprecated: use `.diag()`***
-    #[cfg_attr(has_deprecated, deprecated(note="use .diag() instead"))]
-    pub fn diag_iter(&self) -> Elements<A, Ix> {
-        self.diag().into_iter()
-    }
-
-    /// ***Deprecated: use `.diag_mut()`***
-    #[cfg_attr(has_deprecated, deprecated(note="use .diag_mut() instead"))]
-    pub fn diag_iter_mut(&mut self) -> ElementsMut<A, Ix>
-        where S: DataMut,
-    {
-        self.diag_mut().into_iter_()
     }
 
     /// Make the array unshared.
@@ -1423,7 +1578,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
               A: Clone,
               E: Dimension,
     {
-        if shape.size() != self.dim.size() {
+        if shape.size_checked() != Some(self.dim.size()) {
             panic!("Incompatible shapes in reshape, attempted from: {:?}, to: {:?}",
                    self.dim.slice(), shape.slice())
         }
@@ -1439,7 +1594,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         } else {
             let v = self.iter().map(|x| x.clone()).collect::<Vec<A>>();
             unsafe {
-                ArrayBase::from_vec_dim(shape, v)
+                ArrayBase::from_vec_dim_unchecked(shape, v)
             }
         }
     }
@@ -1464,7 +1619,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     pub fn into_shape<E>(self, shape: E) -> Result<ArrayBase<S, E>, ShapeError>
         where E: Dimension
     {
-        if shape.size() != self.dim.size() {
+        if shape.size_checked() != Some(self.dim.size()) {
             return Err(Self::incompatible_shapes(&self.dim, &shape));
         }
         // Check if contiguous, if not => copy all, else just adapt strides
@@ -1574,14 +1729,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         unsafe {
             Some(ArrayView::new_(self.ptr, dim, broadcast_strides))
         }
-    }
-
-    #[cfg_attr(has_deprecated, deprecated(note="use .broadcast() instead"))]
-    /// ***Deprecated: Use `.broadcast()` instead.***
-    pub fn broadcast_iter<E>(&self, dim: E) -> Option<Elements<A, E>>
-        where E: Dimension,
-    {
-        self.broadcast(dim).map(|v| v.into_iter_())
     }
 
     #[inline]
@@ -1808,7 +1955,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
             res.push(f(elt))
         }
         unsafe {
-            ArrayBase::from_vec_dim(self.dim.clone(), res)
+            ArrayBase::from_vec_dim_unchecked(self.dim.clone(), res)
         }
     }
 }
@@ -1823,7 +1970,7 @@ pub fn zeros<A, D>(dim: D) -> OwnedArray<A, D>
 /// Return a zero-dimensional array with the element `x`.
 pub fn arr0<A>(x: A) -> Array<A, ()>
 {
-    unsafe { Array::from_vec_dim((), vec![x]) }
+    unsafe { Array::from_vec_dim_unchecked((), vec![x]) }
 }
 
 /// Return a one-dimensional array with elements from `xs`.
@@ -1962,7 +2109,7 @@ pub fn arr2<A: Clone, V: Initializer<Elem=A>>(xs: &[V]) -> Array<A, (Ix, Ix)>
         result.extend(snd.iter().map(|x| x.clone()))
     }
     unsafe {
-        Array::from_vec_dim(dim, result)
+        Array::from_vec_dim_unchecked(dim, result)
     }
 }
 
@@ -2004,7 +2151,7 @@ pub fn arr3<A: Clone, V: Initializer<Elem=U>, U: Initializer<Elem=A>>(xs: &[V])
         }
     }
     unsafe {
-        Array::from_vec_dim(dim, result)
+        Array::from_vec_dim_unchecked(dim, result)
     }
 }
 
@@ -2175,12 +2322,6 @@ impl<A, S> ArrayBase<S, Ix>
 impl<A, S> ArrayBase<S, (Ix, Ix)>
     where S: Data<Elem=A>,
 {
-    unsafe fn one_dimensional_iter<'a>(ptr: *mut A, len: Ix, stride: Ix)
-        -> Elements<'a, A, Ix>
-    {
-        ArrayView::new_(ptr, len, stride).into_iter_()
-    }
-
     /// Return an array view of row `index`.
     ///
     /// **Panics** if `index` is out of bounds.
@@ -2213,30 +2354,6 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
         where S: DataMut
     {
         self.subview_mut(1, index)
-    }
-
-    #[cfg_attr(has_deprecated, deprecated(note="use .row() instead"))]
-    /// ***Deprecated: Use `.row()` instead.***
-    pub fn row_iter(&self, index: Ix) -> Elements<A, Ix>
-    {
-        let (m, n) = self.dim;
-        let (sr, sc) = self.strides;
-        assert!(index < m);
-        unsafe {
-            Self::one_dimensional_iter(self.ptr.offset(stride_offset(index, sr)), n, sc)
-        }
-    }
-
-    #[cfg_attr(has_deprecated, deprecated(note="use .column() instead"))]
-    /// ***Deprecated: Use `.column()` instead.***
-    pub fn col_iter(&self, index: Ix) -> Elements<A, Ix>
-    {
-        let (m, n) = self.dim;
-        let (sr, sc) = self.strides;
-        assert!(index < n);
-        unsafe {
-            Self::one_dimensional_iter(self.ptr.offset(stride_offset(index, sc)), m, sr)
-        }
     }
 
     /// Perform matrix multiplication of rectangular arrays `self` and `rhs`.
@@ -2294,7 +2411,7 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
             }
         }
         unsafe {
-            ArrayBase::from_vec_dim((m, n), res_elems)
+            ArrayBase::from_vec_dim_unchecked((m, n), res_elems)
         }
     }
 
@@ -2330,7 +2447,7 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
             i += 1;
         }
         unsafe {
-            ArrayBase::from_vec_dim(m, res_elems)
+            ArrayBase::from_vec_dim_unchecked(m, res_elems)
         }
     }
 }
@@ -2783,7 +2900,7 @@ pub struct Indexed<'a, A: 'a, D>(ElementsBase<'a, A, D>);
 pub struct IndexedMut<'a, A: 'a, D>(ElementsBaseMut<'a, A, D>);
 
 fn zipsl<T, U>(t: T, u: U) -> ZipSlices<T, U>
-    where T: it::misc::Slice, U: it::misc::Slice
+    where T: itertools::misc::Slice, U: itertools::misc::Slice
 {
     ZipSlices::from_slices(t, u)
 }

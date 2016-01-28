@@ -22,6 +22,8 @@ use super::{
     NdIndex,
 };
 
+use numeric_util;
+
 #[cold]
 #[inline(never)]
 fn array_out_of_bounds() -> ! {
@@ -57,14 +59,14 @@ impl<S, D, I> IndexMut<I> for ArrayBase<S, D>
     }
 }
 
+/// Return `true` if the array shapes and all elements of `self` and
+/// `rhs` are equal. Return `false` otherwise.
 impl<S, S2, D> PartialEq<ArrayBase<S2, D>> for ArrayBase<S, D>
     where D: Dimension,
           S: Data,
           S2: Data<Elem = S::Elem>,
           S::Elem: PartialEq,
 {
-    /// Return `true` if the array shapes and all elements of `self` and
-    /// `rhs` are equal. Return `false` otherwise.
     fn eq(&self, rhs: &ArrayBase<S2, D>) -> bool
     {
         if self.shape() != rhs.shape() {
@@ -72,7 +74,7 @@ impl<S, S2, D> PartialEq<ArrayBase<S2, D>> for ArrayBase<S, D>
         }
         if let Some(self_s) = self.as_slice() {
             if let Some(rhs_s) = rhs.as_slice() {
-                return self_s == rhs_s;
+                return numeric_util::unrolled_eq(self_s, rhs_s);
             }
         }
         self.iter().zip(rhs.iter()).all(|(a, b)| a == b)
@@ -239,7 +241,7 @@ impl<A, S, D> Decodable for ArrayBase<S, D>
                     })
             }));
             unsafe {
-                Ok(ArrayBase::from_vec_dim(dim, elements))
+                Ok(ArrayBase::from_vec_dim_unchecked(dim, elements))
             }
         })
     }
