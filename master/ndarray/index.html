@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ndarray` crate.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ndarray">
 
-    <title>ndarray 0.3.1 - ndarray - Rust</title>
+    <title>ndarray 0.4.0-alpha.1 - ndarray - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2794' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2911' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>The <code>ndarray</code> crate provides an N-dimensional container similar to numpy’s
 ndarray.</p>
 
@@ -145,6 +145,26 @@ perform single traversal and lock step traversal respectively.</li>
                                title='ndarray::ArrayBase'>ArrayBase</a></td>
                         <td class='docblock short'>
                              <p>An <em>N</em>-dimensional array.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.AxisChunksIter.html'
+                               title='ndarray::AxisChunksIter'>AxisChunksIter</a></td>
+                        <td class='docblock short'>
+                             <p>An iterator that traverses over the specified axis
+and yields views of the specified size on this axis.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.AxisChunksIterMut.html'
+                               title='ndarray::AxisChunksIterMut'>AxisChunksIterMut</a></td>
+                        <td class='docblock short'>
+                             <p>An iterator that traverses over the specified axis
+and yields mutable views of the specified size on this axis.</p>
 
                         </td>
                     </tr>
@@ -258,6 +278,15 @@ and yields each subview (mutable).</p>
                                title='ndarray::ShapeError'>ShapeError</a></td>
                         <td class='docblock short'>
                              <p>An error that can be produced by <code>.into_shape()</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.StrideError.html'
+                               title='ndarray::StrideError'>StrideError</a></td>
+                        <td class='docblock short'>
+                             <p>An error to describe invalid stride states</p>
 
                         </td>
                     </tr>
