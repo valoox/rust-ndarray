@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ArrayBase` struct in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ArrayBase">
 
-    <title>ndarray 0.4.0-alpha.1 - ndarray::ArrayBase - Rust</title>
+    <title>ndarray 0.4.0-alpha.2 - ndarray::ArrayBase - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1709' class='srclink' href='../src/ndarray/lib.rs.html#342-352' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-1729' class='srclink' href='../src/ndarray/lib.rs.html#342-352' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ArrayBase&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> {
     // some fields omitted
 }</pre><div class='docblock'><p>An <em>N</em>-dimensional array.</p>
@@ -98,7 +98,7 @@ for element indices in <code>.get()</code> and <code>array[index]</code>. The di
 allows a dynamic number of axes.</p>
 
 <p>The default memory order of an array is <em>row major</em> order, where each
-row is contiguous in memory. 
+row is contiguous in memory.
 A <em>column major</em> (a.k.a. fortran) memory order array has
 columns (or, in general, the outermost axis) with contiguous elements.</p>
 
@@ -428,21 +428,6 @@ if the index is out of bounds.</p>
 
 <p><strong>Note:</strong> Only unchecked for non-debug builds of ndarray.<br>
 <strong>Note:</strong> The array must be uniquely held when mutating it.</p>
-</div><h4 id='method.swap_axes' class='method'><code>fn <a href='#method.swap_axes' class='fnname'>swap_axes</a>(&amp;mut self, ax: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, bx: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
-<div class='docblock'><p>Swap axes <code>ax</code> and <code>bx</code>.</p>
-
-<p>This does not move any data, it just adjusts the array’s dimensions
-and strides.</p>
-
-<p><strong>Panics</strong> if the axes are out of bounds.</p>
-<pre class='rust rust-example-rendered'>
-<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>arr2</span>;
-
-<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>, <span class='number'>2.</span>, <span class='number'>3.</span>]]);
-<span class='ident'>a</span>.<span class='ident'>swap_axes</span>(<span class='number'>0</span>, <span class='number'>1</span>);
-<span class='macro'>assert</span><span class='macro'>!</span>(
-    <span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>], [<span class='number'>2.</span>], [<span class='number'>3.</span>]])
-);</pre>
 </div><h4 id='method.subview' class='method'><code>fn <a href='#method.subview' class='fnname'>subview</a>(&amp;self, axis: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, index: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='type' href='../ndarray/type.ArrayView.html' title='ndarray::ArrayView'>ArrayView</a>&lt;A, D::Smaller&gt; <span class='where'>where D: <a class='trait' href='../ndarray/trait.RemoveAxis.html' title='ndarray::RemoveAxis'>RemoveAxis</a></span></code></h4>
 <div class='docblock'><p>Along <code>axis</code>, select the subview <code>index</code> and return a
 view with that axis removed.</p>
@@ -669,6 +654,26 @@ axes that are to be repeated.</p>
     <span class='ident'>aview1</span>(<span class='kw-2'>&amp;</span>[<span class='number'>1.</span>, <span class='number'>0.</span>]).<span class='ident'>broadcast</span>((<span class='number'>10</span>, <span class='number'>2</span>)).<span class='ident'>unwrap</span>()
     <span class='op'>==</span> <span class='ident'>aview2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>, <span class='number'>0.</span>]; <span class='number'>10</span>])
 );</pre>
+</div><h4 id='method.swap_axes' class='method'><code>fn <a href='#method.swap_axes' class='fnname'>swap_axes</a>(&amp;mut self, ax: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>, bx: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Swap axes <code>ax</code> and <code>bx</code>.</p>
+
+<p>This does not move any data, it just adjusts the array’s dimensions
+and strides.</p>
+
+<p><strong>Panics</strong> if the axes are out of bounds.</p>
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>arr2</span>;
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>, <span class='number'>2.</span>, <span class='number'>3.</span>]]);
+<span class='ident'>a</span>.<span class='ident'>swap_axes</span>(<span class='number'>0</span>, <span class='number'>1</span>);
+<span class='macro'>assert</span><span class='macro'>!</span>(
+    <span class='ident'>a</span> <span class='op'>==</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>1.</span>], [<span class='number'>2.</span>], [<span class='number'>3.</span>]])
+);</pre>
+</div><h4 id='method.reversed_axes' class='method'><code>fn <a href='#method.reversed_axes' class='fnname'>reversed_axes</a>(self) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, D&gt;</code></h4>
+<div class='docblock'><p>Transpose the array by reversing all axes.</p>
+
+<p>Transposition reverses the order of the axes (dimensions and strides)
+while retaining the same data.</p>
 </div><h4 id='method.raw_data' class='method'><code>fn <a href='#method.raw_data' class='fnname'>raw_data</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a>A<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a></code></h4>
 <div class='docblock'><p>Return a slice of the array’s backing data in memory order.</p>
 
