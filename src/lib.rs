@@ -181,7 +181,7 @@ pub type Ixs = isize;
 /// allows a dynamic number of axes.
 ///
 /// The default memory order of an array is *row major* order, where each
-/// row is contiguous in memory. 
+/// row is contiguous in memory.
 /// A *column major* (a.k.a. fortran) memory order array has
 /// columns (or, in general, the outermost axis) with contiguous elements.
 ///
@@ -678,7 +678,7 @@ impl<S, A, D> ArrayBase<S, D>
     pub fn from_vec_dim(dim: D, v: Vec<A>) -> Result<ArrayBase<S, D>, ShapeError>
     {
         if dim.size_checked() != Some(v.len()) {
-            return Err(Self::incompatible_shapes(&dim, &v.len()));
+            return Err(shape_error::incompatible_shapes(&v.len(), &dim));
         }
         unsafe {
             Ok(Self::from_vec_dim_unchecked(dim, v))
@@ -1190,28 +1190,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         &mut *self.ptr.offset(off)
     }
 
-    /// Swap axes `ax` and `bx`.
-    ///
-    /// This does not move any data, it just adjusts the array’s dimensions
-    /// and strides.
-    ///
-    /// **Panics** if the axes are out of bounds.
-    ///
-    /// ```
-    /// use ndarray::arr2;
-    ///
-    /// let mut a = arr2(&[[1., 2., 3.]]);
-    /// a.swap_axes(0, 1);
-    /// assert!(
-    ///     a == arr2(&[[1.], [2.], [3.]])
-    /// );
-    /// ```
-    pub fn swap_axes(&mut self, ax: usize, bx: usize)
-    {
-        self.dim.slice_mut().swap(ax, bx);
-        self.strides.slice_mut().swap(ax, bx);
-    }
-
     /// Along `axis`, select the subview `index` and return a
     /// view with that axis removed.
     ///
@@ -1620,7 +1598,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         where E: Dimension
     {
         if shape.size_checked() != Some(self.dim.size()) {
-            return Err(Self::incompatible_shapes(&self.dim, &shape));
+            return Err(shape_error::incompatible_shapes(&self.dim, &shape));
         }
         // Check if contiguous, if not => copy all, else just adapt strides
         if self.is_standard_layout() {
@@ -1633,16 +1611,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         } else {
             Err(ShapeError::IncompatibleLayout)
         }
-    }
-
-    #[inline(never)]
-    #[cold]
-    fn incompatible_shapes<E>(a: &D, b: &E) -> ShapeError
-        where E: Dimension,
-    {
-        ShapeError::IncompatibleShapes(
-            a.slice().to_vec().into_boxed_slice(),
-            b.slice().to_vec().into_boxed_slice())
     }
 
     /// Act like a larger size and/or shape array by *broadcasting*
@@ -1735,17 +1703,54 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     fn broadcast_unwrap<E>(&self, dim: E) -> ArrayView<A, E>
         where E: Dimension,
     {
+        #[cold]
+        #[inline(never)]
+        fn broadcast_panic<D, E>(from: &D, to: &E) -> !
+            where D: Dimension,
+                  E: Dimension,
+        {
+            panic!("Could not broadcast array from shape: {:?} to: {:?}",
+                   from.slice(), to.slice())
+        }
+
         match self.broadcast(dim.clone()) {
             Some(it) => it,
-            None => Self::broadcast_panic(&self.dim, &dim),
+            None => broadcast_panic(&self.dim, &dim),
         }
     }
 
-    #[inline(never)]
-    fn broadcast_panic<E: Dimension>(from: &D, to: &E) -> ! {
-        panic!("Could not broadcast array from shape: {:?} to: {:?}",
-               from.slice(), to.slice())
+    /// Swap axes `ax` and `bx`.
+    ///
+    /// This does not move any data, it just adjusts the array’s dimensions
+    /// and strides.
+    ///
+    /// **Panics** if the axes are out of bounds.
+    ///
+    /// ```
+    /// use ndarray::arr2;
+    ///
+    /// let mut a = arr2(&[[1., 2., 3.]]);
+    /// a.swap_axes(0, 1);
+    /// assert!(
+    ///     a == arr2(&[[1.], [2.], [3.]])
+    /// );
+    /// ```
+    pub fn swap_axes(&mut self, ax: usize, bx: usize)
+    {
+        self.dim.slice_mut().swap(ax, bx);
+        self.strides.slice_mut().swap(ax, bx);
     }
+
+    /// Transpose the array by reversing all axes.
+    ///
+    /// Transposition reverses the order of the axes (dimensions and strides)
+    /// while retaining the same data.
+    pub fn reversed_axes(mut self) -> ArrayBase<S, D> {
+        self.dim.slice_mut().reverse();
+        self.strides.slice_mut().reverse();
+        self
+    }
+
 
     /// Return a slice of the array’s backing data in memory order.
     ///
@@ -2202,47 +2207,15 @@ impl<A, S, D> ArrayBase<S, D>
         where A: Clone + Add<Output=A> + libnum::Zero,
     {
         if let Some(slc) = self.as_slice() {
-            return Self::unrolled_sum(slc);
+            return numeric_util::unrolled_sum(slc);
         }
         let mut sum = A::zero();
         for row in self.inner_iter() {
             if let Some(slc) = row.as_slice() {
-                sum = sum + Self::unrolled_sum(slc);
+                sum = sum + numeric_util::unrolled_sum(slc);
             } else {
                 sum = sum + row.fold(A::zero(), |acc, elt| acc + elt.clone());
             }
-        }
-        sum
-    }
-
-    fn unrolled_sum(mut xs: &[A]) -> A
-        where A: Clone + Add<Output=A> + libnum::Zero,
-    {
-        // eightfold unrolled so that floating point can be vectorized
-        // (even with strict floating point accuracy semantics)
-        let mut sum = A::zero();
-        let (mut p0, mut p1, mut p2, mut p3,
-             mut p4, mut p5, mut p6, mut p7) =
-            (A::zero(), A::zero(), A::zero(), A::zero(),
-             A::zero(), A::zero(), A::zero(), A::zero());
-        while xs.len() >= 8 {
-            p0 = p0 + xs[0].clone();
-            p1 = p1 + xs[1].clone();
-            p2 = p2 + xs[2].clone();
-            p3 = p3 + xs[3].clone();
-            p4 = p4 + xs[4].clone();
-            p5 = p5 + xs[5].clone();
-            p6 = p6 + xs[6].clone();
-            p7 = p7 + xs[7].clone();
-
-            xs = &xs[8..];
-        }
-        sum = sum.clone() + (p0 + p4);
-        sum = sum.clone() + (p1 + p5);
-        sum = sum.clone() + (p2 + p6);
-        sum = sum.clone() + (p3 + p7);
-        for elt in xs {
-            sum = sum.clone() + elt.clone();
         }
         sum
     }
