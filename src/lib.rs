@@ -1401,7 +1401,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     }
 
     /// Return an iterator that traverses over `axis` by chunks of `size`,
-    /// yielding non-overlapping mutable subviews along that axis.
+    /// yielding non-overlapping read-write views along that axis.
     ///
     /// Iterator element is `ArrayViewMut<A, D>`
     ///
@@ -1478,13 +1478,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         }
     }
 
-    /*
-    /// Set the array to the standard layout, without adjusting elements.
-    /// Useful for overwriting.
-    fn force_standard_layout(&mut self) {
-        self.strides = self.dim.default_strides();
-    }
-    */
     /// Return `true` if the array data is laid out in contiguous “C order” in
     /// memory (where the last index is the most rapidly varying).
     ///
@@ -1505,6 +1498,17 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
             }
         }
         true
+    }
+
+    #[cfg(feature = "rblas")]
+    /// Return `true` if the innermost dimension is contiguous (includes
+    /// the special cases of 0 or 1 length in that axis).
+    fn is_inner_contiguous(&self) -> bool {
+        let ndim = self.ndim();
+        if ndim == 0 {
+            return true;
+        }
+        self.shape()[ndim - 1] <= 1 || self.strides()[ndim - 1] == 1
     }
 
     /// Return the array’s data as a slice, if it is contiguous and
@@ -1741,7 +1745,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         self.strides.slice_mut().swap(ax, bx);
     }
 
-    /// Transpose the array by reversing all axes.
+    /// Transpose the array by reversing axes.
     ///
     /// Transposition reverses the order of the axes (dimensions and strides)
     /// while retaining the same data.
@@ -1886,6 +1890,13 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         }
     }
 
+    fn zip_mut_with_elem<B, F>(&mut self, rhs_elem: &B, mut f: F)
+        where S: DataMut,
+              F: FnMut(&mut A, &B)
+    {
+        self.unordered_foreach_mut(move |elt| f(elt, rhs_elem));
+    }
+
     // FIXME: Guarantee the order here or not?
     /// Traverse two arrays in unspecified order, in lock step,
     /// calling the closure `f` on each element pair.
@@ -1894,22 +1905,20 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     ///
     /// **Panics** if broadcasting isn’t possible.
     #[inline]
-    pub fn zip_mut_with<B, S2, E, F>(&mut self, rhs: &ArrayBase<S2, E>, mut f: F)
+    pub fn zip_mut_with<B, S2, E, F>(&mut self, rhs: &ArrayBase<S2, E>, f: F)
         where S: DataMut,
               S2: Data<Elem=B>,
               E: Dimension,
               F: FnMut(&mut A, &B)
     {
-        if self.dim.ndim() == rhs.dim.ndim() && self.shape() == rhs.shape() {
-            self.zip_with_mut_same_shape(rhs, f);
-        } else if rhs.dim.ndim() == 0 {
+        if rhs.dim.ndim() == 0 {
             // Skip broadcast from 0-dim array
-            // FIXME: Order
             unsafe {
                 let rhs_elem = &*rhs.ptr;
-                let f_ = &mut f;
-                self.unordered_foreach_mut(move |elt| f_(elt, rhs_elem));
+                self.zip_mut_with_elem(rhs_elem, f);
             }
+        } else if self.dim.ndim() == rhs.dim.ndim() && self.shape() == rhs.shape() {
+            self.zip_with_mut_same_shape(rhs, f);
         } else {
             let rhs_broadcast = rhs.broadcast_unwrap(self.dim());
             self.zip_with_mut_outer_iter(&rhs_broadcast, f);
