@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `AsBlas` trait in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, AsBlas">
 
-    <title>ndarray 0.4.0-alpha.2 - ndarray::blas::AsBlas - Rust</title>
+    <title>ndarray 0.4.0-alpha.3 - ndarray::blas::AsBlas - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
@@ -46,11 +46,15 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-352' class='srclink' href='../../src/ndarray/blas.rs.html#146-180' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-383' class='srclink' href='../../src/ndarray/blas.rs.html#142-224' title='goto source code'>[src]</a></span></h1>
 <pre class='rust trait'>pub trait AsBlas&lt;A, S, D&gt; {
     fn <a href='#tymethod.blas_checked' class='fnname'>blas_checked</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt;, <a class='enum' href='../../ndarray/enum.ShapeError.html' title='ndarray::ShapeError'>ShapeError</a>&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.DataOwned.html' title='ndarray::DataOwned'>DataOwned</a> + <a class='trait' href='../../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span>;
+    fn <a href='#tymethod.blas_view_checked' class='fnname'>blas_view_checked</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../ndarray/blas/struct.BlasArrayView.html' title='ndarray::blas::BlasArrayView'>BlasArrayView</a>&lt;A, D&gt;, <a class='enum' href='../../ndarray/enum.ShapeError.html' title='ndarray::ShapeError'>ShapeError</a>&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span>;
+    fn <a href='#tymethod.blas_view_mut_checked' class='fnname'>blas_view_mut_checked</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt;, <a class='enum' href='../../ndarray/enum.ShapeError.html' title='ndarray::ShapeError'>ShapeError</a>&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a></span>;
 
     fn <a href='#method.blas' class='fnname'>blas</a>(&amp;mut self) -&gt; <a class='struct' href='../../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.DataOwned.html' title='ndarray::DataOwned'>DataOwned</a>&lt;Elem=A&gt; + <a class='trait' href='../../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span> { ... }
+    fn <a href='#method.bv' class='fnname'>bv</a>(&amp;self) -&gt; <a class='struct' href='../../ndarray/blas/struct.BlasArrayView.html' title='ndarray::blas::BlasArrayView'>BlasArrayView</a>&lt;A, D&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> { ... }
+    fn <a href='#method.bvm' class='fnname'>bvm</a>(&amp;mut self) -&gt; <a class='struct' href='../../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a></span> { ... }
 }</pre><div class='docblock'><p>Convert an array into a blas friendly wrapper.</p>
 
 <p>Note that <code>blas</code> suppors four different element types: <code>f32</code>, <code>f64</code>,
@@ -68,13 +72,43 @@ The result is always mutable, due to the requirement of having write
 access to update the layout either way. Breaks sharing if the array is
 an <code>Array</code>.</p>
 
-<p><strong>Errors:</strong> Produces an error if any dimension is larger than <code>c_int::MAX</code>.</p>
+<p><strong>Errors</strong> if any dimension is larger than <code>c_int::MAX</code>.</p>
+</div><h3 id='tymethod.blas_view_checked' class='method stab '><code>fn <a href='#tymethod.blas_view_checked' class='fnname'>blas_view_checked</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../ndarray/blas/struct.BlasArrayView.html' title='ndarray::blas::BlasArrayView'>BlasArrayView</a>&lt;A, D&gt;, <a class='enum' href='../../ndarray/enum.ShapeError.html' title='ndarray::ShapeError'>ShapeError</a>&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span></code></h3><div class='docblock'><p>Return a read-only array view implementing Vector (1D) or Matrix (2D)
+traits.</p>
+
+<p>The array must already be in a blas compatible layout: its innermost
+dimension must be contiguous.</p>
+
+<p><strong>Errors</strong> if any dimension is larger than <code>c_int::MAX</code>.<br>
+<strong>Errors</strong> if the inner dimension is not c-contiguous.</p>
+
+<p>Layout requirements may be loosened in the future.</p>
+</div><h3 id='tymethod.blas_view_mut_checked' class='method stab '><code>fn <a href='#tymethod.blas_view_mut_checked' class='fnname'>blas_view_mut_checked</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt;, <a class='enum' href='../../ndarray/enum.ShapeError.html' title='ndarray::ShapeError'>ShapeError</a>&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a></span></code></h3><div class='docblock'><p>Return a read-write array view implementing Vector (1D) or Matrix (2D)
+traits.</p>
+
+<p>The array must already be in a blas compatible layout: its innermost
+dimension must be contiguous.</p>
+
+<p><strong>Errors</strong> if any dimension is larger than <code>c_int::MAX</code>.<br>
+<strong>Errors</strong> if the inner dimension is not c-contiguous.</p>
+
+<p>Layout requirements may be loosened in the future.</p>
 </div></div>
             <h2 id='provided-methods'>Provided Methods</h2>
             <div class='methods'>
         <h3 id='method.blas' class='method stab '><code>fn <a href='#method.blas' class='fnname'>blas</a>(&amp;mut self) -&gt; <a class='struct' href='../../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.DataOwned.html' title='ndarray::DataOwned'>DataOwned</a>&lt;Elem=A&gt; + <a class='trait' href='../../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a></span></code></h3><div class='docblock'><p>Equivalent to <code>.blas_checked().unwrap()</code></p>
 
-<p><strong>Panics</strong> if there was a an error in <code>blas_checked</code>.</p>
+<p><strong>Panics</strong> if there was a an error in <code>.blas_checked()</code>.</p>
+</div><h3 id='method.bv' class='method stab '><code>fn <a href='#method.bv' class='fnname'>bv</a>(&amp;self) -&gt; <a class='struct' href='../../ndarray/blas/struct.BlasArrayView.html' title='ndarray::blas::BlasArrayView'>BlasArrayView</a>&lt;A, D&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span></code></h3><div class='docblock'><p><code>bv</code> stands for <strong>b</strong>las <strong>v</strong>iew.</p>
+
+<p>Equivalent to <code>.blas_view_checked().unwrap()</code></p>
+
+<p><strong>Panics</strong> if there was a an error in <code>.blas_view_checked()</code>.</p>
+</div><h3 id='method.bvm' class='method stab '><code>fn <a href='#method.bvm' class='fnname'>bvm</a>(&amp;mut self) -&gt; <a class='struct' href='../../ndarray/blas/struct.BlasArrayViewMut.html' title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a>&lt;A, D&gt; <span class='where'>where S: <a class='trait' href='../../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a></span></code></h3><div class='docblock'><p><code>bvm</code> stands for <strong>b</strong>las <strong>v</strong>iew <strong>m</strong>ut.</p>
+
+<p>Equivalent to <code>.blas_view_mut_checked().unwrap()</code></p>
+
+<p><strong>Panics</strong> if there was a an error in <code>.blas_view_mut_checked()</code>.</p>
 </div></div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>

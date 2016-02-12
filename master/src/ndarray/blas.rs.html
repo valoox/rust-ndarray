@@ -340,6 +340,66 @@
 <span id="297">297</span>
 <span id="298">298</span>
 <span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Experimental BLAS (Basic Linear Algebra Subprograms) integration</span>
 <span class='doccomment'>//!</span>
@@ -401,6 +461,7 @@
 };
 <span class='kw'>use</span> <span class='ident'>super</span>::{
     <span class='ident'>ArrayBase</span>,
+    <span class='ident'>ArrayView</span>,
     <span class='ident'>ArrayViewMut</span>,
     <span class='ident'>Ix</span>, <span class='ident'>Ixs</span>,
     <span class='ident'>ShapeError</span>,
@@ -412,16 +473,14 @@
 };
 
 
-<span class='comment'>/*
-/// ***Requires `features = &quot;rblas&quot;`***
-pub struct BlasArrayView&lt;&#39;a, A: &#39;a, D&gt;(ArrayView&lt;&#39;a, A, D&gt;);
-impl&lt;&#39;a, A, D: Copy&gt; Copy for BlasArrayView&lt;&#39;a, A, D&gt; { }
-impl&lt;&#39;a, A, D: Clone&gt; Clone for BlasArrayView&lt;&#39;a, A, D&gt; {
-    fn clone(&amp;self) -&gt; Self {
-        BlasArrayView(self.0.clone())
+<span class='doccomment'>/// ***Requires `features = &quot;rblas&quot;`***</span>
+<span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='lifetime'>&#39;a</span>, <span class='ident'>D</span><span class='op'>&gt;</span>(<span class='ident'>ArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>);
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span>: <span class='ident'>Copy</span><span class='op'>&gt;</span> <span class='ident'>Copy</span> <span class='kw'>for</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> { }
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span>: <span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='ident'>BlasArrayView</span>(<span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>clone</span>())
     }
 }
-*/</span>
 
 <span class='doccomment'>/// ***Requires `features = &quot;rblas&quot;`***</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='lifetime'>&#39;a</span>, <span class='ident'>D</span><span class='op'>&gt;</span>(<span class='ident'>ArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>);
@@ -442,8 +501,8 @@ impl&lt;&#39;a, A, D: Clone&gt; Clone for BlasArrayView&lt;&#39;a, A, D&gt; {
     }
 
     <span class='kw'>fn</span> <span class='ident'>contiguous_check</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(), <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
-        <span class='comment'>// FIXME: handle transposed</span>
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&lt;=</span> <span class='number'>1</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='ident'>strides</span>().<span class='ident'>last</span>().<span class='ident'>cloned</span>() <span class='op'>==</span> <span class='prelude-val'>Some</span>(<span class='number'>1</span>) {
+        <span class='comment'>// FIXME: handle transposed?</span>
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_inner_contiguous</span>() {
             <span class='prelude-val'>Ok</span>(())
         } <span class='kw'>else</span> {
             <span class='prelude-val'>Err</span>(<span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleLayout</span>)
@@ -451,21 +510,18 @@ impl&lt;&#39;a, A, D: Clone&gt; Clone for BlasArrayView&lt;&#39;a, A, D&gt; {
     }
 }
 
-<span class='comment'>/*
-impl&lt;&#39;a, A, D&gt; ArrayView&lt;&#39;a, A, D&gt;
-    where D: Dimension,
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
 {
-    /// ***Requires `features = &quot;rblas&quot;`***
-    fn into_matrix(self) -&gt; Result&lt;BlasArrayView&lt;&#39;a, A, D&gt;, ShapeError&gt;
+    <span class='kw'>fn</span> <span class='ident'>into_matrix</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
     {
-        if self.dim.ndim() &gt; 1 {
-            try!(self.contiguous_check());
+        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&gt;</span> <span class='number'>1</span> {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>contiguous_check</span>());
         }
-        try!(self.size_check());
-        Ok(BlasArrayView(self))
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>size_check</span>());
+        <span class='prelude-val'>Ok</span>(<span class='ident'>BlasArrayView</span>(<span class='self'>self</span>))
     }
 }
-*/</span>
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
@@ -495,19 +551,67 @@ impl&lt;&#39;a, A, D&gt; ArrayView&lt;&#39;a, A, D&gt;
     <span class='doccomment'>/// access to update the layout either way. Breaks sharing if the array is</span>
     <span class='doccomment'>/// an `Array`.</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// **Errors:** Produces an error if any dimension is larger than `c_int::MAX`.</span>
+    <span class='doccomment'>/// **Errors** if any dimension is larger than `c_int::MAX`.</span>
     <span class='kw'>fn</span> <span class='ident'>blas_checked</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
         <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataOwned</span> <span class='op'>+</span> <span class='ident'>DataMut</span>,
               <span class='ident'>A</span>: <span class='ident'>Clone</span>;
 
     <span class='doccomment'>/// Equivalent to `.blas_checked().unwrap()`</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// **Panics** if there was a an error in `blas_checked`.</span>
+    <span class='doccomment'>/// **Panics** if there was a an error in `.blas_checked()`.</span>
     <span class='kw'>fn</span> <span class='ident'>blas</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
         <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataOwned</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='op'>+</span> <span class='ident'>DataMut</span>,
               <span class='ident'>A</span>: <span class='ident'>Clone</span>
     {
         <span class='self'>self</span>.<span class='ident'>blas_checked</span>().<span class='ident'>unwrap</span>()
+    }
+
+    <span class='doccomment'>/// Return a read-only array view implementing Vector (1D) or Matrix (2D)</span>
+    <span class='doccomment'>/// traits.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// The array must already be in a blas compatible layout: its innermost</span>
+    <span class='doccomment'>/// dimension must be contiguous.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **Errors** if any dimension is larger than `c_int::MAX`.&lt;br&gt;</span>
+    <span class='doccomment'>/// **Errors** if the inner dimension is not c-contiguous.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Layout requirements may be loosened in the future.</span>
+    <span class='kw'>fn</span> <span class='ident'>blas_view_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span>;
+
+    <span class='doccomment'>/// `bv` stands for **b**las **v**iew.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Equivalent to `.blas_view_checked().unwrap()`</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **Panics** if there was a an error in `.blas_view_checked()`.</span>
+    <span class='kw'>fn</span> <span class='ident'>bv</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span>,
+    {
+        <span class='self'>self</span>.<span class='ident'>blas_view_checked</span>().<span class='ident'>unwrap</span>()
+    }
+
+    <span class='doccomment'>/// Return a read-write array view implementing Vector (1D) or Matrix (2D)</span>
+    <span class='doccomment'>/// traits.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// The array must already be in a blas compatible layout: its innermost</span>
+    <span class='doccomment'>/// dimension must be contiguous.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **Errors** if any dimension is larger than `c_int::MAX`.&lt;br&gt;</span>
+    <span class='doccomment'>/// **Errors** if the inner dimension is not c-contiguous.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Layout requirements may be loosened in the future.</span>
+    <span class='kw'>fn</span> <span class='ident'>blas_view_mut_checked</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>;
+
+    <span class='doccomment'>/// `bvm` stands for **b**las **v**iew **m**ut.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Equivalent to `.blas_view_mut_checked().unwrap()`</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// **Panics** if there was a an error in `.blas_view_mut_checked()`.</span>
+    <span class='kw'>fn</span> <span class='ident'>bvm</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
+    {
+        <span class='self'>self</span>.<span class='ident'>blas_view_mut_checked</span>().<span class='ident'>unwrap</span>()
     }
     <span class='comment'>/*
 
@@ -535,12 +639,24 @@ impl&lt;&#39;a, A, D&gt; ArrayView&lt;&#39;a, A, D&gt;
         <span class='kw'>match</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() {
             <span class='number'>0</span> <span class='op'>|</span> <span class='number'>1</span> <span class='op'>=&gt;</span> { }
             <span class='number'>2</span> <span class='op'>=&gt;</span> {
-                <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>strides</span>()[<span class='number'>1</span>] <span class='op'>!=</span> <span class='number'>1</span> {
+                <span class='kw'>if</span> <span class='op'>!</span><span class='self'>self</span>.<span class='ident'>is_inner_contiguous</span>() {
                     <span class='self'>self</span>.<span class='ident'>ensure_standard_layout</span>();
                 }
             }
             <span class='ident'>_n</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>ensure_standard_layout</span>(),
         }
+        <span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_matrix_mut</span>()
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>blas_view_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span>
+    {
+        <span class='self'>self</span>.<span class='ident'>view</span>().<span class='ident'>into_matrix</span>()
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>blas_view_mut_checked</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
+    {
         <span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_matrix_mut</span>()
     }
 
@@ -557,26 +673,25 @@ impl&lt;&#39;a, A, D&gt; ArrayView&lt;&#39;a, A, D&gt;
     */</span>
 }
 
-<span class='comment'>/*
-impl&lt;&#39;a, A&gt; Vector&lt;A&gt; for BlasArrayView&lt;&#39;a, A, Ix&gt; {
-    fn len(&amp;self) -&gt; c_int {
-        self.0.len() as c_int
+<span class='doccomment'>/// **Panics** if `as_mut_ptr` is called on a read-only view.</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> <span class='ident'>Vector</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>c_int</span>
     }
 
-    fn as_ptr(&amp;self) -&gt; *const A {
-        self.0.ptr as *const _
+    <span class='kw'>fn</span> <span class='ident'>as_ptr</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>A</span> {
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>ptr</span>
     }
 
-    fn as_mut_ptr(&amp;mut self) -&gt; *mut A {
-        panic!(&quot;BlasArrayView is not mutable&quot;);
+    <span class='kw'>fn</span> <span class='ident'>as_mut_ptr</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>A</span> {
+        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;BlasArrayView is not mutable&quot;</span>);
     }
 
-    // increment: stride
-    fn inc(&amp;self) -&gt; c_int {
-        self.0.strides as c_int
+    <span class='comment'>// increment: stride</span>
+    <span class='kw'>fn</span> <span class='ident'>inc</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>strides</span> <span class='kw'>as</span> <span class='ident'>c_int</span>
     }
 }
-*/</span>
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> <span class='ident'>Vector</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>len</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
@@ -597,25 +712,30 @@ impl&lt;&#39;a, A&gt; Vector&lt;A&gt; for BlasArrayView&lt;&#39;a, A, Ix&gt; {
     }
 }
 
-<span class='comment'>/*
-impl&lt;&#39;a, A&gt; Matrix&lt;A&gt; for BlasArrayView&lt;&#39;a, A, (Ix, Ix)&gt; {
-    fn rows(&amp;self) -&gt; c_int {
-        self.0.dim().1 as c_int
+<span class='doccomment'>/// **Panics** if `as_mut_ptr` is called on a read-only view.</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, (<span class='ident'>Ix</span>, <span class='ident'>Ix</span>)<span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>rows</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>dim</span>().<span class='number'>0</span> <span class='kw'>as</span> <span class='ident'>c_int</span>
     }
 
-    fn cols(&amp;self) -&gt; c_int {
-        self.0.dim().0 as c_int
+    <span class='kw'>fn</span> <span class='ident'>cols</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>dim</span>().<span class='number'>1</span> <span class='kw'>as</span> <span class='ident'>c_int</span>
     }
 
-    fn as_ptr(&amp;self) -&gt; *const A {
-        self.0.ptr as *const _
+    <span class='comment'>// leading dimension == stride between each row</span>
+    <span class='kw'>fn</span> <span class='ident'>lead_dim</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
+        <span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>cols</span>() <span class='op'>&lt;=</span> <span class='number'>1</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>strides</span>()[<span class='number'>1</span>] <span class='op'>==</span> <span class='number'>1</span>);
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>strides</span>()[<span class='number'>0</span>] <span class='kw'>as</span> <span class='ident'>c_int</span>
     }
 
-    fn as_mut_ptr(&amp;mut self) -&gt; *mut A {
-        panic!(&quot;BlasArrayView is not mutable&quot;);
+    <span class='kw'>fn</span> <span class='ident'>as_ptr</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw'>const</span> <span class='ident'>A</span> {
+        <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>ptr</span> <span class='kw'>as</span> <span class='op'>*</span><span class='kw'>const</span> _
+    }
+
+    <span class='kw'>fn</span> <span class='ident'>as_mut_ptr</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>A</span> {
+        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;BlasArrayView is not mutable&quot;</span>);
     }
 }
-*/</span>
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span><span class='op'>&gt;</span> <span class='ident'>Matrix</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, (<span class='ident'>Ix</span>, <span class='ident'>Ix</span>)<span class='op'>&gt;</span> {
     <span class='kw'>fn</span> <span class='ident'>rows</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
@@ -628,7 +748,7 @@ impl&lt;&#39;a, A&gt; Matrix&lt;A&gt; for BlasArrayView&lt;&#39;a, A, (Ix, Ix)&g
 
     <span class='comment'>// leading dimension == stride between each row</span>
     <span class='kw'>fn</span> <span class='ident'>lead_dim</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='ident'>c_int</span> {
-        <span class='macro'>debug_assert_eq</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>strides</span>()[<span class='number'>1</span>], <span class='number'>1</span>);
+        <span class='macro'>debug_assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>cols</span>() <span class='op'>&lt;=</span> <span class='number'>1</span> <span class='op'>||</span> <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>strides</span>()[<span class='number'>1</span>] <span class='op'>==</span> <span class='number'>1</span>);
         <span class='self'>self</span>.<span class='number'>0</span>.<span class='ident'>strides</span>()[<span class='number'>0</span>] <span class='kw'>as</span> <span class='ident'>c_int</span>
     }
 
