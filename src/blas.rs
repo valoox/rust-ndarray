@@ -14,7 +14,7 @@
 //! use rblas::Gemv;
 //! use rblas::attribute::Transpose;
 //!
-//! use ndarray::{arr1, arr2, Array};
+//! use ndarray::{arr1, arr2};
 //! use ndarray::blas::AsBlas;
 //!
 //! fn main() {
@@ -90,8 +90,9 @@ impl<S, D> ArrayBase<S, D>
         let max = c_int::max_value();
         for (&dim, &stride) in zipsl(self.shape(), self.strides()) {
             if dim > max as Ix || stride > max as Ixs {
-                return Err(ShapeError::DimensionTooLarge(
-                    self.shape().to_vec().into_boxed_slice()));
+                return Err(ShapeError::DimensionTooLarge(self.shape()
+                                                             .to_vec()
+                                                             .into_boxed_slice()));
             }
         }
         Ok(())
@@ -108,10 +109,9 @@ impl<S, D> ArrayBase<S, D>
 }
 
 impl<'a, A, D> ArrayView<'a, A, D>
-    where D: Dimension,
+    where D: Dimension
 {
-    fn into_matrix(self) -> Result<BlasArrayView<'a, A, D>, ShapeError>
-    {
+    fn into_matrix(self) -> Result<BlasArrayView<'a, A, D>, ShapeError> {
         if self.dim.ndim() > 1 {
             try!(self.contiguous_check());
         }
@@ -121,10 +121,9 @@ impl<'a, A, D> ArrayView<'a, A, D>
 }
 
 impl<'a, A, D> ArrayViewMut<'a, A, D>
-    where D: Dimension,
+    where D: Dimension
 {
-    fn into_matrix_mut(self) -> Result<BlasArrayViewMut<'a, A, D>, ShapeError>
-    {
+    fn into_matrix_mut(self) -> Result<BlasArrayViewMut<'a, A, D>, ShapeError> {
         if self.dim.ndim() > 1 {
             try!(self.contiguous_check());
         }
@@ -146,7 +145,7 @@ pub trait AsBlas<A, S, D> {
     /// Elements are copied if needed to produce a contiguous matrix.<br>
     /// The result is always mutable, due to the requirement of having write
     /// access to update the layout either way. Breaks sharing if the array is
-    /// an `Array`.
+    /// an `RcArray`.
     ///
     /// **Errors** if any dimension is larger than `c_int::MAX`.
     fn blas_checked(&mut self) -> Result<BlasArrayViewMut<A, D>, ShapeError>
