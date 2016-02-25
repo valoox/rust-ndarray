@@ -59,7 +59,6 @@
 <span id="16">16</span>
 <span id="17">17</span>
 <span id="18">18</span>
-<span id="19">19</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>allow</span>(<span class='ident'>non_snake_case</span>, <span class='ident'>deprecated</span>)]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>has_deprecated</span>, <span class='ident'>deprecated</span>(<span class='ident'>note</span><span class='op'>=</span><span class='string'>&quot;`linalg` is not in good shape.&quot;</span>))]</span>
@@ -78,8 +77,7 @@
 
 <span class='doccomment'>/// Trait union for a field.</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>Field</span> : <span class='ident'>Ring</span> <span class='op'>+</span> <span class='ident'>Div</span><span class='op'>&lt;</span><span class='ident'>Output</span><span class='op'>=</span><span class='kw'>Self</span><span class='op'>&gt;</span> { }
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>: <span class='ident'>Ring</span> <span class='op'>+</span> <span class='ident'>Div</span><span class='op'>&lt;</span><span class='ident'>Output</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;&gt;</span> <span class='ident'>Field</span> <span class='kw'>for</span> <span class='ident'>A</span> { }
-
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>: <span class='ident'>Ring</span> <span class='op'>+</span> <span class='ident'>Div</span><span class='op'>&lt;</span><span class='ident'>Output</span> <span class='op'>=</span> <span class='ident'>A</span><span class='op'>&gt;&gt;</span> <span class='ident'>Field</span> <span class='kw'>for</span> <span class='ident'>A</span> {}
 </pre>
 </section>
     <section id='search' class="content hidden"></section>
@@ -124,7 +122,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

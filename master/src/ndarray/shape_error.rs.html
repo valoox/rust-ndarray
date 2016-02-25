@@ -96,9 +96,6 @@
 <span id="53">53</span>
 <span id="54">54</span>
 <span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>error</span>::<span class='ident'>Error</span>;
@@ -121,23 +118,20 @@
 <span class='attribute'>#[<span class='ident'>inline</span>(<span class='ident'>never</span>)]</span>
 <span class='attribute'>#[<span class='ident'>cold</span>]</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>incompatible_shapes</span><span class='op'>&lt;</span><span class='ident'>D</span>, <span class='ident'>E</span><span class='op'>&gt;</span>(<span class='ident'>a</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>, <span class='ident'>b</span>: <span class='kw-2'>&amp;</span><span class='ident'>E</span>) <span class='op'>-&gt;</span> <span class='ident'>ShapeError</span>
-    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>, <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
+    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
+          <span class='ident'>E</span>: <span class='ident'>Dimension</span>
 {
-    <span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleShapes</span>(
-        <span class='ident'>a</span>.<span class='ident'>slice</span>().<span class='ident'>to_vec</span>().<span class='ident'>into_boxed_slice</span>(),
-        <span class='ident'>b</span>.<span class='ident'>slice</span>().<span class='ident'>to_vec</span>().<span class='ident'>into_boxed_slice</span>())
+    <span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleShapes</span>(<span class='ident'>a</span>.<span class='ident'>slice</span>().<span class='ident'>to_vec</span>().<span class='ident'>into_boxed_slice</span>(),
+                                   <span class='ident'>b</span>.<span class='ident'>slice</span>().<span class='ident'>to_vec</span>().<span class='ident'>into_boxed_slice</span>())
 }
 
 
 <span class='kw'>impl</span> <span class='ident'>Error</span> <span class='kw'>for</span> <span class='ident'>ShapeError</span> {
     <span class='kw'>fn</span> <span class='ident'>description</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw-2'>&amp;</span><span class='ident'>str</span> {
         <span class='kw'>match</span> <span class='op'>*</span><span class='self'>self</span> {
-            <span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleShapes</span>(..) <span class='op'>=&gt;</span>
-                <span class='string'>&quot;incompatible shapes&quot;</span>,
-            <span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleLayout</span> <span class='op'>=&gt;</span>
-                <span class='string'>&quot;incompatible layout (not contiguous)&quot;</span>,
-            <span class='ident'>ShapeError</span>::<span class='ident'>DimensionTooLarge</span>(..) <span class='op'>=&gt;</span>
-                <span class='string'>&quot;dimension too large&quot;</span>,
+            <span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleShapes</span>(..) <span class='op'>=&gt;</span> <span class='string'>&quot;incompatible shapes&quot;</span>,
+            <span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleLayout</span> <span class='op'>=&gt;</span> <span class='string'>&quot;incompatible layout (not contiguous)&quot;</span>,
+            <span class='ident'>ShapeError</span>::<span class='ident'>DimensionTooLarge</span>(..) <span class='op'>=&gt;</span> <span class='string'>&quot;dimension too large&quot;</span>,
         }
     }
 }
@@ -202,7 +196,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

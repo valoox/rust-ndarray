@@ -173,9 +173,15 @@
 <span id="130">130</span>
 <span id="131">131</span>
 <span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{<span class='ident'>Range</span>, <span class='ident'>RangeFrom</span>, <span class='ident'>RangeTo</span>, <span class='ident'>RangeFull</span>};
-<span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Ixs</span>};
+<span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Ixs</span>;
 
 <span class='comment'>// [a:b:s] syntax for example [:3], [::-1]</span>
 <span class='comment'>// [0,:] -- first row of matrix</span>
@@ -209,28 +215,32 @@
 <span class='doccomment'>/// [`S`]: constant.S.html</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>Si</span>(<span class='kw'>pub</span> <span class='ident'>Ixs</span>, <span class='kw'>pub</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>, <span class='kw'>pub</span> <span class='ident'>Ixs</span>);
 
-<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>Range</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span>
-{
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>Range</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>r</span>: <span class='ident'>Range</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Si</span> { <span class='ident'>Si</span>(<span class='ident'>r</span>.<span class='ident'>start</span>, <span class='prelude-val'>Some</span>(<span class='ident'>r</span>.<span class='ident'>end</span>), <span class='number'>1</span>) }
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>r</span>: <span class='ident'>Range</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Si</span> {
+        <span class='ident'>Si</span>(<span class='ident'>r</span>.<span class='ident'>start</span>, <span class='prelude-val'>Some</span>(<span class='ident'>r</span>.<span class='ident'>end</span>), <span class='number'>1</span>)
+    }
 }
 
-<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>RangeFrom</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span>
-{
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>RangeFrom</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>r</span>: <span class='ident'>RangeFrom</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Si</span> { <span class='ident'>Si</span>(<span class='ident'>r</span>.<span class='ident'>start</span>, <span class='prelude-val'>None</span>, <span class='number'>1</span>) }
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>r</span>: <span class='ident'>RangeFrom</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Si</span> {
+        <span class='ident'>Si</span>(<span class='ident'>r</span>.<span class='ident'>start</span>, <span class='prelude-val'>None</span>, <span class='number'>1</span>)
+    }
 }
 
-<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>RangeTo</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span>
-{
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>RangeTo</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>r</span>: <span class='ident'>RangeTo</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Si</span> { <span class='ident'>Si</span>(<span class='number'>0</span>, <span class='prelude-val'>Some</span>(<span class='ident'>r</span>.<span class='ident'>end</span>), <span class='number'>1</span>) }
+    <span class='kw'>fn</span> <span class='ident'>from</span>(<span class='ident'>r</span>: <span class='ident'>RangeTo</span><span class='op'>&lt;</span><span class='ident'>Ixs</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>Si</span> {
+        <span class='ident'>Si</span>(<span class='number'>0</span>, <span class='prelude-val'>Some</span>(<span class='ident'>r</span>.<span class='ident'>end</span>), <span class='number'>1</span>)
+    }
 }
 
-<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>RangeFull</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span>
-{
+<span class='kw'>impl</span> <span class='ident'>From</span><span class='op'>&lt;</span><span class='ident'>RangeFull</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>Si</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>from</span>(_: <span class='ident'>RangeFull</span>) <span class='op'>-&gt;</span> <span class='ident'>Si</span> { <span class='ident'>S</span> }
+    <span class='kw'>fn</span> <span class='ident'>from</span>(_: <span class='ident'>RangeFull</span>) <span class='op'>-&gt;</span> <span class='ident'>Si</span> {
+        <span class='ident'>S</span>
+    }
 }
 
 
@@ -243,7 +253,9 @@
 
 <span class='kw'>impl</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>Si</span> {
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> { <span class='op'>*</span><span class='self'>self</span> }
+    <span class='kw'>fn</span> <span class='ident'>clone</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='kw'>Self</span> {
+        <span class='op'>*</span><span class='self'>self</span>
+    }
 }
 
 <span class='doccomment'>/// Slice value for the full range of an axis.</span>
@@ -350,7 +362,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

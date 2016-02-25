@@ -181,6 +181,8 @@
 <span id="138">138</span>
 <span id="139">139</span>
 <span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>fmt</span>;
 <span class='kw'>use</span> <span class='ident'>super</span>::{
@@ -190,7 +192,8 @@
 };
 
 <span class='kw'>fn</span> <span class='ident'>format_array</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span>, <span class='ident'>F</span><span class='op'>&gt;</span>(<span class='ident'>view</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>,
-                            <span class='kw-2'>mut</span> <span class='ident'>format</span>: <span class='ident'>F</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span>
+                            <span class='kw-2'>mut</span> <span class='ident'>format</span>: <span class='ident'>F</span>)
+    <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span>
     <span class='kw'>where</span> <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>, <span class='kw-2'>&amp;</span><span class='ident'>A</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span>,
           <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
           <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
@@ -215,10 +218,11 @@
     <span class='kw'>for</span> (<span class='ident'>index</span>, <span class='ident'>elt</span>) <span class='kw'>in</span> <span class='ident'>view</span>.<span class='ident'>indexed_iter</span>() {
         <span class='kw'>let</span> <span class='ident'>take_n</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>ndim</span> <span class='op'>==</span> <span class='number'>0</span> { <span class='number'>1</span> } <span class='kw'>else</span> { <span class='ident'>ndim</span> <span class='op'>-</span> <span class='number'>1</span> };
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>update_index</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-        <span class='kw'>for</span> (<span class='ident'>i</span>, (<span class='ident'>a</span>, <span class='ident'>b</span>)) <span class='kw'>in</span> <span class='ident'>index</span>.<span class='ident'>slice</span>().<span class='ident'>iter</span>().<span class='ident'>take</span>(<span class='ident'>take_n</span>)
-                        .<span class='ident'>zip</span>(<span class='ident'>last_index</span>.<span class='ident'>slice</span>().<span class='ident'>iter</span>())
-                        .<span class='ident'>enumerate</span>()
-        {
+        <span class='kw'>for</span> (<span class='ident'>i</span>, (<span class='ident'>a</span>, <span class='ident'>b</span>)) <span class='kw'>in</span> <span class='ident'>index</span>.<span class='ident'>slice</span>()
+                                .<span class='ident'>iter</span>()
+                                .<span class='ident'>take</span>(<span class='ident'>take_n</span>)
+                                .<span class='ident'>zip</span>(<span class='ident'>last_index</span>.<span class='ident'>slice</span>().<span class='ident'>iter</span>())
+                                .<span class='ident'>enumerate</span>() {
             <span class='kw'>if</span> <span class='ident'>a</span> <span class='op'>!=</span> <span class='ident'>b</span> {
                 <span class='comment'>// New row.</span>
                 <span class='comment'>// # of [&#39;s needed</span>
@@ -366,7 +370,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

@@ -758,20 +758,6 @@
 <span id="715">715</span>
 <span id="716">716</span>
 <span id="717">717</span>
-<span id="718">718</span>
-<span id="719">719</span>
-<span id="720">720</span>
-<span id="721">721</span>
-<span id="722">722</span>
-<span id="723">723</span>
-<span id="724">724</span>
-<span id="725">725</span>
-<span id="726">726</span>
-<span id="727">727</span>
-<span id="728">728</span>
-<span id="729">729</span>
-<span id="730">730</span>
-<span id="731">731</span>
 </pre><pre class='rust '>
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>slice</span>;
 
@@ -781,15 +767,13 @@
 
 <span class='doccomment'>/// Calculate offset from `Ix` stride converting sign properly</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>n</span>: <span class='ident'>Ix</span>, <span class='ident'>stride</span>: <span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='ident'>isize</span>
-{
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>n</span>: <span class='ident'>Ix</span>, <span class='ident'>stride</span>: <span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='ident'>isize</span> {
     (<span class='ident'>n</span> <span class='kw'>as</span> <span class='ident'>isize</span>) <span class='op'>*</span> ((<span class='ident'>stride</span> <span class='kw'>as</span> <span class='ident'>Ixs</span>) <span class='kw'>as</span> <span class='ident'>isize</span>)
 }
 
 <span class='doccomment'>/// Check whether `stride` is strictly positive</span>
 <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-<span class='kw'>fn</span> <span class='ident'>stride_is_positive</span>(<span class='ident'>stride</span>: <span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>
-{
+<span class='kw'>fn</span> <span class='ident'>stride_is_positive</span>(<span class='ident'>stride</span>: <span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     (<span class='ident'>stride</span> <span class='kw'>as</span> <span class='ident'>Ixs</span>) <span class='op'>&gt;</span> <span class='number'>0</span>
 }
 
@@ -797,8 +781,7 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Assumes that no stride value appears twice. This cannot yield the correct</span>
 <span class='doccomment'>/// result the strides are not positive.</span>
-<span class='kw'>fn</span> <span class='ident'>fastest_varying_order</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span>(<span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>) <span class='op'>-&gt;</span> <span class='ident'>D</span>
-{
+<span class='kw'>fn</span> <span class='ident'>fastest_varying_order</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span>(<span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>) <span class='op'>-&gt;</span> <span class='ident'>D</span> {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>sorted</span> <span class='op'>=</span> <span class='ident'>strides</span>.<span class='ident'>clone</span>();
     <span class='ident'>sorted</span>.<span class='ident'>slice_mut</span>().<span class='ident'>sort</span>();
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='ident'>strides</span>.<span class='ident'>clone</span>();
@@ -819,8 +802,7 @@
 <span class='doccomment'>/// preceding strides multiplied by their corresponding dimensions.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// The current implementation assumes strides to be positive</span>
-<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>dim_stride_overlap</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span>(<span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span>
-{
+<span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>dim_stride_overlap</span><span class='op'>&lt;</span><span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span>(<span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>) <span class='op'>-&gt;</span> <span class='ident'>bool</span> {
     <span class='kw'>let</span> <span class='ident'>order</span> <span class='op'>=</span> <span class='ident'>fastest_varying_order</span>(<span class='ident'>strides</span>);
 
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>prev_offset</span> <span class='op'>=</span> <span class='number'>1</span>;
@@ -868,8 +850,7 @@
             <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>StrideError</span>::<span class='ident'>OutOfBounds</span>);
         }
         <span class='prelude-val'>Ok</span>(())
-    }
-    <span class='kw'>else</span> {
+    } <span class='kw'>else</span> {
         <span class='prelude-val'>Err</span>(<span class='ident'>StrideError</span>::<span class='ident'>Unsupported</span>)
     }
 }
@@ -878,20 +859,20 @@
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Return None if the indices are out of bounds, or the calculation would wrap</span>
 <span class='doccomment'>/// around.</span>
-<span class='kw'>fn</span> <span class='ident'>stride_offset_checked_arithmetic</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span>(<span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span>
-    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
+<span class='kw'>fn</span> <span class='ident'>stride_offset_checked_arithmetic</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span>(<span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>)
+    <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span>
+    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>
 {
     <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>offset</span> <span class='op'>=</span> <span class='number'>0</span>;
-    <span class='kw'>for</span> ((<span class='kw-2'>&amp;</span><span class='ident'>d</span>, <span class='kw-2'>&amp;</span><span class='ident'>i</span>), <span class='kw-2'>&amp;</span><span class='ident'>s</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>zipsl</span>(<span class='ident'>dim</span>.<span class='ident'>slice</span>(), <span class='ident'>index</span>.<span class='ident'>slice</span>()), <span class='ident'>strides</span>.<span class='ident'>slice</span>())
-    {
+    <span class='kw'>for</span> ((<span class='kw-2'>&amp;</span><span class='ident'>d</span>, <span class='kw-2'>&amp;</span><span class='ident'>i</span>), <span class='kw-2'>&amp;</span><span class='ident'>s</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>zipsl</span>(<span class='ident'>dim</span>.<span class='ident'>slice</span>(), <span class='ident'>index</span>.<span class='ident'>slice</span>()), <span class='ident'>strides</span>.<span class='ident'>slice</span>()) {
         <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>&gt;=</span> <span class='ident'>d</span> {
             <span class='kw'>return</span> <span class='prelude-val'>None</span>;
         }
 
         <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>offset_</span>) <span class='op'>=</span> (<span class='ident'>i</span> <span class='kw'>as</span> <span class='ident'>isize</span>)
-            .<span class='ident'>checked_mul</span>((<span class='ident'>s</span> <span class='kw'>as</span> <span class='ident'>Ixs</span>) <span class='kw'>as</span> <span class='ident'>isize</span>)
-            .<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>checked_add</span>(<span class='ident'>offset</span>)) {
-                <span class='ident'>offset</span> <span class='op'>=</span> <span class='ident'>offset_</span>;
+                                   .<span class='ident'>checked_mul</span>((<span class='ident'>s</span> <span class='kw'>as</span> <span class='ident'>Ixs</span>) <span class='kw'>as</span> <span class='ident'>isize</span>)
+                                   .<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>x</span><span class='op'>|</span> <span class='ident'>x</span>.<span class='ident'>checked_add</span>(<span class='ident'>offset</span>)) {
+            <span class='ident'>offset</span> <span class='op'>=</span> <span class='ident'>offset_</span>;
         } <span class='kw'>else</span> {
             <span class='kw'>return</span> <span class='prelude-val'>None</span>;
         }
@@ -945,9 +926,7 @@
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
     <span class='doccomment'>/// Compute the size while checking for overflow</span>
     <span class='kw'>fn</span> <span class='ident'>size_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>usize</span><span class='op'>&gt;</span> {
-        <span class='self'>self</span>.<span class='ident'>slice</span>().<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='prelude-val'>Some</span>(<span class='number'>1</span>), <span class='op'>|</span><span class='ident'>s</span>, <span class='kw-2'>&amp;</span><span class='ident'>a</span><span class='op'>|</span> {
-            <span class='ident'>s</span>.<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>s_</span><span class='op'>|</span> <span class='ident'>s_</span>.<span class='ident'>checked_mul</span>(<span class='ident'>a</span>))
-        })
+        <span class='self'>self</span>.<span class='ident'>slice</span>().<span class='ident'>iter</span>().<span class='ident'>fold</span>(<span class='prelude-val'>Some</span>(<span class='number'>1</span>), <span class='op'>|</span><span class='ident'>s</span>, <span class='kw-2'>&amp;</span><span class='ident'>a</span><span class='op'>|</span> <span class='ident'>s</span>.<span class='ident'>and_then</span>(<span class='op'>|</span><span class='ident'>s_</span><span class='op'>|</span> <span class='ident'>s_</span>.<span class='ident'>checked_mul</span>(<span class='ident'>a</span>)))
     }
 
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
@@ -997,7 +976,7 @@
     <span class='kw'>fn</span> <span class='ident'>first_index</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw'>Self</span><span class='op'>&gt;</span> {
         <span class='kw'>for</span> <span class='ident'>ax</span> <span class='kw'>in</span> <span class='self'>self</span>.<span class='ident'>slice</span>().<span class='ident'>iter</span>() {
             <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>ax</span> <span class='op'>==</span> <span class='number'>0</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>None</span>
+                <span class='kw'>return</span> <span class='prelude-val'>None</span>;
             }
         }
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>index</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>clone</span>();
@@ -1015,8 +994,7 @@
     <span class='kw'>fn</span> <span class='ident'>next_for</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>index</span>: <span class='kw'>Self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='kw'>Self</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>index</span> <span class='op'>=</span> <span class='ident'>index</span>;
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>done</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-        <span class='kw'>for</span> (<span class='kw-2'>&amp;</span><span class='ident'>dim</span>, <span class='ident'>ix</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='self'>self</span>.<span class='ident'>slice</span>(), <span class='ident'>index</span>.<span class='ident'>slice_mut</span>()).<span class='ident'>rev</span>()
-        {
+        <span class='kw'>for</span> (<span class='kw-2'>&amp;</span><span class='ident'>dim</span>, <span class='ident'>ix</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='self'>self</span>.<span class='ident'>slice</span>(), <span class='ident'>index</span>.<span class='ident'>slice_mut</span>()).<span class='ident'>rev</span>() {
             <span class='op'>*</span><span class='ident'>ix</span> <span class='op'>+=</span> <span class='number'>1</span>;
             <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>ix</span> <span class='op'>==</span> <span class='ident'>dim</span> {
                 <span class='op'>*</span><span class='ident'>ix</span> <span class='op'>=</span> <span class='number'>0</span>;
@@ -1027,13 +1005,14 @@
         }
         <span class='kw'>if</span> <span class='ident'>done</span> {
             <span class='prelude-val'>Some</span>(<span class='ident'>index</span>)
-        } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>None</span>
+        }
     }
 
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
     <span class='doccomment'>/// Return stride offset for index.</span>
-    <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='kw'>Self</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='kw'>Self</span>) <span class='op'>-&gt;</span> <span class='ident'>isize</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='kw'>Self</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='kw'>Self</span>) <span class='op'>-&gt;</span> <span class='ident'>isize</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>offset</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='kw'>for</span> (<span class='kw-2'>&amp;</span><span class='ident'>i</span>, <span class='kw-2'>&amp;</span><span class='ident'>s</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>index</span>.<span class='ident'>slice</span>(), <span class='ident'>strides</span>.<span class='ident'>slice</span>()) {
             <span class='ident'>offset</span> <span class='op'>+=</span> <span class='ident'>stride_offset</span>(<span class='ident'>i</span>, <span class='ident'>s</span>);
@@ -1043,13 +1022,10 @@
 
     <span class='attribute'>#[<span class='ident'>doc</span>(<span class='ident'>hidden</span>)]</span>
     <span class='doccomment'>/// Return stride offset for this dimension and index.</span>
-    <span class='kw'>fn</span> <span class='ident'>stride_offset_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='kw'>Self</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='kw'>Self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>stride_offset_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='kw'>Self</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='kw'>Self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>offset</span> <span class='op'>=</span> <span class='number'>0</span>;
-        <span class='kw'>for</span> ((<span class='kw-2'>&amp;</span><span class='ident'>d</span>, <span class='kw-2'>&amp;</span><span class='ident'>i</span>), <span class='kw-2'>&amp;</span><span class='ident'>s</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>zipsl</span>(<span class='self'>self</span>.<span class='ident'>slice</span>(),
-                                          <span class='ident'>index</span>.<span class='ident'>slice</span>()),
-                                    <span class='ident'>strides</span>.<span class='ident'>slice</span>())
-        {
+        <span class='kw'>for</span> ((<span class='kw-2'>&amp;</span><span class='ident'>d</span>, <span class='kw-2'>&amp;</span><span class='ident'>i</span>), <span class='kw-2'>&amp;</span><span class='ident'>s</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>zipsl</span>(<span class='self'>self</span>.<span class='ident'>slice</span>(), <span class='ident'>index</span>.<span class='ident'>slice</span>()),
+                                    <span class='ident'>strides</span>.<span class='ident'>slice</span>()) {
             <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>&gt;=</span> <span class='ident'>d</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>None</span>;
             }
@@ -1063,15 +1039,12 @@
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// **Panics** if `slices` does not correspond to the number of axes,</span>
     <span class='doccomment'>/// if any stride is 0, or if any index is out of bounds.</span>
-    <span class='kw'>fn</span> <span class='ident'>do_slices</span>(<span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw'>Self</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw'>Self</span>, <span class='ident'>slices</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>SliceArg</span>) <span class='op'>-&gt;</span> <span class='ident'>isize</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>do_slices</span>(<span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw'>Self</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='kw'>Self</span>, <span class='ident'>slices</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>SliceArg</span>) <span class='op'>-&gt;</span> <span class='ident'>isize</span> {
         <span class='kw'>let</span> <span class='ident'>slices</span> <span class='op'>=</span> <span class='ident'>slices</span>.<span class='ident'>as_ref</span>();
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>offset</span> <span class='op'>=</span> <span class='number'>0</span>;
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>slices</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='ident'>dim</span>.<span class='ident'>slice</span>().<span class='ident'>len</span>());
-        <span class='kw'>for</span> ((<span class='ident'>dr</span>, <span class='ident'>sr</span>), <span class='kw-2'>&amp;</span><span class='ident'>slc</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>zipsl</span>(<span class='ident'>dim</span>.<span class='ident'>slice_mut</span>(),
-                                            <span class='ident'>strides</span>.<span class='ident'>slice_mut</span>()),
-                                      <span class='ident'>slices</span>)
-        {
+        <span class='kw'>for</span> ((<span class='ident'>dr</span>, <span class='ident'>sr</span>), <span class='kw-2'>&amp;</span><span class='ident'>slc</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>zipsl</span>(<span class='ident'>dim</span>.<span class='ident'>slice_mut</span>(), <span class='ident'>strides</span>.<span class='ident'>slice_mut</span>()),
+                                      <span class='ident'>slices</span>) {
             <span class='kw'>let</span> <span class='ident'>m</span> <span class='op'>=</span> <span class='op'>*</span><span class='ident'>dr</span>;
             <span class='kw'>let</span> <span class='ident'>mi</span> <span class='op'>=</span> <span class='ident'>m</span> <span class='kw'>as</span> <span class='ident'>Ixs</span>;
             <span class='kw'>let</span> <span class='ident'>Si</span>(<span class='ident'>b1</span>, <span class='ident'>opt_e1</span>, <span class='ident'>s1</span>) <span class='op'>=</span> <span class='ident'>slc</span>;
@@ -1118,7 +1091,9 @@
 <span class='kw'>fn</span> <span class='ident'>abs_index</span>(<span class='ident'>len</span>: <span class='ident'>Ixs</span>, <span class='ident'>index</span>: <span class='ident'>Ixs</span>) <span class='op'>-&gt;</span> <span class='ident'>Ix</span> {
     <span class='kw'>if</span> <span class='ident'>index</span> <span class='op'>&lt;</span> <span class='number'>0</span> {
         (<span class='ident'>len</span> <span class='op'>+</span> <span class='ident'>index</span>) <span class='kw'>as</span> <span class='ident'>Ix</span>
-    } <span class='kw'>else</span> { <span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>Ix</span> }
+    } <span class='kw'>else</span> {
+        <span class='ident'>index</span> <span class='kw'>as</span> <span class='ident'>Ix</span>
+    }
 }
 
 <span class='doccomment'>/// Collapse axis `axis` and shift so that only subarray `index` is</span>
@@ -1127,8 +1102,7 @@
 <span class='doccomment'>/// **Panics** if `index` is larger than the size of the axis</span>
 <span class='comment'>// FIXME: Move to Dimension trait</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>do_sub</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span>: <span class='ident'>Dimension</span><span class='op'>&gt;</span>(<span class='ident'>dims</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>D</span>, <span class='ident'>ptr</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>A</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>D</span>,
-                               <span class='ident'>axis</span>: <span class='ident'>usize</span>, <span class='ident'>index</span>: <span class='ident'>Ix</span>)
-{
+                               <span class='ident'>axis</span>: <span class='ident'>usize</span>, <span class='ident'>index</span>: <span class='ident'>Ix</span>) {
     <span class='kw'>let</span> <span class='ident'>dim</span> <span class='op'>=</span> <span class='ident'>dims</span>.<span class='ident'>slice</span>()[<span class='ident'>axis</span>];
     <span class='kw'>let</span> <span class='ident'>stride</span> <span class='op'>=</span> <span class='ident'>strides</span>.<span class='ident'>slice</span>()[<span class='ident'>axis</span>];
     <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>index</span> <span class='op'>&lt;</span> <span class='ident'>dim</span>);
@@ -1165,27 +1139,29 @@
     <span class='kw'>fn</span> <span class='ident'>first_index</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ix</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='op'>*</span><span class='self'>self</span> <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='prelude-val'>Some</span>(<span class='number'>0</span>)
-        } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>None</span>
+        }
     }
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>next_for</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='kw-2'>mut</span> <span class='ident'>index</span>: <span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Ix</span><span class='op'>&gt;</span> {
         <span class='ident'>index</span> <span class='op'>+=</span> <span class='number'>1</span>;
         <span class='kw'>if</span> <span class='ident'>index</span> <span class='op'>&lt;</span> <span class='op'>*</span><span class='self'>self</span> {
             <span class='prelude-val'>Some</span>(<span class='ident'>index</span>)
-        } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>None</span>
+        }
     }
 
     <span class='doccomment'>/// Self is an index, return the stride offset</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ix</span>, <span class='ident'>stride</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='ident'>isize</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ix</span>, <span class='ident'>stride</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='ident'>isize</span> {
         <span class='ident'>stride_offset</span>(<span class='op'>*</span><span class='ident'>index</span>, <span class='op'>*</span><span class='ident'>stride</span>)
     }
 
     <span class='doccomment'>/// Return stride offset for this dimension and index.</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>stride_offset_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>stride</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ix</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>stride_offset_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>stride</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ix</span>, <span class='ident'>index</span>: <span class='kw-2'>&amp;</span><span class='ident'>Ix</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='op'>*</span><span class='ident'>index</span> <span class='op'>&lt;</span> <span class='op'>*</span><span class='self'>self</span> {
             <span class='prelude-val'>Some</span>(<span class='ident'>stride_offset</span>(<span class='op'>*</span><span class='ident'>index</span>, <span class='op'>*</span><span class='ident'>stride</span>))
         } <span class='kw'>else</span> {
@@ -1220,7 +1196,9 @@
         <span class='kw'>let</span> (<span class='ident'>m</span>, <span class='ident'>n</span>) <span class='op'>=</span> <span class='op'>*</span><span class='self'>self</span>;
         <span class='kw'>if</span> <span class='ident'>m</span> <span class='op'>!=</span> <span class='number'>0</span> <span class='op'>&amp;&amp;</span> <span class='ident'>n</span> <span class='op'>!=</span> <span class='number'>0</span> {
             <span class='prelude-val'>Some</span>((<span class='number'>0</span>, <span class='number'>0</span>))
-        } <span class='kw'>else</span> { <span class='prelude-val'>None</span> }
+        } <span class='kw'>else</span> {
+            <span class='prelude-val'>None</span>
+        }
     }
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
     <span class='kw'>fn</span> <span class='ident'>next_for</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>index</span>: (<span class='ident'>Ix</span>, <span class='ident'>Ix</span>)) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>)<span class='op'>&gt;</span> {
@@ -1239,8 +1217,7 @@
 
     <span class='doccomment'>/// Self is an index, return the stride offset</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>index</span>: <span class='kw-2'>&amp;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>), <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>)) <span class='op'>-&gt;</span> <span class='ident'>isize</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>index</span>: <span class='kw-2'>&amp;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>), <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>)) <span class='op'>-&gt;</span> <span class='ident'>isize</span> {
         <span class='kw'>let</span> (<span class='ident'>i</span>, <span class='ident'>j</span>) <span class='op'>=</span> <span class='op'>*</span><span class='ident'>index</span>;
         <span class='kw'>let</span> (<span class='ident'>s</span>, <span class='ident'>t</span>) <span class='op'>=</span> <span class='op'>*</span><span class='ident'>strides</span>;
         <span class='ident'>stride_offset</span>(<span class='ident'>i</span>, <span class='ident'>s</span>) <span class='op'>+</span> <span class='ident'>stride_offset</span>(<span class='ident'>j</span>, <span class='ident'>t</span>)
@@ -1288,8 +1265,7 @@
 
     <span class='doccomment'>/// Self is an index, return the stride offset</span>
     <span class='attribute'>#[<span class='ident'>inline</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>index</span>: <span class='kw-2'>&amp;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>), <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>)) <span class='op'>-&gt;</span> <span class='ident'>isize</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>stride_offset</span>(<span class='ident'>index</span>: <span class='kw-2'>&amp;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>), <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>)) <span class='op'>-&gt;</span> <span class='ident'>isize</span> {
         <span class='kw'>let</span> (<span class='ident'>i</span>, <span class='ident'>j</span>, <span class='ident'>k</span>) <span class='op'>=</span> <span class='op'>*</span><span class='ident'>index</span>;
         <span class='kw'>let</span> (<span class='ident'>s</span>, <span class='ident'>t</span>, <span class='ident'>u</span>) <span class='op'>=</span> <span class='op'>*</span><span class='ident'>strides</span>;
         <span class='ident'>stride_offset</span>(<span class='ident'>i</span>, <span class='ident'>s</span>) <span class='op'>+</span> <span class='ident'>stride_offset</span>(<span class='ident'>j</span>, <span class='ident'>t</span>) <span class='op'>+</span> <span class='ident'>stride_offset</span>(<span class='ident'>k</span>, <span class='ident'>u</span>)
@@ -1371,11 +1347,9 @@
 <span class='comment'>// 12 is the maximum number for having the Eq trait from libstd</span>
 <span class='macro'>impl_shrink_recursive</span><span class='macro'>!</span>(<span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>,);
 
-<span class='kw'>impl</span> <span class='ident'>RemoveAxis</span> <span class='kw'>for</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Ix</span><span class='op'>&gt;</span>
-{
+<span class='kw'>impl</span> <span class='ident'>RemoveAxis</span> <span class='kw'>for</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Ix</span><span class='op'>&gt;</span> {
     <span class='kw'>type</span> <span class='ident'>Smaller</span> <span class='op'>=</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Ix</span><span class='op'>&gt;</span>;
-    <span class='kw'>fn</span> <span class='ident'>remove_axis</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>axis</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Ix</span><span class='op'>&gt;</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>remove_axis</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>axis</span>: <span class='ident'>usize</span>) <span class='op'>-&gt;</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Ix</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>res</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>clone</span>();
         <span class='ident'>res</span>.<span class='ident'>remove</span>(<span class='ident'>axis</span>);
         <span class='ident'>res</span>
@@ -1401,7 +1375,9 @@
     <span class='kw'>fn</span> <span class='ident'>index_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Dim</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Dim</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span>;
 }
 
-<span class='kw'>unsafe</span> <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>NdIndex</span> <span class='kw'>for</span> <span class='ident'>D</span> <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span> {
+<span class='kw'>unsafe</span> <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>NdIndex</span> <span class='kw'>for</span> <span class='ident'>D</span>
+    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>
+{
     <span class='kw'>type</span> <span class='ident'>Dim</span> <span class='op'>=</span> <span class='ident'>D</span>;
     <span class='kw'>fn</span> <span class='ident'>index_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Dim</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Dim</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span> {
         <span class='ident'>dim</span>.<span class='ident'>stride_offset_checked</span>(<span class='ident'>strides</span>, <span class='self'>self</span>)
@@ -1455,9 +1431,7 @@
     <span class='kw'>type</span> <span class='ident'>Dim</span> <span class='op'>=</span> <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>Ix</span><span class='op'>&gt;</span>;
     <span class='kw'>fn</span> <span class='ident'>index_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>dim</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Dim</span>, <span class='ident'>strides</span>: <span class='kw-2'>&amp;</span><span class='ident'>Self</span>::<span class='ident'>Dim</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>isize</span><span class='op'>&gt;</span> {
         <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>offset</span> <span class='op'>=</span> <span class='number'>0</span>;
-        <span class='kw'>for</span> ((<span class='kw-2'>&amp;</span><span class='ident'>d</span>, <span class='kw-2'>&amp;</span><span class='ident'>i</span>), <span class='kw-2'>&amp;</span><span class='ident'>s</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>zipsl</span>(<span class='kw-2'>&amp;</span><span class='ident'>dim</span>[..], <span class='kw-2'>&amp;</span><span class='self'>self</span>[..]),
-                                    <span class='ident'>strides</span>.<span class='ident'>slice</span>())
-        {
+        <span class='kw'>for</span> ((<span class='kw-2'>&amp;</span><span class='ident'>d</span>, <span class='kw-2'>&amp;</span><span class='ident'>i</span>), <span class='kw-2'>&amp;</span><span class='ident'>s</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='ident'>zipsl</span>(<span class='kw-2'>&amp;</span><span class='ident'>dim</span>[..], <span class='kw-2'>&amp;</span><span class='self'>self</span>[..]), <span class='ident'>strides</span>.<span class='ident'>slice</span>()) {
             <span class='kw'>if</span> <span class='ident'>i</span> <span class='op'>&gt;=</span> <span class='ident'>d</span> {
                 <span class='kw'>return</span> <span class='prelude-val'>None</span>;
             }
@@ -1469,7 +1443,7 @@
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>test</span>)]</span>
 <span class='kw'>mod</span> <span class='ident'>test</span> {
-    <span class='kw'>use</span> <span class='ident'>super</span>::{<span class='ident'>Dimension</span>};
+    <span class='kw'>use</span> <span class='ident'>super</span>::<span class='ident'>Dimension</span>;
     <span class='kw'>use</span> <span class='ident'>stride_error</span>::<span class='ident'>StrideError</span>;
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
@@ -1480,8 +1454,7 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>slice_indexing_uncommon_strides</span>()
-    {
+    <span class='kw'>fn</span> <span class='ident'>slice_indexing_uncommon_strides</span>() {
         <span class='kw'>let</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span>_<span class='op'>&gt;</span> <span class='op'>=</span> (<span class='number'>0</span>..<span class='number'>12</span>).<span class='ident'>collect</span>();
         <span class='kw'>let</span> <span class='ident'>dim</span> <span class='op'>=</span> (<span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>2</span>);
         <span class='kw'>let</span> <span class='ident'>strides</span> <span class='op'>=</span> (<span class='number'>1</span>, <span class='number'>2</span>, <span class='number'>6</span>);
@@ -1493,8 +1466,7 @@
     }
 
     <span class='attribute'>#[<span class='ident'>test</span>]</span>
-    <span class='kw'>fn</span> <span class='ident'>overlapping_strides_dim</span>()
-    {
+    <span class='kw'>fn</span> <span class='ident'>overlapping_strides_dim</span>() {
         <span class='kw'>let</span> <span class='ident'>dim</span> <span class='op'>=</span> (<span class='number'>2</span>, <span class='number'>3</span>, <span class='number'>2</span>);
         <span class='kw'>let</span> <span class='ident'>strides</span> <span class='op'>=</span> (<span class='number'>5</span>, <span class='number'>2</span>, <span class='number'>1</span>);
         <span class='macro'>assert</span><span class='macro'>!</span>(<span class='ident'>super</span>::<span class='ident'>dim_stride_overlap</span>(<span class='kw-2'>&amp;</span><span class='ident'>dim</span>, <span class='kw-2'>&amp;</span><span class='ident'>strides</span>));
@@ -1548,7 +1520,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

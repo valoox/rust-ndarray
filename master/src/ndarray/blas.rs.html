@@ -399,7 +399,6 @@
 <span id="356">356</span>
 <span id="357">357</span>
 <span id="358">358</span>
-<span id="359">359</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Experimental BLAS (Basic Linear Algebra Subprograms) integration</span>
 <span class='doccomment'>//!</span>
@@ -417,7 +416,7 @@
 <span class='doccomment'>//! use rblas::Gemv;</span>
 <span class='doccomment'>//! use rblas::attribute::Transpose;</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! use ndarray::{arr1, arr2, Array};</span>
+<span class='doccomment'>//! use ndarray::{arr1, arr2};</span>
 <span class='doccomment'>//! use ndarray::blas::AsBlas;</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! fn main() {</span>
@@ -493,8 +492,9 @@
         <span class='kw'>let</span> <span class='ident'>max</span> <span class='op'>=</span> <span class='ident'>c_int</span>::<span class='ident'>max_value</span>();
         <span class='kw'>for</span> (<span class='kw-2'>&amp;</span><span class='ident'>dim</span>, <span class='kw-2'>&amp;</span><span class='ident'>stride</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='self'>self</span>.<span class='ident'>shape</span>(), <span class='self'>self</span>.<span class='ident'>strides</span>()) {
             <span class='kw'>if</span> <span class='ident'>dim</span> <span class='op'>&gt;</span> <span class='ident'>max</span> <span class='kw'>as</span> <span class='ident'>Ix</span> <span class='op'>||</span> <span class='ident'>stride</span> <span class='op'>&gt;</span> <span class='ident'>max</span> <span class='kw'>as</span> <span class='ident'>Ixs</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ShapeError</span>::<span class='ident'>DimensionTooLarge</span>(
-                    <span class='self'>self</span>.<span class='ident'>shape</span>().<span class='ident'>to_vec</span>().<span class='ident'>into_boxed_slice</span>()));
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ShapeError</span>::<span class='ident'>DimensionTooLarge</span>(<span class='self'>self</span>.<span class='ident'>shape</span>()
+                                                             .<span class='ident'>to_vec</span>()
+                                                             .<span class='ident'>into_boxed_slice</span>()));
             }
         }
         <span class='prelude-val'>Ok</span>(())
@@ -511,10 +511,9 @@
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
-    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
+    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>
 {
-    <span class='kw'>fn</span> <span class='ident'>into_matrix</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>into_matrix</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&gt;</span> <span class='number'>1</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>contiguous_check</span>());
         }
@@ -524,10 +523,9 @@
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
-    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
+    <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>
 {
-    <span class='kw'>fn</span> <span class='ident'>into_matrix_mut</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
-    {
+    <span class='kw'>fn</span> <span class='ident'>into_matrix_mut</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&gt;</span> <span class='number'>1</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>contiguous_check</span>());
         }
@@ -549,7 +547,7 @@
     <span class='doccomment'>/// Elements are copied if needed to produce a contiguous matrix.&lt;br&gt;</span>
     <span class='doccomment'>/// The result is always mutable, due to the requirement of having write</span>
     <span class='doccomment'>/// access to update the layout either way. Breaks sharing if the array is</span>
-    <span class='doccomment'>/// an `Array`.</span>
+    <span class='doccomment'>/// an `RcArray`.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// **Errors** if any dimension is larger than `c_int::MAX`.</span>
     <span class='kw'>fn</span> <span class='ident'>blas_checked</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
@@ -804,7 +802,7 @@
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>

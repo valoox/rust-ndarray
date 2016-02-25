@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `blas` mod in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, blas">
 
-    <title>ndarray 0.4.0-alpha.3 - ndarray::blas - Rust</title>
+    <title>ndarray 0.4.0-alpha.4 - ndarray::blas - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-323' class='srclink' href='../../src/ndarray/blas.rs.html#1-359' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-324' class='srclink' href='../../src/ndarray/blas.rs.html#1-358' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>Experimental BLAS (Basic Linear Algebra Subprograms) integration</p>
 
 <p><strong><em>Requires <code>features = &quot;rblas&quot;</code></em></strong></p>
@@ -59,7 +59,7 @@
 <span class='kw'>use</span> <span class='ident'>rblas</span>::<span class='ident'>Gemv</span>;
 <span class='kw'>use</span> <span class='ident'>rblas</span>::<span class='ident'>attribute</span>::<span class='ident'>Transpose</span>;
 
-<span class='kw'>use</span> <span class='ident'>ndarray</span>::{<span class='ident'>arr1</span>, <span class='ident'>arr2</span>, <span class='ident'>Array</span>};
+<span class='kw'>use</span> <span class='ident'>ndarray</span>::{<span class='ident'>arr1</span>, <span class='ident'>arr2</span>};
 <span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>blas</span>::<span class='ident'>AsBlas</span>;
 
 <span class='kw'>fn</span> <span class='ident'>main</span>() {
@@ -98,7 +98,6 @@ mismatch in a matrix multiplication.</p>
                                title='ndarray::blas::BlasArrayView'>BlasArrayView</a></td>
                         <td class='docblock short'>
                              <p><strong><em>Requires <code>features = &quot;rblas&quot;</code></em></strong></p>
-
                         </td>
                     </tr>
                 
@@ -107,7 +106,6 @@ mismatch in a matrix multiplication.</p>
                                title='ndarray::blas::BlasArrayViewMut'>BlasArrayViewMut</a></td>
                         <td class='docblock short'>
                              <p><strong><em>Requires <code>features = &quot;rblas&quot;</code></em></strong></p>
-
                         </td>
                     </tr>
                 </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
@@ -117,7 +115,6 @@ mismatch in a matrix multiplication.</p>
                                title='ndarray::blas::AsBlas'>AsBlas</a></td>
                         <td class='docblock short'>
                              <p>Convert an array into a blas friendly wrapper.</p>
-
                         </td>
                     </tr>
                 </table></section>
@@ -163,7 +160,7 @@ mismatch in a matrix multiplication.</p>
 
                 <p>
                     Search functions by type signature (e.g.
-                    <code>vec -> usize</code>)
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
                 </p>
             </div>
         </div>
