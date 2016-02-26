@@ -2937,6 +2937,7 @@
 <span id="2894">2894</span>
 <span id="2895">2895</span>
 <span id="2896">2896</span>
+<span id="2897">2897</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span><span class='op'>=</span><span class='string'>&quot;ndarray&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>has_deprecated</span>, <span class='ident'>feature</span>(<span class='ident'>deprecated</span>))]</span>
@@ -5109,6 +5110,7 @@
     }
 }
 
+<span class='doccomment'>/// Return a three-dimensional array with elements from `xs`.</span>
 <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>rcarr3</span><span class='op'>&lt;</span><span class='ident'>A</span>: <span class='ident'>Clone</span>, <span class='ident'>V</span>: <span class='ident'>FixedInitializer</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>U</span><span class='op'>&gt;</span>, <span class='ident'>U</span>: <span class='ident'>FixedInitializer</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;&gt;</span>(<span class='ident'>xs</span>: <span class='kw-2'>&amp;</span>[<span class='ident'>V</span>])
     <span class='op'>-&gt;</span> <span class='ident'>RcArray</span><span class='op'>&lt;</span><span class='ident'>A</span>, (<span class='ident'>Ix</span>, <span class='ident'>Ix</span>, <span class='ident'>Ix</span>)<span class='op'>&gt;</span>
 {

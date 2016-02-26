@@ -153,3 +153,9 @@ em.deprecated {
     font-weight: bold;
     font-style: italic;
 }
+
+/* custom fix for rustdoc summary bug */
+
+.short pre.rust {
+    display: none;
+}
