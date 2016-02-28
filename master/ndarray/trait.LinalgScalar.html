@@ -4,13 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `Field` trait in crate `ndarray`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, Field">
+    <meta name="description" content="API documentation for the Rust `LinalgScalar` trait in crate `ndarray`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, LinalgScalar">
 
-    <title>ndarray 0.4.0-alpha.4 - ndarray::linalg::Field - Rust</title>
+    <title>ndarray 0.4.0-alpha.5 - ndarray::LinalgScalar - Rust</title>
 
-    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
-    <link rel="stylesheet" type="text/css" href="../../main.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
 
     
     
@@ -27,7 +27,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='../index.html'>ndarray</a>::<wbr><a href='index.html'>linalg</a></p><script>window.sidebarCurrent = {name: 'Field', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>ndarray</a></p><script>window.sidebarCurrent = {name: 'LinalgScalar', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -42,18 +42,20 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='../index.html'>ndarray</a>::<wbr><a href='index.html'>linalg</a>::<wbr><a class='trait' href=''>Field</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>ndarray</a>::<wbr><a class='trait' href=''>LinalgScalar</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-33' class='srclink' href='../../src/ndarray/linalg.rs.html#17' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait Field: <a class='trait' href='../../ndarray/linalg/trait.Ring.html' title='ndarray::linalg::Ring'>Ring</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;Output=Self&gt; { }</pre><div class='stability'><em class='stab deprecated'>Deprecated<p>: <code>linalg</code> is not in good shape.</p>
-</em></div><div class='docblock'><p>Trait union for a field.</p>
+        </span><a id='src-1583' class='srclink' href='../src/ndarray/linalg.rs.html#21-29' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait LinalgScalar: <a class='trait' href='https://doc.rust-lang.org/nightly/core/any/trait.Any.html' title='core::any::Any'>Any</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> + <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.Zero.html' title='num::traits::Zero'>Zero</a> + <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.One.html' title='num::traits::One'>One</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;Output=Self&gt; + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;Output=Self&gt; + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;Output=Self&gt; + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;Output=Self&gt; { }</pre><div class='docblock'><p>Trait union for scalars (array elements) that support linear algebra operations.</p>
+
+<p><code>Any</code> for type-based specialization, <code>Copy</code> so that they don&#39;t need move
+semantics or destructors, and the rest are numerical traits.</p>
 </div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
     </ul><script type="text/javascript" async
-                              src="../../implementors/ndarray/linalg/trait.Field.js">
+                              src="../implementors/ndarray/trait.LinalgScalar.js">
                       </script></section>
     <section id='search' class="content hidden"></section>
 
@@ -106,13 +108,13 @@
     
 
     <script>
-        window.rootPath = "../../";
+        window.rootPath = "../";
         window.currentCrate = "ndarray";
         window.playgroundUrl = "";
     </script>
-    <script src="../../jquery.js"></script>
-    <script src="../../main.js"></script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
     
-    <script defer src="../../search-index.js"></script>
+    <script defer src="../search-index.js"></script>
 </body>
 </html>

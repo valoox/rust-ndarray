@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ndarray` crate.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ndarray">
 
-    <title>ndarray 0.4.0-alpha.4 - ndarray - Rust</title>
+    <title>ndarray 0.4.0-alpha.5 - ndarray - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2897' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/ndarray/lib.rs.html#1-2997' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>The <code>ndarray</code> crate provides an N-dimensional container similar to numpy’s
 ndarray.</p>
 
@@ -71,12 +71,22 @@ elements from the end of the axis.</li>
 (<code>OwnedArray</code>), and both can use read-only and read-write array views.</li>
 <li>Iteration and most operations are efficient on arrays with contiguous
 innermost dimension.</li>
-<li>Array views can be used to slice and mutate any <code>[T]</code> data.</li>
+<li>Array views can be used to slice and mutate any <code>[T]</code> data using
+<code>aview1</code> and <code>aview_mut1</code>.</li>
 </ul>
 
 <h2 id='crate-status' class='section-header'><a href='#crate-status'>Crate Status</a></h2>
 <ul>
-<li>Still iterating on the API</li>
+<li>Still iterating on and evolving the API
+
+<ul>
+<li>The crate is continuously developing, and breaking changes are expected
+during evolution from version to version. We adhere to semver,
+but alpha releases break at will.</li>
+<li>We adopt the newest stable rust features we need. In place methods like <code>iadd</code>
+<em>will be deprecated</em> when Rust supports <code>+=</code> and similar in Rust 1.8.</li>
+<li>We try to introduce more static checking gradually.</li>
+</ul></li>
 <li>Performance status:
 
 <ul>
@@ -89,6 +99,9 @@ perform single traversal and lock step traversal respectively.</li>
 </ul>
 
 <h2 id='crate-feature-flags' class='section-header'><a href='#crate-feature-flags'>Crate Feature Flags</a></h2>
+<p>The following crate feature flags are available. The are specified in
+<code>Cargo.toml</code>.</p>
+
 <ul>
 <li><code>assign_ops</code>
 
@@ -116,14 +129,6 @@ perform single traversal and lock step traversal respectively.</li>
                                title='ndarray::blas'>blas</a></td>
                         <td class='docblock short'>
                              <p>Experimental BLAS (Basic Linear Algebra Subprograms) integration</p>
-                        </td>
-                    </tr>
-                
-                    <tr class=' module-item'>
-                        <td><a class='mod' href='linalg/index.html'
-                               title='ndarray::linalg'>linalg</a></td>
-                        <td class='docblock short'>
-                            [<em class='stab deprecated'>Deprecated</em>] <p><strong><em>Deprecated: linalg is not in good shape.</em></strong></p>
                         </td>
                     </tr>
                 </table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
@@ -339,6 +344,14 @@ and yields each subview (mutable).</p>
                     </tr>
                 
                     <tr class=' module-item'>
+                        <td><a class='trait' href='trait.LinalgScalar.html'
+                               title='ndarray::LinalgScalar'>LinalgScalar</a></td>
+                        <td class='docblock short'>
+                             <p>Trait union for scalars (array elements) that support linear algebra operations.</p>
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
                         <td><a class='trait' href='trait.NdIndex.html'
                                title='ndarray::NdIndex'>NdIndex</a></td>
                         <td class='docblock short'>
@@ -465,7 +478,7 @@ removing one axis from <em>Self</em> gives smaller dimension <em>Smaller</em>.</
                         <td><a class='fn' href='fn.zeros.html'
                                title='ndarray::zeros'>zeros</a></td>
                         <td class='docblock short'>
-                             <p>Return an array filled with zeros</p>
+                            [<em class='stab deprecated'>Deprecated</em>] <p><strong><em>Deprecated: Use <code>ArrayBase::zeros</code> instead.</em></strong></p>
                         </td>
                     </tr>
                 </table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>

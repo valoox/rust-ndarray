@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Dimension","Trait for the shape and index types of arrays.`unsafe` because of the assumptions in the default methods.***Don't implement or call methods in this trait, its interface is internal to the crate and will evolve at will.***"]]});

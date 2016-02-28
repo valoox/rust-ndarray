@@ -392,17 +392,10 @@
 <span id="349">349</span>
 <span id="350">350</span>
 <span id="351">351</span>
-<span id="352">352</span>
-<span id="353">353</span>
-<span id="354">354</span>
-<span id="355">355</span>
-<span id="356">356</span>
-<span id="357">357</span>
-<span id="358">358</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Experimental BLAS (Basic Linear Algebra Subprograms) integration</span>
 <span class='doccomment'>//!</span>
-<span class='doccomment'>//! ***Requires `features = &quot;rblas&quot;`***</span>
+<span class='doccomment'>//! ***Requires crate feature `&quot;rblas&quot;`***</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! Depends on crate [`rblas`], ([docs]).</span>
 <span class='doccomment'>//!</span>
@@ -450,29 +443,21 @@
 <span class='doccomment'>//! I know), instead output its own error conditions, for example on dimension</span>
 <span class='doccomment'>//! mismatch in a matrix multiplication.</span>
 <span class='doccomment'>//!</span>
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>rblas</span>;
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>os</span>::<span class='ident'>raw</span>::{<span class='ident'>c_int</span>};
 
-<span class='kw'>use</span> <span class='self'>self</span>::<span class='ident'>rblas</span>::{
+<span class='kw'>use</span> <span class='ident'>rblas</span>::{
     <span class='ident'>Matrix</span>,
     <span class='ident'>Vector</span>,
 };
 <span class='kw'>use</span> <span class='ident'>super</span>::{
-    <span class='ident'>ArrayBase</span>,
-    <span class='ident'>ArrayView</span>,
-    <span class='ident'>ArrayViewMut</span>,
-    <span class='ident'>Ix</span>, <span class='ident'>Ixs</span>,
     <span class='ident'>ShapeError</span>,
-    <span class='ident'>Data</span>,
-    <span class='ident'>DataMut</span>,
-    <span class='ident'>DataOwned</span>,
-    <span class='ident'>Dimension</span>,
     <span class='ident'>zipsl</span>,
 };
+<span class='kw'>use</span> <span class='ident'>imp_prelude</span>::<span class='op'>*</span>;
 
 
-<span class='doccomment'>/// ***Requires `features = &quot;rblas&quot;`***</span>
+<span class='doccomment'>/// ***Requires crate feature `&quot;rblas&quot;`***</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='lifetime'>&#39;a</span>, <span class='ident'>D</span><span class='op'>&gt;</span>(<span class='ident'>ArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>);
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span>: <span class='ident'>Copy</span><span class='op'>&gt;</span> <span class='ident'>Copy</span> <span class='kw'>for</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> { }
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span>: <span class='ident'>Clone</span><span class='op'>&gt;</span> <span class='ident'>Clone</span> <span class='kw'>for</span> <span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
@@ -481,7 +466,7 @@
     }
 }
 
-<span class='doccomment'>/// ***Requires `features = &quot;rblas&quot;`***</span>
+<span class='doccomment'>/// ***Requires crate feature `&quot;rblas&quot;`***</span>
 <span class='kw'>pub</span> <span class='kw'>struct</span> <span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>: <span class='lifetime'>&#39;a</span>, <span class='ident'>D</span><span class='op'>&gt;</span>(<span class='ident'>ArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>);
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
@@ -510,22 +495,23 @@
     }
 }
 
-<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
+<span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>Priv</span><span class='op'>&lt;</span><span class='ident'>ArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;&gt;</span>
     <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>
 {
-    <span class='kw'>fn</span> <span class='ident'>into_matrix</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
-        <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&gt;</span> <span class='number'>1</span> {
-            <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>contiguous_check</span>());
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>into_blas_view</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
+        <span class='kw'>let</span> <span class='ident'>self_</span> <span class='op'>=</span> <span class='self'>self</span>.<span class='number'>0</span>;
+        <span class='kw'>if</span> <span class='ident'>self_</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&gt;</span> <span class='number'>1</span> {
+            <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>self_</span>.<span class='ident'>contiguous_check</span>());
         }
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>size_check</span>());
-        <span class='prelude-val'>Ok</span>(<span class='ident'>BlasArrayView</span>(<span class='self'>self</span>))
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>self_</span>.<span class='ident'>size_check</span>());
+        <span class='prelude-val'>Ok</span>(<span class='ident'>BlasArrayView</span>(<span class='ident'>self_</span>))
     }
 }
 
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>
 {
-    <span class='kw'>fn</span> <span class='ident'>into_matrix_mut</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
+    <span class='kw'>fn</span> <span class='ident'>into_blas_view_mut</span>(<span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>ndim</span>() <span class='op'>&gt;</span> <span class='number'>1</span> {
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>contiguous_check</span>());
         }
@@ -539,7 +525,7 @@
 <span class='doccomment'>/// Note that `blas` suppors four different element types: `f32`, `f64`,</span>
 <span class='doccomment'>/// `Complex&lt;f32&gt;`, and `Complex&lt;f64&gt;`.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// ***Requires `features = &quot;rblas&quot;`***</span>
+<span class='doccomment'>/// ***Requires crate feature `&quot;rblas&quot;`***</span>
 <span class='kw'>pub</span> <span class='kw'>trait</span> <span class='ident'>AsBlas</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
     <span class='doccomment'>/// Return an array view implementing Vector (1D) or Matrix (2D)</span>
     <span class='doccomment'>/// traits.</span>
@@ -624,7 +610,7 @@
         */</span>
 }
 
-<span class='doccomment'>/// ***Requires `features = &quot;rblas&quot;`***</span>
+<span class='doccomment'>/// ***Requires crate feature `&quot;rblas&quot;`***</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>AsBlas</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='kw'>for</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
           <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
@@ -643,19 +629,19 @@
             }
             <span class='ident'>_n</span> <span class='op'>=&gt;</span> <span class='self'>self</span>.<span class='ident'>ensure_standard_layout</span>(),
         }
-        <span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_matrix_mut</span>()
+        <span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_blas_view_mut</span>()
     }
 
     <span class='kw'>fn</span> <span class='ident'>blas_view_checked</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayView</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
         <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span>
     {
-        <span class='self'>self</span>.<span class='ident'>view</span>().<span class='ident'>into_matrix</span>()
+        <span class='ident'>Priv</span>(<span class='self'>self</span>.<span class='ident'>view</span>()).<span class='ident'>into_blas_view</span>()
     }
 
     <span class='kw'>fn</span> <span class='ident'>blas_view_mut_checked</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>BlasArrayViewMut</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
         <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span>,
     {
-        <span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_matrix_mut</span>()
+        <span class='self'>self</span>.<span class='ident'>view_mut</span>().<span class='ident'>into_blas_view_mut</span>()
     }
 
     <span class='comment'>/*
