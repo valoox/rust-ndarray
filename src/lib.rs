@@ -24,11 +24,18 @@
 //!   (`OwnedArray`), and both can use read-only and read-write array views.
 //! - Iteration and most operations are efficient on arrays with contiguous
 //!   innermost dimension.
-//! - Array views can be used to slice and mutate any `[T]` data.
+//! - Array views can be used to slice and mutate any `[T]` data using
+//!   `aview1` and `aview_mut1`.
 //!
 //! ## Crate Status
 //!
-//! - Still iterating on the API
+//! - Still iterating on and evolving the API
+//!   + The crate is continuously developing, and breaking changes are expected
+//!     during evolution from version to version. We adhere to semver,
+//!     but alpha releases break at will.
+//!   + We adopt the newest stable rust features we need. In place methods like `iadd`
+//!     *will be deprecated* when Rust supports `+=` and similar in Rust 1.8.
+//!   + We try to introduce more static checking gradually.
 //! - Performance status:
 //!   + Arithmetic involving arrays of contiguous inner dimension optimizes very well.
 //!   + `.fold()` and `.zip_mut_with()` are the most efficient ways to
@@ -37,6 +44,9 @@
 //! - There is experimental bridging to the linear algebra package `rblas`.
 //!
 //! ## Crate Feature Flags
+//!
+//! The following crate feature flags are available. The are specified in
+//! `Cargo.toml`.
 //!
 //! - `assign_ops`
 //!   - Optional, requires nightly
@@ -55,6 +65,9 @@
 extern crate serde;
 #[cfg(feature = "rustc-serialize")]
 extern crate rustc_serialize as serialize;
+
+#[cfg(feature = "rblas")]
+extern crate rblas;
 
 extern crate itertools;
 extern crate num as libnum;
@@ -97,10 +110,8 @@ pub use iterators::{
     AxisChunksIterMut,
 };
 
-#[allow(deprecated)]
-use linalg::{Field, Ring};
+pub use linalg::LinalgScalar;
 
-pub mod linalg;
 mod arraytraits;
 #[cfg(feature = "serde")]
 mod arrayserialize;
@@ -110,11 +121,31 @@ pub mod blas;
 mod dimension;
 mod indexes;
 mod iterators;
+mod linalg;
 mod linspace;
 mod numeric_util;
 mod si;
 mod shape_error;
 mod stride_error;
+
+/// Implementation's prelude. Common types used everywhere.
+mod imp_prelude {
+    pub use {
+        ArrayBase,
+        ArrayView,
+        ArrayViewMut,
+        OwnedArray,
+        RcArray,
+        Ix, Ixs,
+        Dimension,
+        Data,
+        DataMut,
+        DataOwned,
+    };
+    /// Wrapper type for private methods
+    #[derive(Copy, Clone, Debug)]
+    pub struct Priv<T>(pub T);
+}
 
 // NOTE: In theory, the whole library should compile
 // and pass tests even if you change Ix and Ixs.
@@ -141,6 +172,16 @@ pub type Ixs = isize;
 /// [`RcArray`]: type.RcArray.html
 /// [`ArrayView`]: type.ArrayView.html
 /// [`ArrayViewMut`]: type.ArrayViewMut.html
+///
+/// ## Contents
+///
+/// + [OwnedArray and RcArray](#ownedarray-and-rcarray)
+/// + [Indexing and Dimension](#indexing-and-dimension)
+/// + [Slicing](#slicing)
+/// + [Subviews](#subviews)
+/// + [Arithmetic Operations](#arithmetic-operations)
+/// + [Broadcasting](#broadcasting)
+/// + [Methods](#methods)
 ///
 /// ## `OwnedArray` and `RcArray`
 ///
@@ -297,16 +338,18 @@ pub type Ixs = isize;
 ///
 /// Since the trait implementations are hard to overview, here is a summary.
 ///
-/// Let `A` be an array or view of any kind. Let `B` be a mutable
-/// array (that is, either `OwnedArray`, `RcArray`, or `ArrayViewMut`)
+/// Let `A` be an array or view of any kind. Let `B` be an array
+/// with owned storage (either `OwnedArray` or `RcArray`).
+/// Let `C` be an array with mutable data (either `OwnedArray`, `RcArray`
+/// or `ArrayViewMut`).
 /// The following combinations of operands
 /// are supported for an arbitrary binary operator denoted by `@`.
 ///
 /// - `&A @ &A` which produces a new `OwnedArray`
 /// - `B @ A` which consumes `B`, updates it with the result, and returns it
 /// - `B @ &A` which consumes `B`, updates it with the result, and returns it
-/// - `B @= &A` which performs an arithmetic operation in place
-///   (requires `features = "assign_ops"`)
+/// - `C @= &A` which performs an arithmetic operation in place
+///   (requires crate feature `"assign_ops"`)
 ///
 /// The trait [`Scalar`](trait.Scalar.html) marks types that can be used in arithmetic
 /// with arrays directly. For a scalar `K` the following combinations of operands
@@ -314,8 +357,8 @@ pub type Ixs = isize;
 ///
 /// - `&A @ K` or `K @ &A` which produces a new `OwnedArray`
 /// - `B @ K` or `K @ B` which consumes `B`, updates it with the result and returns it
-/// - `B @= K` which performs an arithmetic operation in place
-///   (requires `features = "assign_ops"`)
+/// - `C @= K` which performs an arithmetic operation in place
+///   (requires crate feature `"assign_ops"`)
 ///
 /// ## Broadcasting
 ///
@@ -1990,7 +2033,10 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     }
 }
 
+/// ***Deprecated: Use `ArrayBase::zeros` instead.***
+///
 /// Return an array filled with zeros
+#[cfg_attr(has_deprecated, deprecated(note="Use `ArrayBase::zeros` instead."))]
 pub fn zeros<A, D>(dim: D) -> OwnedArray<A, D>
     where A: Clone + libnum::Zero, D: Dimension,
 {
@@ -2250,9 +2296,8 @@ impl<A, S, D> ArrayBase<S, D>
     ///
     ///
     /// **Panics** if `axis` is out of bounds.
-    #[allow(deprecated)]
     pub fn mean(&self, axis: usize) -> OwnedArray<A, <D as RemoveAxis>::Smaller>
-        where A: Copy + Field,
+        where A: LinalgScalar,
               D: RemoveAxis,
     {
         let n = self.shape()[axis];
@@ -2289,7 +2334,14 @@ impl<A, S> ArrayBase<S, Ix>
     /// **Panics** if the arrays are not of the same length.
     pub fn dot<S2>(&self, rhs: &ArrayBase<S2, Ix>) -> A
         where S2: Data<Elem=A>,
-              A: Clone + Add<Output=A> + Mul<Output=A> + libnum::Zero,
+              A: LinalgScalar,
+    {
+        self.dot_impl(rhs)
+    }
+
+    fn dot_generic<S2>(&self, rhs: &ArrayBase<S2, Ix>) -> A
+        where S2: Data<Elem=A>,
+              A: LinalgScalar,
     {
         assert_eq!(self.len(), rhs.len());
         if let Some(self_s) = self.as_slice() {
@@ -2305,7 +2357,53 @@ impl<A, S> ArrayBase<S, Ix>
         }
         sum
     }
+
+    #[cfg(not(feature="rblas"))]
+    fn dot_impl<S2>(&self, rhs: &ArrayBase<S2, Ix>) -> A
+        where S2: Data<Elem=A>,
+              A: LinalgScalar,
+    {
+        self.dot_generic(rhs)
+    }
+
+    #[cfg(feature="rblas")]
+    fn dot_impl<S2>(&self, rhs: &ArrayBase<S2, Ix>) -> A
+        where S2: Data<Elem=A>,
+              A: LinalgScalar,
+    {
+        use std::any::{Any, TypeId};
+        use rblas::vector::ops::Dot;
+        use linalg::AsBlasAny;
+
+        // Read pointer to type `A` as type `B`.
+        //
+        // **Panics** if `A` and `B` are not the same type
+        fn cast_as<A: Any + Copy, B: Any + Copy>(a: &A) -> B {
+            assert_eq!(TypeId::of::<A>(), TypeId::of::<B>());
+            unsafe {
+                ::std::ptr::read(a as *const _ as *const B)
+            }
+        }
+        // Use only if the vector is large enough to be worth it
+        if self.len() >= 32 {
+            assert_eq!(self.len(), rhs.len());
+            if let Ok(self_v) = self.blas_view_as_type::<f32>() {
+                if let Ok(rhs_v) = rhs.blas_view_as_type::<f32>() {
+                    let f_ret = f32::dot(&self_v, &rhs_v);
+                    return cast_as::<f32, A>(&f_ret);
+                }
+            }
+            if let Ok(self_v) = self.blas_view_as_type::<f64>() {
+                if let Ok(rhs_v) = rhs.blas_view_as_type::<f64>() {
+                    let f_ret = f64::dot(&self_v, &rhs_v);
+                    return cast_as::<f64, A>(&f_ret);
+                }
+            }
+        }
+        self.dot_generic(rhs)
+    }
 }
+
 
 impl<A, S> ArrayBase<S, (Ix, Ix)>
     where S: Data<Elem=A>,
@@ -2367,9 +2465,8 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
     /// );
     /// ```
     ///
-    #[allow(deprecated)]
     pub fn mat_mul(&self, rhs: &ArrayBase<S, (Ix, Ix)>) -> OwnedArray<A, (Ix, Ix)>
-        where A: Copy + Ring
+        where A: LinalgScalar,
     {
         // NOTE: Matrix multiplication only defined for Copy types to
         // avoid trouble with panicking + and *, and destructors
@@ -2412,9 +2509,8 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
     /// Return a result array with shape *M*.
     ///
     /// **Panics** if shapes are incompatible.
-    #[allow(deprecated)]
     pub fn mat_mul_col(&self, rhs: &ArrayBase<S, Ix>) -> OwnedArray<A, Ix>
-        where A: Copy + Ring
+        where A: LinalgScalar,
     {
         let ((m, a), n) = (self.dim, rhs.dim);
         let (self_columns, other_rows) = (a, n);
@@ -2550,12 +2646,14 @@ macro_rules! impl_binary_op(
 /// between `self` and `rhs`,
 /// and return the result (based on `self`).
 ///
+/// `self` must be an `OwnedArray` or `RcArray`.
+///
 /// If their shapes disagree, `rhs` is broadcast to the shape of `self`.
 ///
 /// **Panics** if broadcasting isn’t possible.
 impl<A, S, S2, D, E> $trt<ArrayBase<S2, E>> for ArrayBase<S, D>
     where A: Clone + $trt<A, Output=A>,
-          S: DataMut<Elem=A>,
+          S: DataOwned<Elem=A> + DataMut,
           S2: Data<Elem=A>,
           D: Dimension,
           E: Dimension,
@@ -2609,7 +2707,7 @@ impl<'a, A, S, S2, D, E> $trt<&'a ArrayBase<S2, E>> for &'a ArrayBase<S, D>
     fn $mth (self, rhs: &'a ArrayBase<S2, E>) -> OwnedArray<A, D>
     {
         // FIXME: Can we co-broadcast arrays here? And how?
-        self.to_owned().$mth(rhs.view())
+        self.to_owned().$mth(rhs)
     }
 }
 
@@ -2617,9 +2715,11 @@ impl<'a, A, S, S2, D, E> $trt<&'a ArrayBase<S2, E>> for &'a ArrayBase<S, D>
 #[doc=$doc]
 /// between `self` and the scalar `x`,
 /// and return the result (based on `self`).
+///
+/// `self` must be an `OwnedArray` or `RcArray`.
 impl<A, S, D, B> $trt<B> for ArrayBase<S, D>
     where A: Clone + $trt<B, Output=A>,
-          S: DataMut<Elem=A>,
+          S: DataOwned<Elem=A> + DataMut,
           D: Dimension,
           B: Clone + Scalar,
 {
@@ -2794,7 +2894,7 @@ mod assign_ops {
     ///
     /// **Panics** if broadcasting isn’t possible.
     ///
-    /// **Requires `feature = "assign_ops"`**
+    /// **Requires crate feature `"assign_ops"`**
     impl<'a, A, S, S2, D, E> $trt<&'a ArrayBase<S2, E>> for ArrayBase<S, D>
         where A: Clone + $trt<A>,
               S: DataMut<Elem=A>,
@@ -2810,7 +2910,7 @@ mod assign_ops {
     }
 
     #[doc=$doc]
-    /// **Requires `feature = "assign_ops"`**
+    /// **Requires crate feature `"assign_ops"`**
     impl<A, S, D, B> $trt<B> for ArrayBase<S, D>
         where A: $trt<B>,
               S: DataMut<Elem=A>,
@@ -2895,3 +2995,4 @@ enum ElementsRepr<S, C> {
     Slice(S),
     Counted(C),
 }
+

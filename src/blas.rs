@@ -1,6 +1,6 @@
 //! Experimental BLAS (Basic Linear Algebra Subprograms) integration
 //!
-//! ***Requires `features = "rblas"`***
+//! ***Requires crate feature `"rblas"`***
 //!
 //! Depends on crate [`rblas`], ([docs]).
 //!
@@ -48,29 +48,21 @@
 //! I know), instead output its own error conditions, for example on dimension
 //! mismatch in a matrix multiplication.
 //!
-extern crate rblas;
 
 use std::os::raw::{c_int};
 
-use self::rblas::{
+use rblas::{
     Matrix,
     Vector,
 };
 use super::{
-    ArrayBase,
-    ArrayView,
-    ArrayViewMut,
-    Ix, Ixs,
     ShapeError,
-    Data,
-    DataMut,
-    DataOwned,
-    Dimension,
     zipsl,
 };
+use imp_prelude::*;
 
 
-/// ***Requires `features = "rblas"`***
+/// ***Requires crate feature `"rblas"`***
 pub struct BlasArrayView<'a, A: 'a, D>(ArrayView<'a, A, D>);
 impl<'a, A, D: Copy> Copy for BlasArrayView<'a, A, D> { }
 impl<'a, A, D: Clone> Clone for BlasArrayView<'a, A, D> {
@@ -79,7 +71,7 @@ impl<'a, A, D: Clone> Clone for BlasArrayView<'a, A, D> {
     }
 }
 
-/// ***Requires `features = "rblas"`***
+/// ***Requires crate feature `"rblas"`***
 pub struct BlasArrayViewMut<'a, A: 'a, D>(ArrayViewMut<'a, A, D>);
 
 impl<S, D> ArrayBase<S, D>
@@ -108,22 +100,23 @@ impl<S, D> ArrayBase<S, D>
     }
 }
 
-impl<'a, A, D> ArrayView<'a, A, D>
+impl<'a, A, D> Priv<ArrayView<'a, A, D>>
     where D: Dimension
 {
-    fn into_matrix(self) -> Result<BlasArrayView<'a, A, D>, ShapeError> {
-        if self.dim.ndim() > 1 {
-            try!(self.contiguous_check());
+    pub fn into_blas_view(self) -> Result<BlasArrayView<'a, A, D>, ShapeError> {
+        let self_ = self.0;
+        if self_.dim.ndim() > 1 {
+            try!(self_.contiguous_check());
         }
-        try!(self.size_check());
-        Ok(BlasArrayView(self))
+        try!(self_.size_check());
+        Ok(BlasArrayView(self_))
     }
 }
 
 impl<'a, A, D> ArrayViewMut<'a, A, D>
     where D: Dimension
 {
-    fn into_matrix_mut(self) -> Result<BlasArrayViewMut<'a, A, D>, ShapeError> {
+    fn into_blas_view_mut(self) -> Result<BlasArrayViewMut<'a, A, D>, ShapeError> {
         if self.dim.ndim() > 1 {
             try!(self.contiguous_check());
         }
@@ -137,7 +130,7 @@ impl<'a, A, D> ArrayViewMut<'a, A, D>
 /// Note that `blas` suppors four different element types: `f32`, `f64`,
 /// `Complex<f32>`, and `Complex<f64>`.
 ///
-/// ***Requires `features = "rblas"`***
+/// ***Requires crate feature `"rblas"`***
 pub trait AsBlas<A, S, D> {
     /// Return an array view implementing Vector (1D) or Matrix (2D)
     /// traits.
@@ -222,7 +215,7 @@ pub trait AsBlas<A, S, D> {
         */
 }
 
-/// ***Requires `features = "rblas"`***
+/// ***Requires crate feature `"rblas"`***
 impl<A, S, D> AsBlas<A, S, D> for ArrayBase<S, D>
     where S: Data<Elem=A>,
           D: Dimension,
@@ -241,19 +234,19 @@ impl<A, S, D> AsBlas<A, S, D> for ArrayBase<S, D>
             }
             _n => self.ensure_standard_layout(),
         }
-        self.view_mut().into_matrix_mut()
+        self.view_mut().into_blas_view_mut()
     }
 
     fn blas_view_checked(&self) -> Result<BlasArrayView<A, D>, ShapeError>
         where S: Data
     {
-        self.view().into_matrix()
+        Priv(self.view()).into_blas_view()
     }
 
     fn blas_view_mut_checked(&mut self) -> Result<BlasArrayViewMut<A, D>, ShapeError>
         where S: DataMut,
     {
-        self.view_mut().into_matrix_mut()
+        self.view_mut().into_blas_view_mut()
     }
 
     /*
