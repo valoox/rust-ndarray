@@ -7,13 +7,14 @@ extern crate ndarray;
 use ndarray::{RcArray, S, Si,
     OwnedArray,
 };
-use ndarray::{arr0, arr1, arr2,
+use ndarray::{arr0, arr1, arr2, arr3,
     aview0,
     aview1,
     aview2,
     aview_mut1,
 };
 use ndarray::Indexes;
+use ndarray::Axis;
 
 #[test]
 fn test_matmul_rcarray()
@@ -201,14 +202,14 @@ fn test_cow()
 fn test_sub()
 {
     let mat = RcArray::linspace(0., 15., 16).reshape((2, 4, 2));
-    let s1 = mat.subview(0,0);
-    let s2 = mat.subview(0,1);
+    let s1 = mat.subview(Axis(0),0);
+    let s2 = mat.subview(Axis(0),1);
     assert_eq!(s1.dim(), (4, 2));
     assert_eq!(s2.dim(), (4, 2));
     let n = RcArray::linspace(8., 15., 8).reshape((4,2));
     assert_eq!(n, s2);
     let m = RcArray::from_vec(vec![2., 3., 10., 11.]).reshape((2, 2));
-    assert_eq!(m, mat.subview(1, 1));
+    assert_eq!(m, mat.subview(Axis(1), 1));
 }
 
 #[test]
@@ -248,9 +249,9 @@ fn standard_layout()
     assert!(!a.is_standard_layout());
     a.swap_axes(0, 1);
     assert!(a.is_standard_layout());
-    let x1 = a.subview(0, 0);
+    let x1 = a.subview(Axis(0), 0);
     assert!(x1.is_standard_layout());
-    let x2 = a.subview(1, 0);
+    let x2 = a.subview(Axis(1), 0);
     assert!(!x2.is_standard_layout());
 }
 
@@ -284,12 +285,12 @@ fn assign()
 fn sum_mean()
 {
     let a = arr2(&[[1., 2.], [3., 4.]]);
-    assert_eq!(a.sum(0), arr1(&[4., 6.]));
-    assert_eq!(a.sum(1), arr1(&[3., 7.]));
-    assert_eq!(a.mean(0), arr1(&[2., 3.]));
-    assert_eq!(a.mean(1), arr1(&[1.5, 3.5]));
-    assert_eq!(a.sum(1).sum(0), arr0(10.));
-    assert_eq!(a.view().mean(1), aview1(&[1.5, 3.5]));
+    assert_eq!(a.sum(Axis(0)), arr1(&[4., 6.]));
+    assert_eq!(a.sum(Axis(1)), arr1(&[3., 7.]));
+    assert_eq!(a.mean(Axis(0)), arr1(&[2., 3.]));
+    assert_eq!(a.mean(Axis(1)), arr1(&[1.5, 3.5]));
+    assert_eq!(a.sum(Axis(1)).sum(Axis(0)), arr0(10.));
+    assert_eq!(a.view().mean(Axis(1)), aview1(&[1.5, 3.5]));
     assert_eq!(a.scalar_sum(), 10.);
 }
 
@@ -341,7 +342,7 @@ fn zero_axes()
     println!("{:?}\n{:?}", b.shape(), b);
 
     // we can even get a subarray of b
-    let bsub = b.subview(0, 2);
+    let bsub = b.subview(Axis(0), 2);
     assert_eq!(bsub.dim(), 0);
 }
 
@@ -595,7 +596,7 @@ fn char_array()
 {
     // test compilation & basics of non-numerical array
     let cc = RcArray::from_iter("alphabet".chars()).reshape((4, 2));
-    assert!(cc.subview(1, 0) == RcArray::from_iter("apae".chars()));
+    assert!(cc.subview(Axis(1), 0) == RcArray::from_iter("apae".chars()));
 }
 
 #[test]
@@ -657,4 +658,51 @@ fn deny_wraparound_reshape() {
     //2^64 + 5 = 18446744073709551621 = 3×7×29×36760123×823996703  (5 distinct prime factors)
     let five = OwnedArray::<f32, _>::zeros(5);
     let _five_large = five.into_shape((3, 7, 29, 36760123, 823996703)).unwrap();
+}
+
+#[test]
+fn split_at() {
+    let mut a = arr2(&[[1., 2.], [3., 4.]]);
+
+    {
+        let (c0, c1) = a.view().split_at(Axis(1), 1);
+
+        assert_eq!(c0, arr2(&[[1.], [3.]]));
+        assert_eq!(c1, arr2(&[[2.], [4.]]));
+    }
+
+    {
+        let (mut r0, mut r1) = a.view_mut().split_at(Axis(0), 1);
+        r0[[0, 1]] = 5.;
+        r1[[0, 0]] = 8.;
+    }
+    assert_eq!(a, arr2(&[[1., 5.], [8., 4.]]));
+
+
+    let b = RcArray::linspace(0., 59., 60).reshape((3, 4, 5));
+
+    let (left, right) = b.view().split_at(Axis(2), 2);
+    assert_eq!(left.shape(), [3, 4, 2]);
+    assert_eq!(right.shape(), [3, 4, 3]);
+    assert_eq!(left, arr3(&[[[0., 1.], [5., 6.], [10., 11.], [15., 16.]],
+                            [[20., 21.], [25., 26.], [30., 31.], [35., 36.]],
+                            [[40., 41.], [45., 46.], [50., 51.], [55., 56.]]]));
+
+    // we allow for an empty right view when index == dim[axis]
+    let (_, right) = b.view().split_at(Axis(1), 4);
+    assert_eq!(right.shape(), [3, 0, 5]);
+}
+
+#[test]
+#[should_panic]
+fn deny_split_at_axis_out_of_bounds() {
+    let a = arr2(&[[1., 2.], [3., 4.]]);
+    a.view().split_at(Axis(2), 0);
+}
+
+#[test]
+#[should_panic]
+fn deny_split_at_index_out_of_bounds() {
+    let a = arr2(&[[1., 2.], [3., 4.]]);
+    a.view().split_at(Axis(1), 3);
 }

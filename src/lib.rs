@@ -45,7 +45,7 @@
 //!
 //! ## Crate Feature Flags
 //!
-//! The following crate feature flags are available. The are specified in
+//! The following crate feature flags are available. The are configured in your
 //! `Cargo.toml`.
 //!
 //! - `assign_ops`
@@ -92,7 +92,10 @@ use itertools::free::enumerate;
 pub use dimension::{
     Dimension,
     RemoveAxis,
+    Axis,
 };
+
+use dimension::stride_offset;
 
 pub use dimension::NdIndex;
 pub use indexes::Indexes;
@@ -182,6 +185,7 @@ pub type Ixs = isize;
 /// + [Arithmetic Operations](#arithmetic-operations)
 /// + [Broadcasting](#broadcasting)
 /// + [Methods](#methods)
+/// + [Methods for Array Views](#methods-for-array-views)
 ///
 /// ## `OwnedArray` and `RcArray`
 ///
@@ -292,7 +296,7 @@ pub type Ixs = isize;
 /// Subview takes two arguments: `axis` and `index`.
 ///
 /// ```
-/// use ndarray::{arr3, aview2};
+/// use ndarray::{arr3, aview2, Axis};
 ///
 /// // 2 submatrices of 2 rows with 3 elements per row, means a shape of `[2, 2, 3]`.
 ///
@@ -308,8 +312,8 @@ pub type Ixs = isize;
 /// // Let’s take a subview along the greatest dimension (axis 0),
 /// // taking submatrix 0, then submatrix 1
 ///
-/// let sub_0 = a.subview(0, 0);
-/// let sub_1 = a.subview(0, 1);
+/// let sub_0 = a.subview(Axis(0), 0);
+/// let sub_1 = a.subview(Axis(0), 1);
 ///
 /// assert_eq!(sub_0, aview2(&[[ 1,  2,  3],
 ///                            [ 4,  5,  6]]));
@@ -318,7 +322,7 @@ pub type Ixs = isize;
 /// assert_eq!(sub_0.shape(), &[2, 3]);
 ///
 /// // This is the subview picking only axis 2, column 0
-/// let sub_col = a.subview(2, 0);
+/// let sub_col = a.subview(Axis(2), 0);
 ///
 /// assert_eq!(sub_col, aview2(&[[ 1,  4],
 ///                              [ 7, 10]]));
@@ -822,204 +826,6 @@ impl<S, A, D> ArrayBase<S, D>
 }
 
 
-// ArrayView methods
-impl<'a, A> ArrayView<'a, A, Ix> {
-    #[inline]
-    fn from_slice(xs: &'a [A]) -> Self {
-        ArrayView {
-            data: ViewRepr::new(),
-            ptr: xs.as_ptr() as *mut A,
-            dim: xs.len(),
-            strides: 1,
-        }
-    }
-}
-
-impl<'a, A, D> ArrayView<'a, A, D>
-    where D: Dimension,
-{
-    /// Create a new `ArrayView`
-    ///
-    /// Unsafe because: `ptr` must be valid for the given dimension and strides.
-    #[inline(always)]
-    unsafe fn new_(ptr: *const A, dim: D, strides: D) -> Self {
-        ArrayView {
-            data: ViewRepr::new(),
-            ptr: ptr as *mut A,
-            dim: dim,
-            strides: strides,
-        }
-    }
-
-    /// Create an `ArrayView` borrowing its data from a slice.
-    ///
-    /// Checks whether `dim` and `strides` are compatible with the slice's
-    /// length, returning an `Err` if not compatible.
-    ///
-    /// ```
-    /// use ndarray::ArrayView;
-    /// use ndarray::arr3;
-    ///
-    /// let s = &[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-    /// let a = ArrayView::from_slice_dim_stride((2, 3, 2),
-    ///                                          (1, 4, 2),
-    ///                                          s).unwrap();
-    ///
-    /// assert!(
-    ///     a == arr3(&[[[0, 2],
-    ///                  [4, 6],
-    ///                  [8, 10]],
-    ///                 [[1, 3],
-    ///                  [5, 7],
-    ///                  [9, 11]]])
-    /// );
-    /// assert!(a.strides() == &[1, 4, 2]);
-    /// ```
-    pub fn from_slice_dim_stride(dim: D, strides: D, s: &'a [A])
-        -> Result<Self, StrideError>
-    {
-        dimension::can_index_slice(s, &dim, &strides).map(|_| {
-            unsafe {
-                Self::new_(s.as_ptr(), dim, strides)
-            }
-        })
-    }
-
-    #[inline]
-    fn into_base_iter(self) -> Baseiter<'a, A, D> {
-        unsafe {
-            Baseiter::new(self.ptr, self.dim.clone(), self.strides.clone())
-        }
-    }
-
-    #[inline]
-    fn into_elements_base(self) -> ElementsBase<'a, A, D> {
-        ElementsBase { inner: self.into_base_iter() }
-    }
-
-    fn into_iter_(self) -> Elements<'a, A, D> {
-        Elements {
-            inner: if let Some(slc) = self.into_slice() {
-                ElementsRepr::Slice(slc.iter())
-            } else {
-                ElementsRepr::Counted(self.into_elements_base())
-            },
-        }
-    }
-
-    fn into_slice(&self) -> Option<&'a [A]> {
-        if self.is_standard_layout() {
-            unsafe {
-                Some(slice::from_raw_parts(self.ptr, self.len()))
-            }
-        } else {
-            None
-        }
-    }
-
-    /// Return an outer iterator for this view.
-    pub fn into_outer_iter(self) -> OuterIter<'a, A, D::Smaller>
-        where D: RemoveAxis,
-    {
-        iterators::new_outer_iter(self)
-    }
-}
-
-impl<'a, A, D> ArrayViewMut<'a, A, D>
-    where D: Dimension,
-{
-    /// Create a new `ArrayView`
-    ///
-    /// Unsafe because: `ptr` must be valid for the given dimension and strides.
-    #[inline(always)]
-    unsafe fn new_(ptr: *mut A, dim: D, strides: D) -> Self {
-        ArrayViewMut {
-            data: ViewRepr::new(),
-            ptr: ptr,
-            dim: dim,
-            strides: strides,
-        }
-    }
-
-    /// Create an `ArrayView` borrowing its data from a slice.
-    ///
-    /// Checks whether `dim` and `strides` are compatible with the slice's
-    /// length, returning an `Err` if not compatible.
-    ///
-    /// ```
-    /// use ndarray::ArrayViewMut;
-    /// use ndarray::arr3;
-    ///
-    /// let s = &mut [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-    /// let mut a = ArrayViewMut::from_slice_dim_stride((2, 3, 2),
-    ///                                                 (1, 4, 2),
-    ///                                                 s).unwrap();
-    ///
-    /// a[[0, 0, 0]] = 1;
-    /// assert!(
-    ///     a == arr3(&[[[1, 2],
-    ///                  [4, 6],
-    ///                  [8, 10]],
-    ///                 [[1, 3],
-    ///                  [5, 7],
-    ///                  [9, 11]]])
-    /// );
-    /// assert!(a.strides() == &[1, 4, 2]);
-    /// ```
-    pub fn from_slice_dim_stride(dim: D, strides: D, s: &'a mut [A])
-        -> Result<Self, StrideError>
-    {
-        dimension::can_index_slice(s, &dim, &strides).map(|_| {
-            unsafe {
-                Self::new_(s.as_mut_ptr(), dim, strides)
-            }
-        })
-    }
-
-    #[inline]
-    fn into_base_iter(self) -> Baseiter<'a, A, D> {
-        unsafe {
-            Baseiter::new(self.ptr, self.dim.clone(), self.strides.clone())
-        }
-    }
-
-    #[inline]
-    fn into_elements_base(self) -> ElementsBaseMut<'a, A, D> {
-        ElementsBaseMut { inner: self.into_base_iter() }
-    }
-
-    fn into_iter_(self) -> ElementsMut<'a, A, D> {
-        ElementsMut {
-            inner:
-                if self.is_standard_layout() {
-                    let slc = unsafe {
-                        slice::from_raw_parts_mut(self.ptr, self.len())
-                    };
-                    ElementsRepr::Slice(slc.iter_mut())
-                } else {
-                    ElementsRepr::Counted(self.into_elements_base())
-                }
-        }
-    }
-
-    fn _into_slice_mut(self) -> Option<&'a mut [A]>
-    {
-        if self.is_standard_layout() {
-            unsafe {
-                Some(slice::from_raw_parts_mut(self.ptr, self.len()))
-            }
-        } else {
-            None
-        }
-    }
-
-    pub fn into_outer_iter(self) -> OuterIterMut<'a, A, D::Smaller>
-        where D: RemoveAxis,
-    {
-        iterators::new_outer_iter_mut(self)
-    }
-}
-
 impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
 {
     /// Return the total number of elements in the array.
@@ -1265,7 +1071,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// **Panics** if `axis` or `index` is out of bounds.
     ///
     /// ```
-    /// use ndarray::{arr1, arr2};
+    /// use ndarray::{arr1, arr2, Axis};
     ///
     /// let a = arr2(&[[1., 2.],    // -- axis 0, row 0
     ///                [3., 4.],    // -- axis 0, row 1
@@ -1274,13 +1080,13 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// //                \   axis 1, column 1
     /// //                 axis 1, column 0
     /// assert!(
-    ///     a.subview(0, 1) == arr1(&[3., 4.]) &&
-    ///     a.subview(1, 1) == arr1(&[2., 4., 6.])
+    ///     a.subview(Axis(0), 1) == arr1(&[3., 4.]) &&
+    ///     a.subview(Axis(1), 1) == arr1(&[2., 4., 6.])
     /// );
     /// ```
-    pub fn subview(&self, axis: usize, index: Ix)
+    pub fn subview(&self, axis: Axis, index: Ix)
         -> ArrayView<A, <D as RemoveAxis>::Smaller>
-        where D: RemoveAxis
+        where D: RemoveAxis,
     {
         self.view().into_subview(axis, index)
     }
@@ -1291,19 +1097,19 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// **Panics** if `axis` or `index` is out of bounds.
     ///
     /// ```
-    /// use ndarray::{arr2, aview2};
+    /// use ndarray::{arr2, aview2, Axis};
     ///
     /// let mut a = arr2(&[[1., 2.],
     ///                    [3., 4.]]);
     ///
-    /// a.subview_mut(1, 1).iadd_scalar(&10.);
+    /// a.subview_mut(Axis(1), 1).iadd_scalar(&10.);
     ///
     /// assert!(
     ///     a == aview2(&[[1., 12.],
     ///                   [3., 14.]])
     /// );
     /// ```
-    pub fn subview_mut(&mut self, axis: usize, index: Ix)
+    pub fn subview_mut(&mut self, axis: Axis, index: Ix)
         -> ArrayViewMut<A, D::Smaller>
         where S: DataMut,
               D: RemoveAxis,
@@ -1315,19 +1121,21 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// and select the subview of `index` along that axis.
     ///
     /// **Panics** if `index` is past the length of the axis.
-    pub fn isubview(&mut self, axis: usize, index: Ix) {
-        dimension::do_sub(&mut self.dim, &mut self.ptr, &self.strides, axis, index)
+    pub fn isubview(&mut self, axis: Axis, index: Ix) {
+        dimension::do_sub(&mut self.dim, &mut self.ptr, &self.strides,
+                          axis.axis(), index)
     }
 
     /// Along `axis`, select the subview `index` and return `self`
     /// with that axis removed.
     ///
     /// See [`.subview()`](#method.subview) and [*Subviews*](#subviews) for full documentation.
-    pub fn into_subview(mut self, axis: usize, index: Ix)
+    pub fn into_subview(mut self, axis: Axis, index: Ix)
         -> ArrayBase<S, <D as RemoveAxis>::Smaller>
-        where D: RemoveAxis
+        where D: RemoveAxis,
     {
         self.isubview(axis, index);
+        let axis = axis.axis();
         // don't use reshape -- we always know it will fit the size,
         // and we can use remove_axis on the strides as well
         ArrayBase {
@@ -1379,31 +1187,34 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// Iterator element is `ArrayView<A, D::Smaller>` (read-only array view).
     ///
     /// ```
-    /// use ndarray::arr3;
+    /// use ndarray::{arr3, Axis};
+    ///
     /// let a = arr3(&[[[ 0,  1,  2],    // \ axis 0, submatrix 0
     ///                 [ 3,  4,  5]],   // /
     ///                [[ 6,  7,  8],    // \ axis 0, submatrix 1
     ///                 [ 9, 10, 11]]]); // /
     /// // `outer_iter` yields the two submatrices along axis 0.
     /// let mut iter = a.outer_iter();
-    /// assert_eq!(iter.next().unwrap(), a.subview(0, 0));
-    /// assert_eq!(iter.next().unwrap(), a.subview(0, 1));
+    /// assert_eq!(iter.next().unwrap(), a.subview(Axis(0), 0));
+    /// assert_eq!(iter.next().unwrap(), a.subview(Axis(0), 1));
     /// ```
+    #[allow(deprecated)]
     pub fn outer_iter(&self) -> OuterIter<A, D::Smaller>
         where D: RemoveAxis,
     {
-        iterators::new_outer_iter(self.view())
+        self.view().into_outer_iter()
     }
 
     /// Return an iterator that traverses over the outermost dimension
     /// and yields each subview.
     ///
     /// Iterator element is `ArrayViewMut<A, D::Smaller>` (read-write array view).
+    #[allow(deprecated)]
     pub fn outer_iter_mut(&mut self) -> OuterIterMut<A, D::Smaller>
         where S: DataMut,
               D: RemoveAxis,
     {
-        iterators::new_outer_iter_mut(self.view_mut())
+        self.view_mut().into_outer_iter()
     }
 
     /// Return an iterator that traverses over `axis`
@@ -1418,10 +1229,10 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// See [*Subviews*](#subviews) for full documentation.
     ///
     /// **Panics** if `axis` is out of bounds.
-    pub fn axis_iter(&self, axis: usize) -> OuterIter<A, D::Smaller>
-        where D: RemoveAxis
+    pub fn axis_iter(&self, axis: Axis) -> OuterIter<A, D::Smaller>
+        where D: RemoveAxis,
     {
-        iterators::new_axis_iter(self.view(), axis)
+        iterators::new_axis_iter(self.view(), axis.axis())
     }
 
 
@@ -1432,12 +1243,13 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// (read-write array view).
     ///
     /// **Panics** if `axis` is out of bounds.
-    pub fn axis_iter_mut(&mut self, axis: usize) -> OuterIterMut<A, D::Smaller>
+    pub fn axis_iter_mut(&mut self, axis: Axis) -> OuterIterMut<A, D::Smaller>
         where S: DataMut,
               D: RemoveAxis,
     {
-        iterators::new_axis_iter_mut(self.view_mut(), axis)
+        iterators::new_axis_iter_mut(self.view_mut(), axis.axis())
     }
+
 
     /// Return an iterator that traverses over `axis` by chunks of `size`,
     /// yielding non-overlapping views along that axis.
@@ -1451,20 +1263,22 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     ///
     /// ```
     /// use ndarray::OwnedArray;
-    /// use ndarray::arr3;
+    /// use ndarray::{arr3, Axis};
     ///
     /// let a = OwnedArray::from_iter(0..28).into_shape((2, 7, 2)).unwrap();
-    /// let mut iter = a.axis_chunks_iter(1, 2);
+    /// let mut iter = a.axis_chunks_iter(Axis(1), 2);
     ///
     /// // first iteration yields a 2 × 2 × 2 view
     /// assert_eq!(iter.next().unwrap(),
-    ///            arr3(&[[[0, 1], [2, 3]], [[14, 15], [16, 17]]]));
+    ///            arr3(&[[[ 0,  1], [ 2, 3]],
+    ///                   [[14, 15], [16, 17]]]));
     ///
     /// // however the last element is a 2 × 1 × 2 view since 7 % 2 == 1
-    /// assert_eq!(iter.next_back().unwrap(), arr3(&[[[12, 13]], [[26, 27]]]));
+    /// assert_eq!(iter.next_back().unwrap(), arr3(&[[[12, 13]],
+    ///                                              [[26, 27]]]));
     /// ```
-    pub fn axis_chunks_iter(&self, axis: usize, size: usize) -> AxisChunksIter<A, D> {
-        iterators::new_chunk_iter(self.view(), axis, size)
+    pub fn axis_chunks_iter(&self, axis: Axis, size: usize) -> AxisChunksIter<A, D> {
+        iterators::new_chunk_iter(self.view(), axis.axis(), size)
     }
 
     /// Return an iterator that traverses over `axis` by chunks of `size`,
@@ -1473,11 +1287,11 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// Iterator element is `ArrayViewMut<A, D>`
     ///
     /// **Panics** if `axis` is out of bounds.
-    pub fn axis_chunks_iter_mut(&mut self, axis: usize, size: usize)
+    pub fn axis_chunks_iter_mut(&mut self, axis: Axis, size: usize)
         -> AxisChunksIterMut<A, D>
         where S: DataMut
     {
-        iterators::new_chunk_iter_mut(self.view_mut(), axis, size)
+        iterators::new_chunk_iter_mut(self.view_mut(), axis.axis(), size)
     }
 
     // Return (length, stride) for diagonal
@@ -2115,7 +1929,7 @@ pub fn aview2<A, V: FixedInitializer<Elem=A>>(xs: &[V]) -> ArrayView<A, (Ix, Ix)
 /// }
 /// ```
 pub fn aview_mut1<A>(xs: &mut [A]) -> ArrayViewMut<A, Ix> {
-    unsafe { ArrayViewMut::new_(xs.as_mut_ptr(), xs.len() as Ix, 1) }
+    ArrayViewMut::from_slice(xs)
 }
 
 /// Fixed-size array used for array initialization
@@ -2229,24 +2043,24 @@ impl<A, S, D> ArrayBase<S, D>
     /// Return sum along `axis`.
     ///
     /// ```
-    /// use ndarray::{aview0, aview1, arr2};
+    /// use ndarray::{aview0, aview1, arr2, Axis};
     ///
     /// let a = arr2(&[[1., 2.],
     ///                [3., 4.]]);
     /// assert!(
-    ///     a.sum(0) == aview1(&[4., 6.]) &&
-    ///     a.sum(1) == aview1(&[3., 7.]) &&
+    ///     a.sum(Axis(0)) == aview1(&[4., 6.]) &&
+    ///     a.sum(Axis(1)) == aview1(&[3., 7.]) &&
     ///
-    ///     a.sum(0).sum(0) == aview0(&10.)
+    ///     a.sum(Axis(0)).sum(Axis(0)) == aview0(&10.)
     /// );
     /// ```
     ///
     /// **Panics** if `axis` is out of bounds.
-    pub fn sum(&self, axis: usize) -> OwnedArray<A, <D as RemoveAxis>::Smaller>
+    pub fn sum(&self, axis: Axis) -> OwnedArray<A, <D as RemoveAxis>::Smaller>
         where A: Clone + Add<Output=A>,
               D: RemoveAxis,
     {
-        let n = self.shape()[axis];
+        let n = self.shape()[axis.axis()];
         let mut res = self.subview(axis, 0).to_owned();
         for i in 1..n {
             let view = self.subview(axis, i);
@@ -2283,24 +2097,23 @@ impl<A, S, D> ArrayBase<S, D>
 
     /// Return mean along `axis`.
     ///
+    /// **Panics** if `axis` is out of bounds.
+    ///
     /// ```
-    /// use ndarray::{aview1, arr2};
+    /// use ndarray::{aview1, arr2, Axis};
     ///
     /// let a = arr2(&[[1., 2.],
     ///                [3., 4.]]);
     /// assert!(
-    ///     a.mean(0) == aview1(&[2.0, 3.0]) &&
-    ///     a.mean(1) == aview1(&[1.5, 3.5])
+    ///     a.mean(Axis(0)) == aview1(&[2.0, 3.0]) &&
+    ///     a.mean(Axis(1)) == aview1(&[1.5, 3.5])
     /// );
     /// ```
-    ///
-    ///
-    /// **Panics** if `axis` is out of bounds.
-    pub fn mean(&self, axis: usize) -> OwnedArray<A, <D as RemoveAxis>::Smaller>
+    pub fn mean(&self, axis: Axis) -> OwnedArray<A, <D as RemoveAxis>::Smaller>
         where A: LinalgScalar,
               D: RemoveAxis,
     {
-        let n = self.shape()[axis];
+        let n = self.shape()[axis.axis()];
         let mut sum = self.sum(axis);
         let one = libnum::one::<A>();
         let mut cnt = one;
@@ -2413,7 +2226,7 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
     /// **Panics** if `index` is out of bounds.
     pub fn row(&self, index: Ix) -> ArrayView<A, Ix>
     {
-        self.subview(0, index)
+        self.subview(Axis(0), index)
     }
 
     /// Return a mutable array view of row `index`.
@@ -2422,7 +2235,7 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
     pub fn row_mut(&mut self, index: Ix) -> ArrayViewMut<A, Ix>
         where S: DataMut
     {
-        self.subview_mut(0, index)
+        self.subview_mut(Axis(0), index)
     }
 
     /// Return an array view of column `index`.
@@ -2430,7 +2243,7 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
     /// **Panics** if `index` is out of bounds.
     pub fn column(&self, index: Ix) -> ArrayView<A, Ix>
     {
-        self.subview(1, index)
+        self.subview(Axis(1), index)
     }
 
     /// Return a mutable array view of column `index`.
@@ -2439,7 +2252,7 @@ impl<A, S> ArrayBase<S, (Ix, Ix)>
     pub fn column_mut(&mut self, index: Ix) -> ArrayViewMut<A, Ix>
         where S: DataMut
     {
-        self.subview_mut(1, index)
+        self.subview_mut(Axis(1), index)
     }
 
     /// Perform matrix multiplication of rectangular arrays `self` and `rhs`.
@@ -2944,6 +2757,302 @@ mod assign_ops {
     impl_assign_op!(BitXorAssign, bitxor_assign,
                     "Perform `self ^= rhs` as elementwise bit xor (in place).\n");
 }
+
+/// # Methods for Array Views
+///
+/// Methods for read-only array views `ArrayView<'a, A, D>`
+impl<'a, A> ArrayBase<ViewRepr<&'a A>, Ix> {
+    /// Create a one-dimensional read-only array view of the data in `xs`.
+    #[inline]
+    pub fn from_slice(xs: &'a [A]) -> Self {
+        ArrayView {
+            data: ViewRepr::new(),
+            ptr: xs.as_ptr() as *mut A,
+            dim: xs.len(),
+            strides: 1,
+        }
+    }
+}
+
+impl<'a, A, D> ArrayBase<ViewRepr<&'a A>, D>
+    where D: Dimension,
+{
+    /// Create a new `ArrayView`
+    ///
+    /// Unsafe because: `ptr` must be valid for the given dimension and strides.
+    #[inline(always)]
+    unsafe fn new_(ptr: *const A, dim: D, strides: D) -> Self {
+        ArrayView {
+            data: ViewRepr::new(),
+            ptr: ptr as *mut A,
+            dim: dim,
+            strides: strides,
+        }
+    }
+
+    /// Create a read-only array view borrowing its data from a slice.
+    ///
+    /// Checks whether `dim` and `strides` are compatible with the slice's
+    /// length, returning an `Err` if not compatible.
+    ///
+    /// ```
+    /// use ndarray::ArrayView;
+    /// use ndarray::arr3;
+    ///
+    /// let s = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    /// let a = ArrayView::from_slice_dim_stride((2, 3, 2),
+    ///                                          (1, 4, 2),
+    ///                                          &s).unwrap();
+    ///
+    /// assert!(
+    ///     a == arr3(&[[[0, 2],
+    ///                  [4, 6],
+    ///                  [8, 10]],
+    ///                 [[1, 3],
+    ///                  [5, 7],
+    ///                  [9, 11]]])
+    /// );
+    /// assert!(a.strides() == &[1, 4, 2]);
+    /// ```
+    pub fn from_slice_dim_stride(dim: D, strides: D, xs: &'a [A])
+        -> Result<Self, StrideError>
+    {
+        dimension::can_index_slice(xs, &dim, &strides).map(|_| {
+            unsafe {
+                Self::new_(xs.as_ptr(), dim, strides)
+            }
+        })
+    }
+
+    #[inline]
+    fn into_base_iter(self) -> Baseiter<'a, A, D> {
+        unsafe {
+            Baseiter::new(self.ptr, self.dim.clone(), self.strides.clone())
+        }
+    }
+
+    #[inline]
+    fn into_elements_base(self) -> ElementsBase<'a, A, D> {
+        ElementsBase { inner: self.into_base_iter() }
+    }
+
+    fn into_iter_(self) -> Elements<'a, A, D> {
+        Elements {
+            inner: if let Some(slc) = self.into_slice() {
+                ElementsRepr::Slice(slc.iter())
+            } else {
+                ElementsRepr::Counted(self.into_elements_base())
+            },
+        }
+    }
+
+    fn into_slice(&self) -> Option<&'a [A]> {
+        if self.is_standard_layout() {
+            unsafe {
+                Some(slice::from_raw_parts(self.ptr, self.len()))
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Return an outer iterator for this view.
+    #[doc(hidden)] // not official
+    #[cfg_attr(has_deprecated, deprecated(note="This method will be replaced."))]
+    pub fn into_outer_iter(self) -> OuterIter<'a, A, D::Smaller>
+        where D: RemoveAxis,
+    {
+        iterators::new_outer_iter(self)
+    }
+
+    /// Split the array along `axis` and return one view strictly before the
+    /// split and one view after the split.
+    ///
+    /// **Panics** if `axis` is out of bounds.
+    pub fn split_at(self, axis: Axis, index: Ix)
+        -> (Self, Self)
+    {
+        // NOTE: Keep this in sync with the ArrayViewMut version
+        let axis = axis.axis();
+        assert!(index <= self.shape()[axis]);
+        let left_ptr = self.ptr;
+        let right_ptr = if index == self.shape()[axis] {
+            self.ptr
+        } else {
+            let offset = stride_offset(index, self.strides.slice()[axis]);
+            unsafe {
+                self.ptr.offset(offset)
+            }
+        };
+
+        let mut dim_left = self.dim.clone();
+        dim_left.slice_mut()[axis] = index;
+        let left = unsafe {
+            Self::new_(left_ptr, dim_left, self.strides.clone())
+        };
+
+        let mut dim_right = self.dim;
+        let right_len  = dim_right.slice()[axis] - index;
+        dim_right.slice_mut()[axis] = right_len;
+        let right = unsafe {
+            Self::new_(right_ptr, dim_right, self.strides)
+        };
+
+        (left, right)
+    }
+
+}
+
+/// Methods for read-write array views `ArrayViewMut<'a, A, D>`
+impl<'a, A> ArrayBase<ViewRepr<&'a mut A>, Ix> {
+    /// Create a one-dimensional read-write array view of the data in `xs`.
+    #[inline]
+    pub fn from_slice(xs: &'a mut [A]) -> Self {
+        ArrayViewMut {
+            data: ViewRepr::new(),
+            ptr: xs.as_mut_ptr(),
+            dim: xs.len(),
+            strides: 1,
+        }
+    }
+}
+
+impl<'a, A, D> ArrayBase<ViewRepr<&'a mut A>, D>
+    where D: Dimension,
+{
+    /// Create a new `ArrayView`
+    ///
+    /// Unsafe because: `ptr` must be valid for the given dimension and strides.
+    #[inline(always)]
+    unsafe fn new_(ptr: *mut A, dim: D, strides: D) -> Self {
+        ArrayViewMut {
+            data: ViewRepr::new(),
+            ptr: ptr,
+            dim: dim,
+            strides: strides,
+        }
+    }
+
+    /// Create a read-write array view borrowing its data from a slice.
+    ///
+    /// Checks whether `dim` and `strides` are compatible with the slice's
+    /// length, returning an `Err` if not compatible.
+    ///
+    /// ```
+    /// use ndarray::ArrayViewMut;
+    /// use ndarray::arr3;
+    ///
+    /// let mut s = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    /// let mut a = ArrayViewMut::from_slice_dim_stride((2, 3, 2),
+    ///                                                 (1, 4, 2),
+    ///                                                 &mut s).unwrap();
+    ///
+    /// a[[0, 0, 0]] = 1;
+    /// assert!(
+    ///     a == arr3(&[[[1, 2],
+    ///                  [4, 6],
+    ///                  [8, 10]],
+    ///                 [[1, 3],
+    ///                  [5, 7],
+    ///                  [9, 11]]])
+    /// );
+    /// assert!(a.strides() == &[1, 4, 2]);
+    /// ```
+    pub fn from_slice_dim_stride(dim: D, strides: D, xs: &'a mut [A])
+        -> Result<Self, StrideError>
+    {
+        dimension::can_index_slice(xs, &dim, &strides).map(|_| {
+            unsafe {
+                Self::new_(xs.as_mut_ptr(), dim, strides)
+            }
+        })
+    }
+
+    #[inline]
+    fn into_base_iter(self) -> Baseiter<'a, A, D> {
+        unsafe {
+            Baseiter::new(self.ptr, self.dim.clone(), self.strides.clone())
+        }
+    }
+
+    #[inline]
+    fn into_elements_base(self) -> ElementsBaseMut<'a, A, D> {
+        ElementsBaseMut { inner: self.into_base_iter() }
+    }
+
+    fn into_iter_(self) -> ElementsMut<'a, A, D> {
+        ElementsMut {
+            inner:
+                if self.is_standard_layout() {
+                    let slc = unsafe {
+                        slice::from_raw_parts_mut(self.ptr, self.len())
+                    };
+                    ElementsRepr::Slice(slc.iter_mut())
+                } else {
+                    ElementsRepr::Counted(self.into_elements_base())
+                }
+        }
+    }
+
+    fn _into_slice_mut(self) -> Option<&'a mut [A]>
+    {
+        if self.is_standard_layout() {
+            unsafe {
+                Some(slice::from_raw_parts_mut(self.ptr, self.len()))
+            }
+        } else {
+            None
+        }
+    }
+
+    /// Return an outer iterator for this view.
+    #[doc(hidden)] // not official
+    #[cfg_attr(has_deprecated, deprecated(note="This method will be replaced."))]
+    pub fn into_outer_iter(self) -> OuterIterMut<'a, A, D::Smaller>
+        where D: RemoveAxis,
+    {
+        iterators::new_outer_iter_mut(self)
+    }
+
+    /// Split the array along `axis` and return one mutable view strictly
+    /// before the split and one mutable view after the split.
+    ///
+    /// **Panics** if `axis` is out of bounds.
+    pub fn split_at(self, axis: Axis, index: Ix)
+        -> (Self, Self)
+    {
+        // NOTE: Keep this in sync with the ArrayView version
+        let axis = axis.axis();
+        assert!(index <= self.shape()[axis]);
+        let left_ptr = self.ptr;
+        let right_ptr = if index == self.shape()[axis] {
+            self.ptr
+        }
+        else {
+            let offset = stride_offset(index, self.strides.slice()[axis]);
+            unsafe {
+                self.ptr.offset(offset)
+            }
+        };
+
+        let mut dim_left = self.dim.clone();
+        dim_left.slice_mut()[axis] = index;
+        let left = unsafe {
+            Self::new_(left_ptr, dim_left, self.strides.clone())
+        };
+
+        let mut dim_right = self.dim;
+        let right_len  = dim_right.slice()[axis] - index;
+        dim_right.slice_mut()[axis] = right_len;
+        let right = unsafe {
+            Self::new_(right_ptr, dim_right, self.strides)
+        };
+
+        (left, right)
+    }
+
+}
+
 
 /// An iterator over the elements of an array.
 ///
