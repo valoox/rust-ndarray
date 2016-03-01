@@ -26,11 +26,10 @@ Highlights
 
   - ``ArrayBase``:
     The N-dimensional array type itself.
-  - ``Array``:
-    An array where the data is shared and copy on write, it
-    can act as both an owner of the data as well as a lightweight view.
   - ``OwnedArray``:
     An array where the data is owned uniquely.
+  - ``RcArray``:
+    An array where the data has shared ownership and is copy on write.
   - ``ArrayView``, ``ArrayViewMut``:
     Lightweight array views.
 
@@ -89,6 +88,12 @@ How to use with cargo::
 
 Recent Changes
 --------------
+
+- 0.4.0-alpha.7
+
+  - Fix too strict lifetime bound in arithmetic operations like ``&a @ &b``.
+  - Rename trait Scalar to ScalarOperand (and improve its docs).
+  - Implement <<= and >>= for arrays.
 
 - 0.4.0-alpha.6
 
