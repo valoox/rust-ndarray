@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ndarray` crate.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ndarray">
 
-    <title>ndarray 0.4.0-alpha.6 - ndarray - Rust</title>
+    <title>ndarray 0.4.0-alpha.7 - ndarray - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-0' class='srclink' href='../src/ndarray/src/lib.rs.html#1-3106' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-0' class='srclink' href='../src/ndarray/src/lib.rs.html#1-684' title='goto source code'>[src]</a></span></h1>
 <div class='docblock'><p>The <code>ndarray</code> crate provides an N-dimensional container similar to numpy’s
 ndarray.</p>
 
@@ -56,8 +56,7 @@ The N-dimensional array type itself.</li>
 <li><a href="type.OwnedArray.html"><code>OwnedArray</code></a>:
 An array where the data is owned uniquely.</li>
 <li><a href="type.RcArray.html"><code>RcArray</code></a>:
-An array where the data is shared and copy on write, it
-can act as both an owner of the data as well as a lightweight view.</li>
+An array where the data has shared ownership and is copy on write.</li>
 <li><a href="type.ArrayView.html"><code>ArrayView</code></a>, <a href="type.ArrayViewMut.html"><code>ArrayViewMut</code></a>:
 Lightweight array views.</li>
 </ul>
@@ -72,7 +71,7 @@ elements from the end of the axis.</li>
 <li>Iteration and most operations are efficient on arrays with contiguous
 innermost dimension.</li>
 <li>Array views can be used to slice and mutate any <code>[T]</code> data using
-<code>aview1</code> and <code>aview_mut1</code>.</li>
+<code>ArrayView::from_slice</code> and <code>ArrayViewMut::from_slice</code>.</li>
 </ul>
 
 <h2 id='crate-status' class='section-header'><a href='#crate-status'>Crate Status</a></h2>
@@ -364,8 +363,6 @@ and yields each subview (mutable).</p>
                                title='ndarray::NdIndex'>NdIndex</a></td>
                         <td class='docblock short'>
                              <p>A tuple or fixed size array that can be used to index an array.</p>
-<pre class='rust rust-example-rendered'>
-<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>arr2</span>;
                         </td>
                     </tr>
                 
@@ -379,8 +376,8 @@ removing one axis from <em>Self</em> gives smaller dimension <em>Smaller</em>.</
                     </tr>
                 
                     <tr class=' module-item'>
-                        <td><a class='trait' href='trait.Scalar.html'
-                               title='ndarray::Scalar'>Scalar</a></td>
+                        <td><a class='trait' href='trait.ScalarOperand.html'
+                               title='ndarray::ScalarOperand'>ScalarOperand</a></td>
                         <td class='docblock short'>
                              <p>Elements that can be used as direct operands in arithmetic with arrays.</p>
                         </td>
@@ -408,8 +405,6 @@ removing one axis from <em>Self</em> gives smaller dimension <em>Smaller</em>.</
                                title='ndarray::arr2'>arr2</a></td>
                         <td class='docblock short'>
                              <p>Return a two-dimensional array with elements from <code>xs</code>.</p>
-<pre class='rust rust-example-rendered'>
-<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>arr2</span>;
                         </td>
                     </tr>
                 
@@ -434,8 +429,6 @@ removing one axis from <em>Self</em> gives smaller dimension <em>Smaller</em>.</
                                title='ndarray::aview1'>aview1</a></td>
                         <td class='docblock short'>
                              <p>Return a one-dimensional array view with elements borrowing <code>xs</code>.</p>
-<pre class='rust rust-example-rendered'>
-<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>aview1</span>;
                         </td>
                     </tr>
                 
@@ -452,9 +445,6 @@ removing one axis from <em>Self</em> gives smaller dimension <em>Smaller</em>.</
                                title='ndarray::aview_mut1'>aview_mut1</a></td>
                         <td class='docblock short'>
                              <p>Return a one-dimensional read-write array view with elements borrowing <code>xs</code>.</p>
-<pre class='rust rust-example-rendered'>
-<span class='attribute'>#[<span class='ident'>macro_use</span>(<span class='ident'>s</span>)]</span>
-<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>ndarray</span>;
                         </td>
                     </tr>
                 

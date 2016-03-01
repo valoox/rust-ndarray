@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["LinalgScalar","Trait union for scalars (array elements) that support linear algebra operations.`Any` for type-based specialization, `Copy` so that they don't need move semantics or destructors, and the rest are numerical traits."]]});
+initSidebarItems({"trait":[["LinalgScalar","Trait union for scalars (array elements) that support linear algebra operations."]]});
