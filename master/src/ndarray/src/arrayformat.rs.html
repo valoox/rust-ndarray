@@ -194,7 +194,7 @@
 <span class='kw'>fn</span> <span class='ident'>format_array</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span>, <span class='ident'>F</span><span class='op'>&gt;</span>(<span class='ident'>view</span>: <span class='kw-2'>&amp;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>,
                             <span class='kw-2'>mut</span> <span class='ident'>format</span>: <span class='ident'>F</span>)
     <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span>
-    <span class='kw'>where</span> <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>, <span class='kw-2'>&amp;</span><span class='ident'>A</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span>,
+    <span class='kw'>where</span> <span class='ident'>F</span>: <span class='ident'>FnMut</span>(<span class='kw-2'>&amp;</span><span class='ident'>A</span>, <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span>,
           <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
           <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
@@ -249,7 +249,7 @@
             <span class='macro'>try</span><span class='macro'>!</span>(<span class='macro'>write</span><span class='macro'>!</span>(<span class='ident'>f</span>, <span class='string'>&quot;, &quot;</span>));
         }
         <span class='ident'>first</span> <span class='op'>=</span> <span class='boolval'>false</span>;
-        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>format</span>(<span class='ident'>f</span>, <span class='ident'>elt</span>));
+        <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>format</span>(<span class='ident'>elt</span>, <span class='ident'>f</span>));
 
         <span class='kw'>if</span> <span class='ident'>update_index</span> {
             <span class='ident'>last_index</span> <span class='op'>=</span> <span class='ident'>index</span>;
@@ -271,7 +271,7 @@
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
+        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>&lt;</span>_<span class='op'>&gt;</span>::<span class='ident'>fmt</span>)
     }
 }
 
@@ -284,7 +284,7 @@
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
+        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>&lt;</span>_<span class='op'>&gt;</span>::<span class='ident'>fmt</span>)
     }
 }
 
@@ -297,7 +297,7 @@
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
+        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>&lt;</span>_<span class='op'>&gt;</span>::<span class='ident'>fmt</span>)
     }
 }
 
@@ -310,7 +310,7 @@
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
+        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>&lt;</span>_<span class='op'>&gt;</span>::<span class='ident'>fmt</span>)
     }
 }
 <span class='doccomment'>/// Format the array using `LowerHex` and apply the formatting parameters used</span>
@@ -322,7 +322,7 @@
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
 {
     <span class='kw'>fn</span> <span class='ident'>fmt</span>(<span class='kw-2'>&amp;</span><span class='self'>self</span>, <span class='ident'>f</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>fmt</span>::<span class='ident'>Formatter</span>) <span class='op'>-&gt;</span> <span class='ident'>fmt</span>::<span class='prelude-ty'>Result</span> {
-        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>|</span><span class='ident'>f</span>, <span class='ident'>elt</span><span class='op'>|</span> <span class='ident'>elt</span>.<span class='ident'>fmt</span>(<span class='ident'>f</span>))
+        <span class='ident'>format_array</span>(<span class='self'>self</span>, <span class='ident'>f</span>, <span class='op'>&lt;</span>_<span class='op'>&gt;</span>::<span class='ident'>fmt</span>)
     }
 }
 

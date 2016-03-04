@@ -257,6 +257,8 @@
 <span id="214">214</span>
 <span id="215">215</span>
 <span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
 </pre><pre class='rust '>
 
 <span class='doccomment'>//! Constructor methods for ndarray</span>
@@ -266,20 +268,30 @@
 <span class='kw'>use</span> <span class='ident'>imp_prelude</span>::<span class='op'>*</span>;
 <span class='kw'>use</span> <span class='ident'>dimension</span>;
 <span class='kw'>use</span> <span class='ident'>linspace</span>;
-<span class='kw'>use</span> <span class='ident'>shape_error</span>::{<span class='self'>self</span>, <span class='ident'>ShapeError</span>};
-<span class='kw'>use</span> <span class='ident'>stride_error</span>::<span class='ident'>StrideError</span>;
+<span class='kw'>use</span> <span class='ident'>error</span>::{<span class='self'>self</span>, <span class='ident'>ShapeError</span>};
 
 <span class='doccomment'>/// Constructor methods for one-dimensional arrays.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Note that the constructor methods apply to `OwnedArray` and `RcArray`,</span>
+<span class='doccomment'>/// the two array types that have owned storage.</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>S</span><span class='op'>&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataOwned</span>
 {
-    <span class='doccomment'>/// Create a one-dimensional array from a vector (no allocation needed).</span>
+    <span class='doccomment'>/// Create a one-dimensional array from a vector (no copying needed).</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// ```rust</span>
+    <span class='doccomment'>/// use ndarray::OwnedArray;</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// let array = OwnedArray::from_vec(vec![1., 2., 3., 4.]);</span>
+    <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_vec</span>(<span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>S</span>::<span class='ident'>Elem</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span> {
         <span class='kw'>unsafe</span> { <span class='ident'>Self</span>::<span class='ident'>from_vec_dim_unchecked</span>(<span class='ident'>v</span>.<span class='ident'>len</span>() <span class='kw'>as</span> <span class='ident'>Ix</span>, <span class='ident'>v</span>) }
     }
 
     <span class='doccomment'>/// Create a one-dimensional array from an iterable.</span>
-    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_iter</span><span class='op'>&lt;</span><span class='ident'>I</span>: <span class='ident'>IntoIterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>S</span>::<span class='ident'>Elem</span><span class='op'>&gt;&gt;</span>(<span class='ident'>iterable</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span> {
+    <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_iter</span><span class='op'>&lt;</span><span class='ident'>I</span><span class='op'>&gt;</span>(<span class='ident'>iterable</span>: <span class='ident'>I</span>) <span class='op'>-&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>Ix</span><span class='op'>&gt;</span>
+        <span class='kw'>where</span> <span class='ident'>I</span>: <span class='ident'>IntoIterator</span><span class='op'>&lt;</span><span class='ident'>Item</span><span class='op'>=</span><span class='ident'>S</span>::<span class='ident'>Elem</span><span class='op'>&gt;</span>
+    {
         <span class='ident'>Self</span>::<span class='ident'>from_vec</span>(<span class='ident'>iterable</span>.<span class='ident'>into_iter</span>().<span class='ident'>collect</span>())
     }
 
@@ -312,7 +324,7 @@
     }
 }
 
-<span class='doccomment'>/// Constructor methods for arrays.</span>
+<span class='doccomment'>/// Constructor methods for n-dimensional arrays.</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataOwned</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
           <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
@@ -322,10 +334,10 @@
     <span class='doccomment'>/// **Panics** if the number of elements in `dim` would overflow usize.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```</span>
-    <span class='doccomment'>/// use ndarray::RcArray;</span>
+    <span class='doccomment'>/// use ndarray::OwnedArray;</span>
     <span class='doccomment'>/// use ndarray::arr3;</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// let a = RcArray::from_elem((2, 2, 2), 1.);</span>
+    <span class='doccomment'>/// let a = OwnedArray::from_elem((2, 2, 2), 1.);</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// assert!(</span>
     <span class='doccomment'>///     a == arr3(&amp;[[[1., 1.],</span>
@@ -333,6 +345,7 @@
     <span class='doccomment'>///                 [[1., 1.],</span>
     <span class='doccomment'>///                  [1., 1.]]])</span>
     <span class='doccomment'>/// );</span>
+    <span class='doccomment'>/// assert!(a.strides() == &amp;[4, 2, 1]);</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_elem</span>(<span class='ident'>dim</span>: <span class='ident'>D</span>, <span class='ident'>elem</span>: <span class='ident'>A</span>) <span class='op'>-&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
         <span class='kw'>where</span> <span class='ident'>A</span>: <span class='ident'>Clone</span>
@@ -351,17 +364,9 @@
     <span class='doccomment'>/// **Panics** if the number of elements would overflow usize.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// ```</span>
-    <span class='doccomment'>/// use ndarray::RcArray;</span>
-    <span class='doccomment'>/// use ndarray::arr3;</span>
+    <span class='doccomment'>/// use ndarray::OwnedArray;</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// let a = RcArray::from_elem_f((2, 2, 2), 1.);</span>
-    <span class='doccomment'>///</span>
-    <span class='doccomment'>/// assert!(</span>
-    <span class='doccomment'>///     a == arr3(&amp;[[[1., 1.],</span>
-    <span class='doccomment'>///                  [1., 1.]],</span>
-    <span class='doccomment'>///                 [[1., 1.],</span>
-    <span class='doccomment'>///                  [1., 1.]]])</span>
-    <span class='doccomment'>/// );</span>
+    <span class='doccomment'>/// let a = OwnedArray::from_elem_f((2, 2, 2), 1.);</span>
     <span class='doccomment'>/// assert!(a.strides() == &amp;[1, 2, 4]);</span>
     <span class='doccomment'>/// ```</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_elem_f</span>(<span class='ident'>dim</span>: <span class='ident'>D</span>, <span class='ident'>elem</span>: <span class='ident'>A</span>) <span class='op'>-&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
@@ -400,18 +405,17 @@
         <span class='kw'>unsafe</span> { <span class='ident'>Self</span>::<span class='ident'>from_vec_dim_unchecked</span>(<span class='ident'>dim</span>, <span class='ident'>v</span>) }
     }
 
-    <span class='doccomment'>/// Create an array from a vector (with no allocation needed).</span>
+    <span class='doccomment'>/// Create an array from a vector (no copying needed).</span>
     <span class='doccomment'>///</span>
-    <span class='doccomment'>/// **Errors** if `dim` does not correspond to the number of elements</span>
-    <span class='doccomment'>/// in `v`.</span>
+    <span class='doccomment'>/// **Errors** if `dim` does not correspond to the number of elements in `v`.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_vec_dim</span>(<span class='ident'>dim</span>: <span class='ident'>D</span>, <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span> {
         <span class='kw'>if</span> <span class='ident'>dim</span>.<span class='ident'>size_checked</span>() <span class='op'>!=</span> <span class='prelude-val'>Some</span>(<span class='ident'>v</span>.<span class='ident'>len</span>()) {
-            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>shape_error</span>::<span class='ident'>incompatible_shapes</span>(<span class='kw-2'>&amp;</span><span class='ident'>v</span>.<span class='ident'>len</span>(), <span class='kw-2'>&amp;</span><span class='ident'>dim</span>));
+            <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>error</span>::<span class='ident'>incompatible_shapes</span>(<span class='kw-2'>&amp;</span><span class='ident'>v</span>.<span class='ident'>len</span>(), <span class='kw-2'>&amp;</span><span class='ident'>dim</span>));
         }
         <span class='kw'>unsafe</span> { <span class='prelude-val'>Ok</span>(<span class='ident'>Self</span>::<span class='ident'>from_vec_dim_unchecked</span>(<span class='ident'>dim</span>, <span class='ident'>v</span>)) }
     }
 
-    <span class='doccomment'>/// Create an array from a vector (with no allocation needed).</span>
+    <span class='doccomment'>/// Create an array from a vector (no copying needed).</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Unsafe because dimension is unchecked, and must be correct.</span>
     <span class='kw'>pub</span> <span class='kw'>unsafe</span> <span class='kw'>fn</span> <span class='ident'>from_vec_dim_unchecked</span>(<span class='ident'>dim</span>: <span class='ident'>D</span>, <span class='kw-2'>mut</span> <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>) <span class='op'>-&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> {
@@ -424,7 +428,7 @@
         }
     }
 
-    <span class='doccomment'>/// Create an array from a vector (with no allocation needed),</span>
+    <span class='doccomment'>/// Create an array from a vector (with no copying needed),</span>
     <span class='doccomment'>/// using fortran memory order to interpret the data.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// Unsafe because dimension is unchecked, and must be correct.</span>
@@ -447,7 +451,7 @@
     <span class='doccomment'>/// **Errors** if strides and dimensions can point out of bounds of `v`.&lt;br&gt;</span>
     <span class='doccomment'>/// **Errors** if strides allow multiple indices to point to the same element.</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>from_vec_dim_stride</span>(<span class='ident'>dim</span>: <span class='ident'>D</span>, <span class='ident'>strides</span>: <span class='ident'>D</span>, <span class='ident'>v</span>: <span class='ident'>Vec</span><span class='op'>&lt;</span><span class='ident'>A</span><span class='op'>&gt;</span>)
-        <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>StrideError</span><span class='op'>&gt;</span>
+        <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>, <span class='ident'>ShapeError</span><span class='op'>&gt;</span>
     {
         <span class='ident'>dimension</span>::<span class='ident'>can_index_slice</span>(<span class='kw-2'>&amp;</span><span class='ident'>v</span>, <span class='kw-2'>&amp;</span><span class='ident'>dim</span>, <span class='kw-2'>&amp;</span><span class='ident'>strides</span>).<span class='ident'>map</span>(<span class='op'>|</span>_<span class='op'>|</span> {
             <span class='kw'>unsafe</span> {

@@ -725,6 +725,18 @@
 <span id="682">682</span>
 <span id="683">683</span>
 <span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
 </pre><pre class='rust '>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>crate_name</span><span class='op'>=</span><span class='string'>&quot;ndarray&quot;</span>]</span>
 <span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>has_deprecated</span>, <span class='ident'>feature</span>(<span class='ident'>deprecated</span>))]</span>
@@ -752,7 +764,7 @@
 <span class='doccomment'>//! - Iteration and most operations are efficient on arrays with contiguous</span>
 <span class='doccomment'>//!   innermost dimension.</span>
 <span class='doccomment'>//! - Array views can be used to slice and mutate any `[T]` data using</span>
-<span class='doccomment'>//!   `ArrayView::from_slice` and `ArrayViewMut::from_slice`.</span>
+<span class='doccomment'>//!   `ArrayView::from` and `ArrayViewMut::from`.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ## Crate Status</span>
 <span class='doccomment'>//!</span>
@@ -776,7 +788,7 @@
 <span class='doccomment'>//! `Cargo.toml`.</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! - `assign_ops`</span>
-<span class='doccomment'>//!   - Optional, requires nightly</span>
+<span class='doccomment'>//!   - Requires Rust 1.8, will be default soon.</span>
 <span class='doccomment'>//!   - Enables the compound assignment operators</span>
 <span class='doccomment'>//! - `rustc-serialize`</span>
 <span class='doccomment'>//!   - Optional, stable</span>
@@ -785,8 +797,8 @@
 <span class='doccomment'>//!   - Optional, stable</span>
 <span class='doccomment'>//!   - Enables `rblas` integration</span>
 <span class='doccomment'>//!</span>
-<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;assign_ops&quot;</span>, <span class='ident'>feature</span>(<span class='ident'>augmented_assignments</span>,
-                                            <span class='ident'>op_assign_traits</span>))]</span>
+<span class='attribute'>#<span class='op'>!</span>[<span class='ident'>cfg_attr</span>(<span class='ident'>all</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;assign_ops&quot;</span>, <span class='ident'>not</span>(<span class='ident'>has_assign</span>)),
+            <span class='ident'>feature</span>(<span class='ident'>augmented_assignments</span>, <span class='ident'>op_assign_traits</span>))]</span>
 
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;serde&quot;</span>)]</span>
 <span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>serde</span>;
@@ -813,8 +825,7 @@
 
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>dimension</span>::<span class='ident'>NdIndex</span>;
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>indexes</span>::<span class='ident'>Indexes</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>shape_error</span>::<span class='ident'>ShapeError</span>;
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>stride_error</span>::<span class='ident'>StrideError</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>error</span>::{<span class='ident'>ShapeError</span>, <span class='ident'>ErrorKind</span>};
 <span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>si</span>::{<span class='ident'>Si</span>, <span class='ident'>S</span>};
 
 <span class='kw'>use</span> <span class='ident'>iterators</span>::<span class='ident'>Baseiter</span>;
@@ -827,7 +838,8 @@
     <span class='ident'>AxisChunksIterMut</span>,
 };
 
-<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>linalg</span>::<span class='ident'>LinalgScalar</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>arraytraits</span>::<span class='ident'>AsArray</span>;
+<span class='kw'>pub</span> <span class='kw'>use</span> <span class='ident'>linalg</span>::{<span class='ident'>LinalgScalar</span>, <span class='ident'>NdFloat</span>};
 
 <span class='kw'>mod</span> <span class='ident'>arraytraits</span>;
 <span class='attribute'>#[<span class='ident'>cfg</span>(<span class='ident'>feature</span> <span class='op'>=</span> <span class='string'>&quot;serde&quot;</span>)]</span>
@@ -856,8 +868,7 @@
 <span class='kw'>mod</span> <span class='ident'>linspace</span>;
 <span class='kw'>mod</span> <span class='ident'>numeric_util</span>;
 <span class='kw'>mod</span> <span class='ident'>si</span>;
-<span class='kw'>mod</span> <span class='ident'>shape_error</span>;
-<span class='kw'>mod</span> <span class='ident'>stride_error</span>;
+<span class='kw'>mod</span> <span class='ident'>error</span>;
 
 <span class='doccomment'>/// Implementation&#39;s prelude. Common types used everywhere.</span>
 <span class='kw'>mod</span> <span class='ident'>imp_prelude</span> {
@@ -875,6 +886,7 @@
         <span class='ident'>DataMut</span>,
         <span class='ident'>DataOwned</span>,
         <span class='ident'>DataShared</span>,
+        <span class='ident'>ViewRepr</span>,
     };
     <span class='doccomment'>/// Wrapper type for private methods</span>
     <span class='attribute'>#[<span class='ident'>derive</span>(<span class='ident'>Copy</span>, <span class='ident'>Clone</span>, <span class='ident'>Debug</span>)]</span>
@@ -892,10 +904,8 @@
 <span class='doccomment'>/// can be sliced into subsets of its data.</span>
 <span class='doccomment'>/// The array supports arithmetic operations by applying them elementwise.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// The `ArrayBase&lt;S, D&gt;` is parameterized by:</span>
-
-<span class='doccomment'>/// - `S` for the data container</span>
-<span class='doccomment'>/// - `D` for the number of dimensions</span>
+<span class='doccomment'>/// The `ArrayBase&lt;S, D&gt;` is parameterized by `S` for the data container and</span>
+<span class='doccomment'>/// `D` for the dimensionality.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// Type aliases [`OwnedArray`], [`RcArray`], [`ArrayView`], and [`ArrayViewMut`] refer</span>
 <span class='doccomment'>/// to `ArrayBase` with different types for the data storage.</span>
@@ -1146,11 +1156,25 @@
 
 <span class='doccomment'>/// A lightweight array view.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// `ArrayView` implements `IntoIterator`.</span>
+<span class='doccomment'>/// An array view represents an array or a part of it, created from</span>
+<span class='doccomment'>/// an iterator, subview or slice of an array.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Array views have all the methods of an array (see [`ArrayBase`][ab]).</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// See also specific [**Methods for Array Views**](struct.ArrayBase.html#methods-for-array-views).</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// [ab]: struct.ArrayBase.html</span>
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>ArrayView</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>ViewRepr</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='ident'>A</span><span class='op'>&gt;</span>, <span class='ident'>D</span><span class='op'>&gt;</span>;
 <span class='doccomment'>/// A lightweight read-write array view.</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// `ArrayViewMut` implements `IntoIterator`.</span>
+<span class='doccomment'>/// An array view represents an array or a part of it, created from</span>
+<span class='doccomment'>/// an iterator, subview or slice of an array.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// Array views have all the methods of an array (see [`ArrayBase`][ab]).</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// See also specific [**Methods for Array Views**](struct.ArrayBase.html#methods-for-array-views).</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// [ab]: struct.ArrayBase.html</span>
 <span class='kw'>pub</span> <span class='kw'>type</span> <span class='ident'>ArrayViewMut</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>A</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='op'>=</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>ViewRepr</span><span class='op'>&lt;</span><span class='kw-2'>&amp;</span><span class='lifetime'>&#39;a</span> <span class='kw-2'>mut</span> <span class='ident'>A</span><span class='op'>&gt;</span>, <span class='ident'>D</span><span class='op'>&gt;</span>;
 
 <span class='doccomment'>/// Array view’s representation.</span>

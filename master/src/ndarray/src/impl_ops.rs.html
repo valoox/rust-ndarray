@@ -407,11 +407,11 @@
 <span class='doccomment'>/// and let `C` be an array with mutable data.</span>
 <span class='doccomment'>///</span>
 <span class='doccomment'>/// `ScalarOperand` determines for which scalars `K` operations `&amp;A @ K`, and `B @ K`,</span>
-<span class='doccomment'>/// and `C @= K` are defined, as **right hand side** operands, for applicable</span>
+<span class='doccomment'>/// and `C @= K` are defined, as ***right hand side operands***, for applicable</span>
 <span class='doccomment'>/// arithmetic operators (denoted `@`).</span>
 <span class='doccomment'>///</span>
-<span class='doccomment'>/// **Left hand side** scalar operands are implemented differently</span>
-<span class='doccomment'>/// (one `impl` per concrete scalar type); they are</span>
+<span class='doccomment'>/// ***Left hand side*** scalar operands are not related to this trait.</span>
+<span class='doccomment'>/// (They need one `impl` per concrete scalar type); they are</span>
 <span class='doccomment'>/// implemented for the default `ScalarOperand` types, allowing</span>
 <span class='doccomment'>/// operations `K @ &amp;A`, and `K @ B`.</span>
 <span class='doccomment'>///</span>

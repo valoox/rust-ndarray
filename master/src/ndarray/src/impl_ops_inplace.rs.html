@@ -122,6 +122,9 @@
 <span id="79">79</span>
 <span id="80">80</span>
 <span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
 </pre><pre class='rust '>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ops</span>::{
@@ -166,7 +169,10 @@
     );
 );
 
-<span class='doccomment'>/// *In-place* arithmetic operations.</span>
+<span class='doccomment'>/// In-place arithmetic operations.</span>
+<span class='doccomment'>///</span>
+<span class='doccomment'>/// ***Note: These will be deprecated in favour of overloaded `@=` operators</span>
+<span class='doccomment'>/// when Rust 1.8 is released.***</span>
 <span class='kw'>impl</span><span class='op'>&lt;</span><span class='ident'>A</span>, <span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span> <span class='ident'>ArrayBase</span><span class='op'>&lt;</span><span class='ident'>S</span>, <span class='ident'>D</span><span class='op'>&gt;</span>
     <span class='kw'>where</span> <span class='ident'>S</span>: <span class='ident'>DataMut</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
           <span class='ident'>D</span>: <span class='ident'>Dimension</span>,

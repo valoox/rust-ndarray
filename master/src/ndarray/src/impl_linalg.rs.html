@@ -264,6 +264,8 @@
 <span id="221">221</span>
 <span id="222">222</span>
 <span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
 </pre><pre class='rust '>
 
 <span class='kw'>use</span> <span class='ident'>libnum</span>;
@@ -296,7 +298,8 @@
         <span class='kw'>where</span> <span class='ident'>S2</span>: <span class='ident'>Data</span><span class='op'>&lt;</span><span class='ident'>Elem</span><span class='op'>=</span><span class='ident'>A</span><span class='op'>&gt;</span>,
               <span class='ident'>A</span>: <span class='ident'>LinalgScalar</span>,
     {
-        <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>len</span>(), <span class='ident'>rhs</span>.<span class='ident'>len</span>());
+        <span class='macro'>debug_assert_eq</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>len</span>(), <span class='ident'>rhs</span>.<span class='ident'>len</span>());
+        <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>len</span>());
         <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>self_s</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>as_slice</span>() {
             <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Some</span>(<span class='ident'>rhs_s</span>) <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>as_slice</span>() {
                 <span class='kw'>return</span> <span class='ident'>numeric_util</span>::<span class='ident'>unrolled_dot</span>(<span class='ident'>self_s</span>, <span class='ident'>rhs_s</span>);
@@ -339,7 +342,8 @@
         }
         <span class='comment'>// Use only if the vector is large enough to be worth it</span>
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>len</span>() <span class='op'>&gt;=</span> <span class='number'>32</span> {
-            <span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>len</span>(), <span class='ident'>rhs</span>.<span class='ident'>len</span>());
+            <span class='macro'>debug_assert_eq</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>len</span>(), <span class='ident'>rhs</span>.<span class='ident'>len</span>());
+            <span class='macro'>assert</span><span class='macro'>!</span>(<span class='self'>self</span>.<span class='ident'>len</span>() <span class='op'>==</span> <span class='ident'>rhs</span>.<span class='ident'>len</span>());
             <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>self_v</span>) <span class='op'>=</span> <span class='self'>self</span>.<span class='ident'>blas_view_as_type</span>::<span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>() {
                 <span class='kw'>if</span> <span class='kw'>let</span> <span class='prelude-val'>Ok</span>(<span class='ident'>rhs_v</span>) <span class='op'>=</span> <span class='ident'>rhs</span>.<span class='ident'>blas_view_as_type</span>::<span class='op'>&lt;</span><span class='ident'>f32</span><span class='op'>&gt;</span>() {
                     <span class='kw'>let</span> <span class='ident'>f_ret</span> <span class='op'>=</span> <span class='ident'>f32</span>::<span class='ident'>dot</span>(<span class='kw-2'>&amp;</span><span class='ident'>self_v</span>, <span class='kw-2'>&amp;</span><span class='ident'>rhs_v</span>);

@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `LinalgScalar` trait in crate `ndarray`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, LinalgScalar">
+    <meta name="description" content="API documentation for the Rust `AsArray` trait in crate `ndarray`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, AsArray">
 
-    <title>ndarray 0.4.0-alpha.8 - ndarray::LinalgScalar - Rust</title>
+    <title>ndarray 0.4.0-alpha.8 - ndarray::AsArray - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -27,7 +27,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>ndarray</a></p><script>window.sidebarCurrent = {name: 'LinalgScalar', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>ndarray</a></p><script>window.sidebarCurrent = {name: 'AsArray', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -42,20 +42,36 @@
     </nav>
 
     <section id='main' class="content trait">
-<h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>ndarray</a>::<wbr><a class='trait' href=''>LinalgScalar</a></span><span class='out-of-band'><span id='render-detail'>
+<h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>ndarray</a>::<wbr><a class='trait' href=''>AsArray</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1958' class='srclink' href='../src/ndarray/src/linalg.rs.html#34-42' title='goto source code'>[src]</a></span></h1>
-<pre class='rust trait'>pub trait LinalgScalar: <a class='trait' href='https://doc.rust-lang.org/nightly/core/any/trait.Any.html' title='core::any::Any'>Any</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> + <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.Zero.html' title='num::traits::Zero'>Zero</a> + <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.One.html' title='num::traits::One'>One</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Add.html' title='core::ops::Add'>Add</a>&lt;Output=Self&gt; + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Sub.html' title='core::ops::Sub'>Sub</a>&lt;Output=Self&gt; + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Mul.html' title='core::ops::Mul'>Mul</a>&lt;Output=Self&gt; + <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Div.html' title='core::ops::Div'>Div</a>&lt;Output=Self&gt; { }</pre><div class='docblock'><p>Elements that support linear algebra operations.</p>
+        </span><a id='src-239' class='srclink' href='../src/ndarray/src/arraytraits.rs.html#348' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait AsArray&lt;'a, A: 'a, D = <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt;: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='type' href='../ndarray/type.ArrayView.html' title='ndarray::ArrayView'>ArrayView</a>&lt;'a, A, D&gt;&gt; <span class='where'>where D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span> { }</pre><div class='docblock'><p>Argument conversion into an array view</p>
 
-<p><code>Any</code> for type-based specialization, <code>Copy</code> so that they don&#39;t need move
-semantics or destructors, and the rest are numerical traits.</p>
+<p>The trait is parameterized over <code>A</code>, the element type, and <code>D</code>, the
+dimensionality of the array. <code>D</code> defaults to one-dimensional.</p>
+
+<p>Use <code>.into()</code> to do the conversion.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>ndarray</span>::<span class='ident'>AsArray</span>;
+
+<span class='kw'>fn</span> <span class='ident'>sum</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>V</span>: <span class='ident'>AsArray</span><span class='op'>&lt;</span><span class='lifetime'>&#39;a</span>, <span class='ident'>f64</span><span class='op'>&gt;&gt;</span>(<span class='ident'>data</span>: <span class='ident'>V</span>) <span class='op'>-&gt;</span> <span class='ident'>f64</span> {
+    <span class='kw'>let</span> <span class='ident'>array_view</span> <span class='op'>=</span> <span class='ident'>data</span>.<span class='ident'>into</span>();
+    <span class='ident'>array_view</span>.<span class='ident'>scalar_sum</span>()
+}
+
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(
+    <span class='ident'>sum</span>(<span class='kw-2'>&amp;</span>[<span class='number'>1.</span>, <span class='number'>2.</span>, <span class='number'>3.</span>]),
+    <span class='number'>6.</span>
+);
+</pre>
 </div>
         <h2 id='implementors'>Implementors</h2>
         <ul class='item-list' id='implementors-list'>
     </ul><script type="text/javascript" async
-                              src="../implementors/ndarray/trait.LinalgScalar.js">
+                              src="../implementors/ndarray/trait.AsArray.js">
                       </script></section>
     <section id='search' class="content hidden"></section>
 

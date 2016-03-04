@@ -391,7 +391,6 @@
 <span id="348">348</span>
 <span id="349">349</span>
 <span id="350">350</span>
-<span id="351">351</span>
 </pre><pre class='rust '>
 <span class='doccomment'>//! Experimental BLAS (Basic Linear Algebra Subprograms) integration</span>
 <span class='doccomment'>//!</span>
@@ -454,6 +453,7 @@
     <span class='ident'>ShapeError</span>,
     <span class='ident'>zipsl</span>,
 };
+<span class='kw'>use</span> <span class='ident'>error</span>::{<span class='ident'>from_kind</span>, <span class='ident'>ErrorKind</span>};
 <span class='kw'>use</span> <span class='ident'>imp_prelude</span>::<span class='op'>*</span>;
 
 
@@ -477,9 +477,7 @@
         <span class='kw'>let</span> <span class='ident'>max</span> <span class='op'>=</span> <span class='ident'>c_int</span>::<span class='ident'>max_value</span>();
         <span class='kw'>for</span> (<span class='kw-2'>&amp;</span><span class='ident'>dim</span>, <span class='kw-2'>&amp;</span><span class='ident'>stride</span>) <span class='kw'>in</span> <span class='ident'>zipsl</span>(<span class='self'>self</span>.<span class='ident'>shape</span>(), <span class='self'>self</span>.<span class='ident'>strides</span>()) {
             <span class='kw'>if</span> <span class='ident'>dim</span> <span class='op'>&gt;</span> <span class='ident'>max</span> <span class='kw'>as</span> <span class='ident'>Ix</span> <span class='op'>||</span> <span class='ident'>stride</span> <span class='op'>&gt;</span> <span class='ident'>max</span> <span class='kw'>as</span> <span class='ident'>Ixs</span> {
-                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>ShapeError</span>::<span class='ident'>DimensionTooLarge</span>(<span class='self'>self</span>.<span class='ident'>shape</span>()
-                                                             .<span class='ident'>to_vec</span>()
-                                                             .<span class='ident'>into_boxed_slice</span>()));
+                <span class='kw'>return</span> <span class='prelude-val'>Err</span>(<span class='ident'>from_kind</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>RangeLimited</span>));
             }
         }
         <span class='prelude-val'>Ok</span>(())
@@ -490,7 +488,7 @@
         <span class='kw'>if</span> <span class='self'>self</span>.<span class='ident'>is_inner_contiguous</span>() {
             <span class='prelude-val'>Ok</span>(())
         } <span class='kw'>else</span> {
-            <span class='prelude-val'>Err</span>(<span class='ident'>ShapeError</span>::<span class='ident'>IncompatibleLayout</span>)
+            <span class='prelude-val'>Err</span>(<span class='ident'>from_kind</span>(<span class='ident'>ErrorKind</span>::<span class='ident'>IncompatibleLayout</span>))
         }
     }
 }
