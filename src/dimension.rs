@@ -1,8 +1,10 @@
+use std::cmp::Ordering;
+use std::fmt::Debug;
 use std::slice;
 
 use super::{Si, Ix, Ixs};
 use super::zipsl;
-use stride_error::StrideError;
+use error::{from_kind, ErrorKind, ShapeError};
 
 /// Calculate offset from `Ix` stride converting sign properly
 #[inline]
@@ -63,11 +65,11 @@ pub fn dim_stride_overlap<D: Dimension>(dim: &D, strides: &D) -> bool {
 /// of the slice. Also, the strides should not allow a same element to be
 /// referenced by two different index.
 pub fn can_index_slice<A, D: Dimension>(data: &[A], dim: &D, strides: &D)
-    -> Result<(), StrideError>
+    -> Result<(), ShapeError>
 {
     if strides.slice().iter().cloned().all(stride_is_positive) {
         if dim.size_checked().is_none() {
-            return Err(StrideError::OutOfBounds);
+            return Err(from_kind(ErrorKind::OutOfBounds));
         }
         let mut last_index = dim.clone();
         for mut index in last_index.slice_mut().iter_mut() {
@@ -80,17 +82,17 @@ pub fn can_index_slice<A, D: Dimension>(data: &[A], dim: &D, strides: &D)
             // offset is guaranteed to be positive so no issue converting
             // to usize here
             if (offset as usize) >= data.len() {
-                return Err(StrideError::OutOfBounds);
+                return Err(from_kind(ErrorKind::OutOfBounds));
             }
             if dim_stride_overlap(dim, strides) {
-                return Err(StrideError::Unsupported);
+                return Err(from_kind(ErrorKind::Unsupported));
             }
         } else {
-            return Err(StrideError::OutOfBounds);
+            return Err(from_kind(ErrorKind::OutOfBounds));
         }
         Ok(())
     } else {
-        Err(StrideError::Unsupported)
+        return Err(from_kind(ErrorKind::Unsupported));
     }
 }
 
@@ -119,13 +121,13 @@ fn stride_offset_checked_arithmetic<D>(dim: &D, strides: &D, index: &D)
     Some(offset)
 }
 
-/// Trait for the shape and index types of arrays.
+/// Array shape and index trait.
 ///
 /// `unsafe` because of the assumptions in the default methods.
 ///
 /// ***Don't implement or call methods in this trait, its interface is internal
 /// to the crate and will evolve at will.***
-pub unsafe trait Dimension : Clone + Eq {
+pub unsafe trait Dimension : Clone + Eq + Debug {
     /// `SliceArg` is the type which is used to specify slicing for this
     /// dimension.
     ///
@@ -324,6 +326,24 @@ pub unsafe trait Dimension : Clone + Eq {
             *sr = s_prim as Ix;
         }
         offset
+    }
+
+    #[doc(hidden)]
+    /// Get the dimension on `axis`.
+    ///
+    /// *Panics* if `axis` is out of bounds.
+    #[inline]
+    fn index(&self, axis: Axis) -> &Ix {
+        &self.slice()[axis.axis()]
+    }
+
+    #[doc(hidden)]
+    /// Get a mutable reference to the dimension on `axis`.
+    ///
+    /// *Panics* if `axis` is out of bounds.
+    #[inline]
+    fn index_mut(&mut self, axis: Axis) -> &mut Ix {
+        &mut self.slice_mut()[axis.axis()]
     }
 }
 
@@ -541,11 +561,13 @@ unsafe impl Dimension for Vec<Ix>
     fn slice_mut(&mut self) -> &mut [Ix] { self }
 }
 
-/// Helper trait to define a larger-than relation for array shapes:
+/// Array shape with a next smaller dimension.
+///
+/// `RemoveAxis` defines a larger-than relation for array shapes:
 /// removing one axis from *Self* gives smaller dimension *Smaller*.
 pub trait RemoveAxis : Dimension {
     type Smaller: Dimension;
-    fn remove_axis(&self, axis: usize) -> Self::Smaller;
+    fn remove_axis(&self, axis: Axis) -> Self::Smaller;
 }
 
 macro_rules! impl_shrink(
@@ -555,12 +577,12 @@ impl RemoveAxis for ($from $(,$more)*)
     type Smaller = ($($more),*);
     #[allow(unused_parens)]
     #[inline]
-    fn remove_axis(&self, axis: usize) -> ($($more),*) {
+    fn remove_axis(&self, axis: Axis) -> ($($more),*) {
         let mut tup = ($(0 as $more),*);
         {
             let mut it = tup.slice_mut().iter_mut();
             for (i, &d) in self.slice().iter().enumerate() {
-                if i == axis {
+                if i == axis.axis() {
                     continue;
                 }
                 for rr in it.by_ref() {
@@ -588,14 +610,14 @@ impl_shrink_recursive!(Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix, Ix,);
 
 impl RemoveAxis for Vec<Ix> {
     type Smaller = Vec<Ix>;
-    fn remove_axis(&self, axis: usize) -> Vec<Ix> {
+    fn remove_axis(&self, axis: Axis) -> Vec<Ix> {
         let mut res = self.clone();
-        res.remove(axis);
+        res.remove(axis.axis());
         res
     }
 }
 
-/// A tuple or fixed size array that can be used to index an array.
+/// Tuple or fixed size arrays that can be used to index an array.
 ///
 /// ```
 /// use ndarray::arr2;
@@ -608,7 +630,7 @@ impl RemoveAxis for Vec<Ix> {
 ///
 /// **Note** the blanket implementation that's not visible in rustdoc:
 /// `impl<D> NdIndex for D where D: Dimension { ... }`
-pub unsafe trait NdIndex {
+pub unsafe trait NdIndex : Debug {
     type Dim: Dimension;
     #[doc(hidden)]
     fn index_checked(&self, dim: &Self::Dim, strides: &Self::Dim) -> Option<isize>;
@@ -680,10 +702,11 @@ unsafe impl<'a> NdIndex for &'a [Ix] {
     }
 }
 
+// NOTE: These tests are not compiled & tested
 #[cfg(test)]
 mod test {
     use super::Dimension;
-    use stride_error::StrideError;
+    use error::StrideError;
 
     #[test]
     fn fastest_varying_order() {
@@ -723,11 +746,35 @@ mod test {
 ///
 /// All array axis arguments use this type to make the code easier to write
 /// correctly and easier to understand.
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(Copy, Eq, Ord, Hash, Debug)]
 pub struct Axis(pub usize);
 
 impl Axis {
     #[inline(always)]
     pub fn axis(&self) -> usize { self.0 }
 }
+
+macro_rules! clone_from_copy {
+    ($typename:ident) => {
+        impl Clone for $typename {
+            #[inline]
+            fn clone(&self) -> Self { *self }
+        }
+    }
+}
+
+macro_rules! derive_cmp {
+    ($traitname:ident for $typename:ident, $method:ident -> $ret:ty) => {
+        impl $traitname for $typename {
+            #[inline(always)]
+            fn $method(&self, rhs: &Self) -> $ret {
+                (self.0).$method(&rhs.0)
+            }
+        }
+    }
+}
+
+derive_cmp!{PartialEq for Axis, eq -> bool}
+derive_cmp!{PartialOrd for Axis, partial_cmp -> Option<Ordering>}
+clone_from_copy!{Axis}
 

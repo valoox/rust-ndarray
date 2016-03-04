@@ -2,7 +2,7 @@ ndarray
 =========
 
 The ``ndarray`` crate provides an N-dimensional container similar to numpy’s
-ndarray. Requires Rust 1.5.
+ndarray. Requires Rust 1.7.
 
 Please read the `API documentation here (master)`__, `(0.3)`__, `(0.2)`__
 
@@ -68,7 +68,7 @@ your `Cargo.toml`.
 
 - ``assign_ops``
 
-  - Optional, requires nightly
+  - Requires Rust 1.8, will be default soon.
   - Enables the compound assignment operators
 
 - ``rustc-serialize``
@@ -88,6 +88,21 @@ How to use with cargo::
 
 Recent Changes
 --------------
+
+- 0.4.0-alpha.8
+
+  - In debug mode, indexing an array out of bounds now has a detailed
+    message about index and shape. (In release mode it does not.)
+  - Enable assign_ops feature automatically when it is supported (Rust 1.8 beta
+    or later).
+  - Add trait ``NdFloat`` which makes it easy to be generic over ``f32, f64``.
+  - Add ``From`` implementations that convert slices or references to arrays
+    into array views. This replaces ``from_slice`` from a previous alpha.
+  - Add ``AsArray`` trait, which is simply based on those ``From`` implementations.
+  - Improve ``.map()`` so that it can autovectorize.
+  - Use ``Axis`` argument in ``RemoveAxis`` too.
+  - Require ``DataOwned`` in the raw data methods.
+  - Merged error types into a single ``ShapeError``, which uses no allocated data.
 
 - 0.4.0-alpha.7
 

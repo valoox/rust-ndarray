@@ -1,5 +1,4 @@
 #![allow(non_snake_case)]
-#![cfg_attr(feature = "assign_ops", feature(augmented_assignments))]
 
 #[macro_use]
 extern crate ndarray;
@@ -66,6 +65,13 @@ fn test_slice()
     let vi = A.slice(&[S, S]);
     assert_eq!(vi.shape(), A.shape());
     assert!(vi.iter().zip(A.iter()).all(|(a, b)| a == b));
+}
+
+#[should_panic]
+#[test]
+fn index_out_of_bounds() {
+    let mut a = OwnedArray::<i32, _>::zeros((3, 4));
+    a[[3, 2]] = 1;
 }
 
 #[should_panic]
@@ -564,7 +570,7 @@ fn reshape() {
 }
 
 #[test]
-#[should_panic(expected = "IncompatibleShapes")]
+#[should_panic(expected = "IncompatibleShape")]
 fn reshape_error1() {
     let data = [1, 2, 3, 4, 5, 6, 7, 8];
     let v = aview1(&data);

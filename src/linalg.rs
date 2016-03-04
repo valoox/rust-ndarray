@@ -1,6 +1,16 @@
-use libnum::{Zero, One};
-use std::ops::{Add, Sub, Mul, Div};
+use libnum::{Zero, One, Float};
 use std::any::Any;
+use std::fmt;
+use std::ops::{Add, Sub, Mul, Div};
+#[cfg(feature="assign_ops")]
+use std::ops::{
+    AddAssign,
+    SubAssign,
+    MulAssign,
+    DivAssign,
+    RemAssign,
+};
+use ScalarOperand;
 
 #[cfg(feature="rblas")]
 use std::any::TypeId;
@@ -9,12 +19,15 @@ use std::any::TypeId;
 use ShapeError;
 
 #[cfg(feature="rblas")]
+use error::{from_kind, ErrorKind};
+
+#[cfg(feature="rblas")]
 use blas::{AsBlas, BlasArrayView};
 
 #[cfg(feature="rblas")]
 use imp_prelude::*;
 
-/// Trait union for scalars (array elements) that support linear algebra operations.
+/// Elements that support linear algebra operations.
 ///
 /// `Any` for type-based specialization, `Copy` so that they don't need move
 /// semantics or destructors, and the rest are numerical traits.
@@ -39,6 +52,37 @@ impl<T> LinalgScalar for T
     Div<Output=T>
 { }
 
+/// Floating-point element types `f32` and `f64`.
+///
+/// Trait `NdFloat` is only implemented for `f32` and `f64` but encompasses as
+/// much float-relevant ndarray functionality as possible, including the traits
+/// needed for linear algebra (`Any`) and for *right hand side* scalar
+/// operations (`ScalarOperand`).
+#[cfg(not(feature="assign_ops"))]
+pub trait NdFloat :
+    Float +
+    fmt::Display + fmt::Debug + fmt::LowerExp + fmt::UpperExp +
+    ScalarOperand + LinalgScalar
+{ }
+
+/// Floating-point element types `f32` and `f64`.
+///
+/// Trait `NdFloat` is only implemented for `f32` and `f64` but encompasses as
+/// much float-relevant ndarray functionality as possible, including the traits
+/// needed for linear algebra (`Any`) and for *right hand side* scalar
+/// operations (`ScalarOperand`).
+#[cfg(feature="assign_ops")]
+pub trait NdFloat :
+    Float +
+    AddAssign + SubAssign + MulAssign + DivAssign + RemAssign +
+    fmt::Display + fmt::Debug + fmt::LowerExp + fmt::UpperExp +
+    ScalarOperand + LinalgScalar
+{ }
+
+impl NdFloat for f32 { }
+impl NdFloat for f64 { }
+
+
 #[cfg(feature = "rblas")]
 pub trait AsBlasAny<A, S, D> : AsBlas<A, S, D> {
     fn blas_view_as_type<T: Any>(&self) -> Result<BlasArrayView<T, D>, ShapeError>
@@ -62,7 +106,7 @@ impl<A, S, D> AsBlasAny<A, S, D> for ArrayBase<S, D>
                 Priv(u).into_blas_view()
             }
         } else {
-            Err(ShapeError::IncompatibleLayout)
+            Err(from_kind(ErrorKind::IncompatibleLayout))
         }
     }
 }

@@ -1,12 +1,14 @@
 
 use std::cmp;
+use std::ptr;
 use std::slice;
 
 use imp_prelude::*;
 
+use arraytraits;
 use dimension;
 use iterators;
-use shape_error::{self, ShapeError};
+use error::{self, ShapeError};
 use super::zipsl;
 use {
     NdIndex,
@@ -234,9 +236,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// **Note:** only unchecked for non-debug builds of ndarray.
     #[inline]
     pub unsafe fn uget(&self, index: D) -> &A {
-        debug_assert!(self.dim
-                          .stride_offset_checked(&self.strides, &index)
-                          .is_some());
+        arraytraits::debug_bounds_check(self, &index);
         let off = Dimension::stride_offset(&index, &self.strides);
         &*self.ptr.offset(off)
     }
@@ -252,9 +252,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         where S: DataMut
     {
         debug_assert!(self.data.is_unique());
-        debug_assert!(self.dim
-                          .stride_offset_checked(&self.strides, &index)
-                          .is_some());
+        arraytraits::debug_bounds_check(self, &index);
         let off = Dimension::stride_offset(&index, &self.strides);
         &mut *self.ptr.offset(off)
     }
@@ -267,7 +265,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// **Panics** if `axis` or `index` is out of bounds.
     ///
     /// ```
-    /// use ndarray::{arr1, arr2, Axis};
+    /// use ndarray::{arr2, ArrayView, Axis};
     ///
     /// let a = arr2(&[[1., 2.],    // -- axis 0, row 0
     ///                [3., 4.],    // -- axis 0, row 1
@@ -276,8 +274,8 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// //                \   axis 1, column 1
     /// //                 axis 1, column 0
     /// assert!(
-    ///     a.subview(Axis(0), 1) == arr1(&[3., 4.]) &&
-    ///     a.subview(Axis(1), 1) == arr1(&[2., 4., 6.])
+    ///     a.subview(Axis(0), 1) == ArrayView::from(&[3., 4.]) &&
+    ///     a.subview(Axis(1), 1) == ArrayView::from(&[2., 4., 6.])
     /// );
     /// ```
     pub fn subview(&self, axis: Axis, index: Ix)
@@ -331,7 +329,6 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         where D: RemoveAxis,
     {
         self.isubview(axis, index);
-        let axis = axis.axis();
         // don't use reshape -- we always know it will fit the size,
         // and we can use remove_axis on the strides as well
         ArrayBase {
@@ -650,7 +647,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         where E: Dimension
     {
         if shape.size_checked() != Some(self.dim.size()) {
-            return Err(shape_error::incompatible_shapes(&self.dim, &shape));
+            return Err(error::incompatible_shapes(&self.dim, &shape));
         }
         // Check if contiguous, if not => copy all, else just adapt strides
         if self.is_standard_layout() {
@@ -661,7 +658,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
                 dim: shape,
             })
         } else {
-            Err(ShapeError::IncompatibleLayout)
+            Err(error::from_kind(error::ErrorKind::IncompatibleLayout))
         }
     }
 
@@ -804,8 +801,9 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// **Note:** Data memory order may not correspond to the index order
     /// of the array. Neither is the raw data slice is restricted to just the
     /// array’s view.<br>
-    /// **Note:** the slice may be empty.
-    pub fn raw_data(&self) -> &[A] {
+    pub fn raw_data(&self) -> &[A]
+        where S: DataOwned,
+    {
         self.data.slice()
     }
 
@@ -814,12 +812,11 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
     /// **Note:** Data memory order may not correspond to the index order
     /// of the array. Neither is the raw data slice is restricted to just the
     /// array’s view.<br>
-    /// **Note:** the slice may be empty.
     ///
     /// **Note:** The data is uniquely held and nonaliased
     /// while it is mutably borrowed.
     pub fn raw_data_mut(&mut self) -> &mut [A]
-        where S: DataMut,
+        where S: DataOwned + DataMut,
     {
         self.ensure_unique();
         self.data.slice_mut()
@@ -988,9 +985,20 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
         where F: FnMut(&'a A) -> B,
               A: 'a,
     {
+        // Use an `unsafe` block to do this efficiently.
+        // We know that iter will produce exactly .size() elements,
+        // and the loop can vectorize if it's clean (without branch
+        // to grow the vector).
         let mut res = Vec::with_capacity(self.dim.size());
+        let mut out_ptr = res.as_mut_ptr();
+        let mut len = 0;
         for elt in self.iter() {
-            res.push(f(elt))
+            unsafe {
+                ptr::write(out_ptr, f(elt));
+                len += 1;
+                res.set_len(len);
+                out_ptr = out_ptr.offset(1);
+            }
         }
         unsafe {
             ArrayBase::from_vec_dim_unchecked(self.dim.clone(), res)

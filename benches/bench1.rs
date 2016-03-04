@@ -1,6 +1,5 @@
 #![feature(test)]
 #![allow(unused_imports)]
-#![cfg_attr(feature = "assign_ops", feature(augmented_assignments))]
 
 extern crate test;
 #[macro_use(s)]
@@ -19,36 +18,12 @@ use ndarray::{arr0, arr1, arr2};
 use test::black_box;
 
 #[bench]
-fn small_iter_1d(bench: &mut test::Bencher)
+fn map(bench: &mut test::Bencher)
 {
-    let a = arr1::<f32>(&[1., 2., 2.,
-                         3., 4., 4.,
-                         3., 4., 4.,
-                         3., 4., 4.,
-                         5., 6., 6.]);
-    bench.iter(|| for &elt in a.iter() { black_box(elt); })
-}
-
-#[bench]
-fn small_iter_1d_raw(bench: &mut test::Bencher)
-{
-    let a = arr1::<f32>(&[1., 2., 2.,
-                         3., 4., 4.,
-                         3., 4., 4.,
-                         3., 4., 4.,
-                         5., 6., 6.]);
-    bench.iter(|| for &elt in a.raw_data().iter() { black_box(elt); })
-}
-
-#[bench]
-fn small_iter_2d(bench: &mut test::Bencher)
-{
-    let a = arr2::<f32, _>(&[[1., 2., 2.],
-                          [3., 4., 4.],
-                          [3., 4., 4.],
-                          [3., 4., 4.],
-                          [5., 6., 6.]]);
-    bench.iter(|| for &elt in a.iter() { black_box(elt); })
+    let a = OwnedArray::linspace(0., 127., 128).into_shape((8, 16)).unwrap();
+    bench.iter(|| {
+        a.map(|&x| 2. * x)
+    });
 }
 
 #[bench]
@@ -270,7 +245,6 @@ fn add_2d_regular(bench: &mut test::Bencher)
     });
 }
 
-#[cfg(feature = "assign_ops")]
 #[bench]
 fn add_2d_assign_ops(bench: &mut test::Bencher)
 {
@@ -542,6 +516,14 @@ fn dot_f32_16(bench: &mut test::Bencher)
 }
 
 #[bench]
+fn dot_f32_32(bench: &mut test::Bencher)
+{
+    let a = OwnedArray::<f32, _>::zeros(32);
+    let b = OwnedArray::<f32, _>::zeros(32);
+    bench.iter(|| a.dot(&b));
+}
+
+#[bench]
 fn dot_f32_256(bench: &mut test::Bencher)
 {
     let a = OwnedArray::<f32, _>::zeros(256);
@@ -557,6 +539,26 @@ fn dot_f32_1024(bench: &mut test::Bencher)
     bench.iter(|| {
         av.dot(&bv)
     });
+}
+
+#[bench]
+fn dot_extended(bench: &mut test::Bencher) {
+    let m = 10;
+    let n = 33;
+    let k = 10;
+    let av = OwnedArray::<f32, _>::zeros((m, n));
+    let bv = OwnedArray::<f32, _>::zeros((n, k));
+    let mut res = OwnedArray::<f32, _>::zeros((m, k));
+    // make a manual simple matrix multiply to test
+    bench.iter(|| {
+        for i in 0..m {
+            for j in 0..k {
+                unsafe {
+                    *res.uget_mut((i, j)) = av.row(i).dot(&bv.column(j));
+                }
+            }
+        }
+    })
 }
 
 #[bench]

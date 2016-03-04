@@ -6,20 +6,30 @@ use libnum;
 use imp_prelude::*;
 use dimension;
 use linspace;
-use shape_error::{self, ShapeError};
-use stride_error::StrideError;
+use error::{self, ShapeError};
 
 /// Constructor methods for one-dimensional arrays.
+///
+/// Note that the constructor methods apply to `OwnedArray` and `RcArray`,
+/// the two array types that have owned storage.
 impl<S> ArrayBase<S, Ix>
     where S: DataOwned
 {
-    /// Create a one-dimensional array from a vector (no allocation needed).
+    /// Create a one-dimensional array from a vector (no copying needed).
+    ///
+    /// ```rust
+    /// use ndarray::OwnedArray;
+    ///
+    /// let array = OwnedArray::from_vec(vec![1., 2., 3., 4.]);
+    /// ```
     pub fn from_vec(v: Vec<S::Elem>) -> ArrayBase<S, Ix> {
         unsafe { Self::from_vec_dim_unchecked(v.len() as Ix, v) }
     }
 
     /// Create a one-dimensional array from an iterable.
-    pub fn from_iter<I: IntoIterator<Item=S::Elem>>(iterable: I) -> ArrayBase<S, Ix> {
+    pub fn from_iter<I>(iterable: I) -> ArrayBase<S, Ix>
+        where I: IntoIterator<Item=S::Elem>
+    {
         Self::from_vec(iterable.into_iter().collect())
     }
 
@@ -52,7 +62,7 @@ impl<S, A> ArrayBase<S, (Ix, Ix)>
     }
 }
 
-/// Constructor methods for arrays.
+/// Constructor methods for n-dimensional arrays.
 impl<S, A, D> ArrayBase<S, D>
     where S: DataOwned<Elem=A>,
           D: Dimension,
@@ -62,10 +72,10 @@ impl<S, A, D> ArrayBase<S, D>
     /// **Panics** if the number of elements in `dim` would overflow usize.
     ///
     /// ```
-    /// use ndarray::RcArray;
+    /// use ndarray::OwnedArray;
     /// use ndarray::arr3;
     ///
-    /// let a = RcArray::from_elem((2, 2, 2), 1.);
+    /// let a = OwnedArray::from_elem((2, 2, 2), 1.);
     ///
     /// assert!(
     ///     a == arr3(&[[[1., 1.],
@@ -73,6 +83,7 @@ impl<S, A, D> ArrayBase<S, D>
     ///                 [[1., 1.],
     ///                  [1., 1.]]])
     /// );
+    /// assert!(a.strides() == &[4, 2, 1]);
     /// ```
     pub fn from_elem(dim: D, elem: A) -> ArrayBase<S, D>
         where A: Clone
@@ -91,17 +102,9 @@ impl<S, A, D> ArrayBase<S, D>
     /// **Panics** if the number of elements would overflow usize.
     ///
     /// ```
-    /// use ndarray::RcArray;
-    /// use ndarray::arr3;
+    /// use ndarray::OwnedArray;
     ///
-    /// let a = RcArray::from_elem_f((2, 2, 2), 1.);
-    ///
-    /// assert!(
-    ///     a == arr3(&[[[1., 1.],
-    ///                  [1., 1.]],
-    ///                 [[1., 1.],
-    ///                  [1., 1.]]])
-    /// );
+    /// let a = OwnedArray::from_elem_f((2, 2, 2), 1.);
     /// assert!(a.strides() == &[1, 2, 4]);
     /// ```
     pub fn from_elem_f(dim: D, elem: A) -> ArrayBase<S, D>
@@ -140,18 +143,17 @@ impl<S, A, D> ArrayBase<S, D>
         unsafe { Self::from_vec_dim_unchecked(dim, v) }
     }
 
-    /// Create an array from a vector (with no allocation needed).
+    /// Create an array from a vector (no copying needed).
     ///
-    /// **Errors** if `dim` does not correspond to the number of elements
-    /// in `v`.
+    /// **Errors** if `dim` does not correspond to the number of elements in `v`.
     pub fn from_vec_dim(dim: D, v: Vec<A>) -> Result<ArrayBase<S, D>, ShapeError> {
         if dim.size_checked() != Some(v.len()) {
-            return Err(shape_error::incompatible_shapes(&v.len(), &dim));
+            return Err(error::incompatible_shapes(&v.len(), &dim));
         }
         unsafe { Ok(Self::from_vec_dim_unchecked(dim, v)) }
     }
 
-    /// Create an array from a vector (with no allocation needed).
+    /// Create an array from a vector (no copying needed).
     ///
     /// Unsafe because dimension is unchecked, and must be correct.
     pub unsafe fn from_vec_dim_unchecked(dim: D, mut v: Vec<A>) -> ArrayBase<S, D> {
@@ -164,7 +166,7 @@ impl<S, A, D> ArrayBase<S, D>
         }
     }
 
-    /// Create an array from a vector (with no allocation needed),
+    /// Create an array from a vector (with no copying needed),
     /// using fortran memory order to interpret the data.
     ///
     /// Unsafe because dimension is unchecked, and must be correct.
@@ -187,7 +189,7 @@ impl<S, A, D> ArrayBase<S, D>
     /// **Errors** if strides and dimensions can point out of bounds of `v`.<br>
     /// **Errors** if strides allow multiple indices to point to the same element.
     pub fn from_vec_dim_stride(dim: D, strides: D, v: Vec<A>)
-        -> Result<ArrayBase<S, D>, StrideError>
+        -> Result<ArrayBase<S, D>, ShapeError>
     {
         dimension::can_index_slice(&v, &dim, &strides).map(|_| {
             unsafe {

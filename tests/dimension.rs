@@ -6,17 +6,19 @@ use ndarray::{
     RemoveAxis,
     arr2,
     Axis,
+    Ix,
+    Dimension,
 };
 
 #[test]
 fn remove_axis()
 {
-    assert_eq!(3.remove_axis(0), ());
-    assert_eq!((1, 2).remove_axis(0), 2);
-    assert_eq!((4, 5, 6).remove_axis(1), (4, 6));
+    assert_eq!(3.remove_axis(Axis(0)), ());
+    assert_eq!((1, 2).remove_axis(Axis(0)), 2);
+    assert_eq!((4, 5, 6).remove_axis(Axis(1)), (4, 6));
 
-    assert_eq!(vec![1,2].remove_axis(0), vec![2]);
-    assert_eq!(vec![4, 5, 6].remove_axis(1), vec![4, 6]);
+    assert_eq!(vec![1,2].remove_axis(Axis(0)), vec![2]);
+    assert_eq!(vec![4, 5, 6].remove_axis(Axis(1)), vec![4, 6]);
 
     let a = RcArray::<f32, _>::zeros((4,5));
     a.subview(Axis(1), 0);
@@ -41,3 +43,16 @@ fn dyn_dimension()
     assert_eq!(z.shape(), &dim[..]);
 }
 
+#[test]
+fn index_axis()
+{
+    assert_eq!(3.index(Axis(0)), &3);
+    assert_eq!((3, 2).index(Axis(1)), &2);
+
+    let mut dim = (2, 3, 3);
+    *dim.index_mut(Axis(2)) = 1;
+    assert_eq!(dim.index(Axis(2)), &1);
+
+    let a: OwnedArray<f64, (Ix, Ix, Ix)> = OwnedArray::zeros(dim);
+    assert_eq!(a.dim().index(Axis(1)), &3);
+}

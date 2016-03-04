@@ -9,16 +9,10 @@ use std::ops::{
     IndexMut,
 };
 
-use super::{
-    Dimension, Ix,
+use imp_prelude::*;
+use {
     Elements,
     ElementsMut,
-    ArrayBase,
-    ArrayView,
-    ArrayViewMut,
-    Data,
-    DataMut,
-    DataOwned,
     NdIndex,
 };
 
@@ -28,6 +22,31 @@ use numeric_util;
 #[inline(never)]
 fn array_out_of_bounds() -> ! {
     panic!("ndarray: index out of bounds");
+}
+
+// Macro to insert more informative out of bounds message in debug builds
+#[cfg(debug_assertions)]
+macro_rules! debug_bounds_check {
+    ($self_:ident, $index:expr) => {
+        if let None = $index.index_checked(&$self_.dim, &$self_.strides) {
+            panic!("ndarray: index {:?} is out of bounds for array of shape {:?}",
+                   $index, $self_.shape());
+        }
+    };
+}
+
+#[cfg(not(debug_assertions))]
+macro_rules! debug_bounds_check {
+    ($self_:ident, $index:expr) => { };
+}
+
+#[inline(always)]
+pub fn debug_bounds_check<S, D, I>(_a: &ArrayBase<S, D>, _index: &I)
+    where D: Dimension,
+          I: NdIndex<Dim=D>,
+          S: Data,
+{
+    debug_bounds_check!(_a, *_index);
 }
 
 /// Access the element at **index**.
@@ -41,6 +60,7 @@ impl<S, D, I> Index<I> for ArrayBase<S, D>
     type Output = S::Elem;
     #[inline]
     fn index(&self, index: I) -> &S::Elem {
+        debug_bounds_check!(self, index);
         self.get(index).unwrap_or_else(|| array_out_of_bounds())
     }
 }
@@ -55,6 +75,7 @@ impl<S, D, I> IndexMut<I> for ArrayBase<S, D>
 {
     #[inline]
     fn index_mut(&mut self, index: I) -> &mut S::Elem {
+        debug_bounds_check!(self, index);
         self.get_mut(index).unwrap_or_else(|| array_out_of_bounds())
     }
 }
@@ -248,3 +269,84 @@ impl<A, S, D> Decodable for ArrayBase<S, D>
         })
     }
 }
+
+
+// use "raw" form instead of type aliases here so that they show up in docs
+/// Implementation of `ArrayView::from(&S)` where `S` is a slice or slicable.
+///
+/// Create a one-dimensional read-only array view of the data in `slice`.
+impl<'a, A, Slice: ?Sized> From<&'a Slice> for ArrayBase<ViewRepr<&'a A>, Ix>
+    where Slice: AsRef<[A]>
+{
+    fn from(slice: &'a Slice) -> Self {
+        let xs = slice.as_ref();
+        unsafe {
+            Self::new_(xs.as_ptr(), xs.len(), 1)
+        }
+    }
+}
+
+/// Implementation of `ArrayView::from(&A)` where `A` is an array.
+///
+/// Create a read-only array view of the array.
+impl<'a, A, S, D> From<&'a ArrayBase<S, D>> for ArrayBase<ViewRepr<&'a A>, D>
+    where S: Data<Elem=A>,
+          D: Dimension,
+{
+    fn from(array: &'a ArrayBase<S, D>) -> Self {
+        array.view()
+    }
+}
+
+/// Implementation of `ArrayViewMut::from(&mut S)` where `S` is a slice or slicable.
+///
+/// Create a one-dimensional read-write array view of the data in `slice`.
+impl<'a, A, Slice: ?Sized> From<&'a mut Slice> for ArrayBase<ViewRepr<&'a mut A>, Ix>
+    where Slice: AsMut<[A]>
+{
+    fn from(slice: &'a mut Slice) -> Self {
+        let xs = slice.as_mut();
+        unsafe {
+            Self::new_(xs.as_mut_ptr(), xs.len(), 1)
+        }
+    }
+}
+
+/// Implementation of `ArrayViewMut::from(&mut A)` where `A` is an array.
+///
+/// Create a read-write array view of the array.
+impl<'a, A, S, D> From<&'a mut ArrayBase<S, D>> for ArrayBase<ViewRepr<&'a mut A>, D>
+    where S: DataMut<Elem=A>,
+          D: Dimension,
+{
+    fn from(array: &'a mut ArrayBase<S, D>) -> Self {
+        array.view_mut()
+    }
+}
+
+/// Argument conversion into an array view
+///
+/// The trait is parameterized over `A`, the element type, and `D`, the
+/// dimensionality of the array. `D` defaults to one-dimensional.
+///
+/// Use `.into()` to do the conversion.
+///
+/// ```
+/// use ndarray::AsArray;
+///
+/// fn sum<'a, V: AsArray<'a, f64>>(data: V) -> f64 {
+///     let array_view = data.into();
+///     array_view.scalar_sum()
+/// }
+///
+/// assert_eq!(
+///     sum(&[1., 2., 3.]),
+///     6.
+/// );
+///
+/// ```
+pub trait AsArray<'a, A: 'a, D = Ix> : Into<ArrayView<'a, A, D>> where D: Dimension { }
+impl<'a, A: 'a, D, T> AsArray<'a, A, D> for T
+    where T: Into<ArrayView<'a, A, D>>,
+          D: Dimension,
+{ }

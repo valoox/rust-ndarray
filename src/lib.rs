@@ -24,7 +24,7 @@
 //! - Iteration and most operations are efficient on arrays with contiguous
 //!   innermost dimension.
 //! - Array views can be used to slice and mutate any `[T]` data using
-//!   `ArrayView::from_slice` and `ArrayViewMut::from_slice`.
+//!   `ArrayView::from` and `ArrayViewMut::from`.
 //!
 //! ## Crate Status
 //!
@@ -48,7 +48,7 @@
 //! `Cargo.toml`.
 //!
 //! - `assign_ops`
-//!   - Optional, requires nightly
+//!   - Requires Rust 1.8, will be default soon.
 //!   - Enables the compound assignment operators
 //! - `rustc-serialize`
 //!   - Optional, stable
@@ -57,8 +57,8 @@
 //!   - Optional, stable
 //!   - Enables `rblas` integration
 //!
-#![cfg_attr(feature = "assign_ops", feature(augmented_assignments,
-                                            op_assign_traits))]
+#![cfg_attr(all(feature = "assign_ops", not(has_assign)),
+            feature(augmented_assignments, op_assign_traits))]
 
 #[cfg(feature = "serde")]
 extern crate serde;
@@ -85,8 +85,7 @@ pub use dimension::{
 
 pub use dimension::NdIndex;
 pub use indexes::Indexes;
-pub use shape_error::ShapeError;
-pub use stride_error::StrideError;
+pub use error::{ShapeError, ErrorKind};
 pub use si::{Si, S};
 
 use iterators::Baseiter;
@@ -99,7 +98,8 @@ pub use iterators::{
     AxisChunksIterMut,
 };
 
-pub use linalg::LinalgScalar;
+pub use arraytraits::AsArray;
+pub use linalg::{LinalgScalar, NdFloat};
 
 mod arraytraits;
 #[cfg(feature = "serde")]
@@ -128,8 +128,7 @@ mod linalg;
 mod linspace;
 mod numeric_util;
 mod si;
-mod shape_error;
-mod stride_error;
+mod error;
 
 /// Implementation's prelude. Common types used everywhere.
 mod imp_prelude {
@@ -147,6 +146,7 @@ mod imp_prelude {
         DataMut,
         DataOwned,
         DataShared,
+        ViewRepr,
     };
     /// Wrapper type for private methods
     #[derive(Copy, Clone, Debug)]
@@ -164,10 +164,8 @@ pub type Ixs = isize;
 /// can be sliced into subsets of its data.
 /// The array supports arithmetic operations by applying them elementwise.
 ///
-/// The `ArrayBase<S, D>` is parameterized by:
-
-/// - `S` for the data container
-/// - `D` for the number of dimensions
+/// The `ArrayBase<S, D>` is parameterized by `S` for the data container and
+/// `D` for the dimensionality.
 ///
 /// Type aliases [`OwnedArray`], [`RcArray`], [`ArrayView`], and [`ArrayViewMut`] refer
 /// to `ArrayBase` with different types for the data storage.
@@ -418,11 +416,25 @@ pub type OwnedArray<A, D> = ArrayBase<Vec<A>, D>;
 
 /// A lightweight array view.
 ///
-/// `ArrayView` implements `IntoIterator`.
+/// An array view represents an array or a part of it, created from
+/// an iterator, subview or slice of an array.
+///
+/// Array views have all the methods of an array (see [`ArrayBase`][ab]).
+///
+/// See also specific [**Methods for Array Views**](struct.ArrayBase.html#methods-for-array-views).
+///
+/// [ab]: struct.ArrayBase.html
 pub type ArrayView<'a, A, D> = ArrayBase<ViewRepr<&'a A>, D>;
 /// A lightweight read-write array view.
 ///
-/// `ArrayViewMut` implements `IntoIterator`.
+/// An array view represents an array or a part of it, created from
+/// an iterator, subview or slice of an array.
+///
+/// Array views have all the methods of an array (see [`ArrayBase`][ab]).
+///
+/// See also specific [**Methods for Array Views**](struct.ArrayBase.html#methods-for-array-views).
+///
+/// [ab]: struct.ArrayBase.html
 pub type ArrayViewMut<'a, A, D> = ArrayBase<ViewRepr<&'a mut A>, D>;
 
 /// Array view’s representation.

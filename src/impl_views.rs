@@ -1,28 +1,14 @@
 
 use imp_prelude::*;
 use dimension::{self, stride_offset};
-use stride_error::StrideError;
-
-use {
-    ViewRepr,
-};
+use error::ShapeError;
 
 /// # Methods for Array Views
 ///
 /// Methods for read-only array views `ArrayView<'a, A, D>`
-impl<'a, A> ArrayBase<ViewRepr<&'a A>, Ix> {
-    /// Create a one-dimensional read-only array view of the data in `xs`.
-    #[inline]
-    pub fn from_slice(xs: &'a [A]) -> Self {
-        ArrayView {
-            data: ViewRepr::new(),
-            ptr: xs.as_ptr() as *mut A,
-            dim: xs.len(),
-            strides: 1,
-        }
-    }
-}
-
+///
+/// Note that array views implement traits like [`From`][f] and `IntoIterator` too.
+/// [f]: #method.from
 impl<'a, A, D> ArrayBase<ViewRepr<&'a A>, D>
     where D: Dimension,
 {
@@ -51,7 +37,7 @@ impl<'a, A, D> ArrayBase<ViewRepr<&'a A>, D>
     /// assert!(a.strides() == &[1, 4, 2]);
     /// ```
     pub fn from_slice_dim_stride(dim: D, strides: D, xs: &'a [A])
-        -> Result<Self, StrideError>
+        -> Result<Self, ShapeError>
     {
         dimension::can_index_slice(xs, &dim, &strides).map(|_| {
             unsafe {
@@ -99,19 +85,10 @@ impl<'a, A, D> ArrayBase<ViewRepr<&'a A>, D>
 }
 
 /// Methods for read-write array views `ArrayViewMut<'a, A, D>`
-impl<'a, A> ArrayBase<ViewRepr<&'a mut A>, Ix> {
-    /// Create a one-dimensional read-write array view of the data in `xs`.
-    #[inline]
-    pub fn from_slice(xs: &'a mut [A]) -> Self {
-        ArrayViewMut {
-            data: ViewRepr::new(),
-            ptr: xs.as_mut_ptr(),
-            dim: xs.len(),
-            strides: 1,
-        }
-    }
-}
-
+///
+/// Note that array views implement traits like [`From`][f] and `IntoIterator` too.
+///
+/// [f]: #method.from
 impl<'a, A, D> ArrayBase<ViewRepr<&'a mut A>, D>
     where D: Dimension,
 {
@@ -141,7 +118,7 @@ impl<'a, A, D> ArrayBase<ViewRepr<&'a mut A>, D>
     /// assert!(a.strides() == &[1, 4, 2]);
     /// ```
     pub fn from_slice_dim_stride(dim: D, strides: D, xs: &'a mut [A])
-        -> Result<Self, StrideError>
+        -> Result<Self, ShapeError>
     {
         dimension::can_index_slice(xs, &dim, &strides).map(|_| {
             unsafe {
