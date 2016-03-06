@@ -1039,6 +1039,11 @@ length, returning an <code>Err</code> if not compatible.</p>
 split and one view after the split.</p>
 
 <p><strong>Panics</strong> if <code>axis</code> or <code>index</code> is out of bounds.</p>
+
+<p>Below, an illustration of <code>.split_at(Axis(2), 2)</code> on
+an array with shape 3 × 5 × 5.</p>
+
+<p><img src="split_at.svg" width="300px" height="271px"></p>
 </div></div><h3 class='impl'><code>impl&lt;'a, A, D&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;<a class='struct' href='../ndarray/struct.ViewRepr.html' title='ndarray::ViewRepr'>ViewRepr</a>&lt;&amp;'a mut A&gt;, D&gt; <span class='where'>where D: <a class='trait' href='../ndarray/trait.Dimension.html' title='ndarray::Dimension'>Dimension</a></span></code></h3><div class='docblock'><p>Methods for read-write array views <code>ArrayViewMut&lt;&#39;a, A, D&gt;</code></p>
 
 <p>Note that array views implement traits like <a href="#method.from"><code>From</code></a> and <code>IntoIterator</code> too.</p>

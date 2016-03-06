@@ -216,6 +216,11 @@
 <span id="173">173</span>
 <span id="174">174</span>
 <span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
 </pre><pre class='rust '>
 <span class='comment'>// Copyright 2014-2016 bluss and ndarray developers.</span>
 <span class='comment'>//</span>
@@ -276,6 +281,11 @@
     <span class='doccomment'>/// split and one view after the split.</span>
     <span class='doccomment'>///</span>
     <span class='doccomment'>/// **Panics** if `axis` or `index` is out of bounds.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// Below, an illustration of `.split_at(Axis(2), 2)` on</span>
+    <span class='doccomment'>/// an array with shape 3 × 5 × 5.</span>
+    <span class='doccomment'>///</span>
+    <span class='doccomment'>/// &lt;img src=&quot;split_at.svg&quot; width=&quot;300px&quot; height=&quot;271px&quot;&gt;</span>
     <span class='kw'>pub</span> <span class='kw'>fn</span> <span class='ident'>split_at</span>(<span class='self'>self</span>, <span class='ident'>axis</span>: <span class='ident'>Axis</span>, <span class='ident'>index</span>: <span class='ident'>Ix</span>)
         <span class='op'>-&gt;</span> (<span class='kw'>Self</span>, <span class='kw'>Self</span>)
     {
