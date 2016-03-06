@@ -125,7 +125,7 @@ em.stab.unstable { background: #FFF5D6; border-color: #FFC600; }
 em.stab.deprecated { background: #F3DFFF; border-color: #7F0087; }
 
 .docblock pre.rust { background: #eeeeff; }
-pre.trait, pre.macro, pre.fn, pre.struct, pre.enum, pre.typedef { background: #fcfefc; }
+pre.trait, pre.macro, pre.fn, pre.struct, pre.enum, pre.typedef, pre.const { background: inherit; }
 
 /* Small “example” label for doc examples */
 .docblock pre.rust::before {

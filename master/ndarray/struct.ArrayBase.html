@@ -7,7 +7,7 @@
     <meta name="description" content="API documentation for the Rust `ArrayBase` struct in crate `ndarray`.">
     <meta name="keywords" content="rust, rustlang, rust-lang, ArrayBase">
 
-    <title>ndarray 0.4.0-alpha.8 - ndarray::ArrayBase - Rust</title>
+    <title>ndarray 0.4.0 - ndarray::ArrayBase - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -46,7 +46,7 @@
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-2231' class='srclink' href='../src/ndarray/src/lib.rs.html#389-401' title='goto source code'>[src]</a></span></h1>
+        </span><a id='src-2290' class='srclink' href='../src/ndarray/src/lib.rs.html#400-412' title='goto source code'>[src]</a></span></h1>
 <pre class='rust struct'>pub struct ArrayBase&lt;S, D&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a></span> {
     // some fields omitted
 }</pre><div class='docblock'><p>An <em>N</em>-dimensional array.</p>
@@ -59,7 +59,7 @@ The array supports arithmetic operations by applying them elementwise.</p>
 <code>D</code> for the dimensionality.</p>
 
 <p>Type aliases <a href="type.OwnedArray.html"><code>OwnedArray</code></a>, <a href="type.RcArray.html"><code>RcArray</code></a>, <a href="type.ArrayView.html"><code>ArrayView</code></a>, and <a href="type.ArrayViewMut.html"><code>ArrayViewMut</code></a> refer
-to <code>ArrayBase</code> with different types for the data storage.</p>
+to <code>ArrayBase</code> with different types for the data container.</p>
 
 <h2 id='contents' class='section-header'><a href='#contents'>Contents</a></h2>
 <ul>
@@ -236,7 +236,8 @@ are supported for an arbitrary binary operator denoted by <code>@</code>.</p>
 
 <p>The trait <a href="trait.ScalarOperand.html"><code>ScalarOperand</code></a> marks types that can be used in arithmetic
 with arrays directly. For a scalar <code>K</code> the following combinations of operands
-are supported (scalar can be on either side).</p>
+are supported (scalar can be on either the left or right side, but
+<code>ScalarOperand</code> docs has the detailed condtions).</p>
 
 <ul>
 <li><code>&amp;A @ K</code> or <code>K @ &amp;A</code> which produces a new <code>OwnedArray</code></li>
@@ -279,8 +280,11 @@ the two array types that have owned storage.</p>
 </div><h4 id='method.from_iter' class='method'><code>fn <a href='#method.from_iter' class='fnname'>from_iter</a>&lt;I&gt;(iterable: I) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt; <span class='where'>where I: <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/trait.IntoIterator.html' title='core::iter::IntoIterator'>IntoIterator</a>&lt;Item=S::Elem&gt;</span></code></h4>
 <div class='docblock'><p>Create a one-dimensional array from an iterable.</p>
 </div><h4 id='method.linspace' class='method'><code>fn <a href='#method.linspace' class='fnname'>linspace</a>&lt;F&gt;(start: F, end: F, n: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=F&gt;, F: <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.Float.html' title='num::traits::Float'>Float</a></span></code></h4>
-<div class='docblock'><p>Create a one-dimensional array from inclusive interval
+<div class='docblock'><p>Create a one-dimensional array from the inclusive interval
 <code>[start, end]</code> with <code>n</code> elements. <code>F</code> must be a floating point type.</p>
+</div><h4 id='method.range' class='method'><code>fn <a href='#method.range' class='fnname'>range</a>&lt;F&gt;(start: F, end: F, step: F) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.Data.html' title='ndarray::Data'>Data</a>&lt;Elem=F&gt;, F: <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.Float.html' title='num::traits::Float'>Float</a></span></code></h4>
+<div class='docblock'><p>Create a one-dimensional array from the half-open interval
+<code>[start, end)</code> with elements spaced by <code>step</code>. <code>F</code> must be a floating point type.</p>
 </div></div><h3 class='impl'><code>impl&lt;S, A&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataOwned.html' title='ndarray::DataOwned'>DataOwned</a>&lt;Elem=A&gt;</span></code></h3><div class='docblock'><p>Constructor methods for two-dimensional arrays.</p>
 </div><div class='impl-items'><h4 id='method.eye' class='method'><code>fn <a href='#method.eye' class='fnname'>eye</a>(n: <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>) -&gt; <a class='struct' href='../ndarray/struct.ArrayBase.html' title='ndarray::ArrayBase'>ArrayBase</a>&lt;S, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a>, <a class='type' href='../ndarray/type.Ix.html' title='ndarray::Ix'>Ix</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt; <span class='where'>where S: <a class='trait' href='../ndarray/trait.DataMut.html' title='ndarray::DataMut'>DataMut</a>, A: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> + <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.Zero.html' title='num::traits::Zero'>Zero</a> + <a class='trait' href='http://rust-num.github.io/num/num/traits/trait.One.html' title='num::traits::One'>One</a></span></code></h4>
 <div class='docblock'><p>Create an identity matrix of size <code>n</code> (square 2D array).</p>

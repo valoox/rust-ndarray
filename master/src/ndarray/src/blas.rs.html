@@ -391,7 +391,21 @@
 <span id="348">348</span>
 <span id="349">349</span>
 <span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
 </pre><pre class='rust '>
+<span class='comment'>// Copyright 2014-2016 bluss and ndarray developers.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 <span class='doccomment'>//! Experimental BLAS (Basic Linear Algebra Subprograms) integration</span>
 <span class='doccomment'>//!</span>
 <span class='doccomment'>//! ***Requires crate feature `&quot;rblas&quot;`***</span>
@@ -666,7 +680,7 @@
     }
 
     <span class='kw'>fn</span> <span class='ident'>as_mut_ptr</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>A</span> {
-        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;BlasArrayView is not mutable&quot;</span>);
+        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;ndarray: as_mut_ptr called on BlasArrayView (not mutable)&quot;</span>);
     }
 
     <span class='comment'>// increment: stride</span>
@@ -715,7 +729,7 @@
     }
 
     <span class='kw'>fn</span> <span class='ident'>as_mut_ptr</span>(<span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='self'>self</span>) <span class='op'>-&gt;</span> <span class='op'>*</span><span class='kw-2'>mut</span> <span class='ident'>A</span> {
-        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;BlasArrayView is not mutable&quot;</span>);
+        <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;ndarray: as_mut_ptr called on BlasArrayView (not mutable)&quot;</span>);
     }
 }
 

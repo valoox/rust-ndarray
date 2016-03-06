@@ -1048,7 +1048,21 @@
 <span id="1005">1005</span>
 <span id="1006">1006</span>
 <span id="1007">1007</span>
+<span id="1008">1008</span>
+<span id="1009">1009</span>
+<span id="1010">1010</span>
+<span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
 </pre><pre class='rust '>
+<span class='comment'>// Copyright 2014-2016 bluss and ndarray developers.</span>
+<span class='comment'>//</span>
+<span class='comment'>// Licensed under the Apache License, Version 2.0 &lt;LICENSE-APACHE or</span>
+<span class='comment'>// http://www.apache.org/licenses/LICENSE-2.0&gt; or the MIT license</span>
+<span class='comment'>// &lt;LICENSE-MIT or http://opensource.org/licenses/MIT&gt;, at your</span>
+<span class='comment'>// option. This file may not be copied, modified, or distributed</span>
+<span class='comment'>// except according to those terms.</span>
 
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>cmp</span>;
 <span class='kw'>use</span> <span class='ident'>std</span>::<span class='ident'>ptr</span>;
@@ -1656,7 +1670,7 @@
               <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
     {
         <span class='kw'>if</span> <span class='ident'>shape</span>.<span class='ident'>size_checked</span>() <span class='op'>!=</span> <span class='prelude-val'>Some</span>(<span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>size</span>()) {
-            <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Incompatible shapes in reshape, attempted from: {:?}, to: {:?}&quot;</span>,
+            <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;ndarray: incompatible shapes in reshape, attempted from: {:?}, to: {:?}&quot;</span>,
                    <span class='self'>self</span>.<span class='ident'>dim</span>.<span class='ident'>slice</span>(),
                    <span class='ident'>shape</span>.<span class='ident'>slice</span>())
         }
@@ -1805,7 +1819,7 @@
             <span class='kw'>where</span> <span class='ident'>D</span>: <span class='ident'>Dimension</span>,
                   <span class='ident'>E</span>: <span class='ident'>Dimension</span>,
         {
-            <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;Could not broadcast array from shape: {:?} to: {:?}&quot;</span>,
+            <span class='macro'>panic</span><span class='macro'>!</span>(<span class='string'>&quot;ndarray: could not broadcast array from shape: {:?} to: {:?}&quot;</span>,
                    <span class='ident'>from</span>.<span class='ident'>slice</span>(), <span class='ident'>to</span>.<span class='ident'>slice</span>())
         }
 

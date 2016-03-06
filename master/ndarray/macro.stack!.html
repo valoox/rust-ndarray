@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="generator" content="rustdoc">
-    <meta name="description" content="API documentation for the Rust `arr0` fn in crate `ndarray`.">
-    <meta name="keywords" content="rust, rustlang, rust-lang, arr0">
+    <meta name="description" content="API documentation for the Rust `stack!` macro in crate `ndarray`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, stack!">
 
-    <title>ndarray 0.4.0 - ndarray::arr0 - Rust</title>
+    <title>ndarray 0.4.0 - ndarray::stack! - Rust</title>
 
     <link rel="stylesheet" type="text/css" href="../rustdoc.css">
     <link rel="stylesheet" type="text/css" href="../main.css">
@@ -27,7 +27,7 @@
 
     <nav class="sidebar">
         
-        <p class='location'><a href='index.html'>ndarray</a></p><script>window.sidebarCurrent = {name: 'arr0', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+        <p class='location'><a href='index.html'>ndarray</a></p><script>window.sidebarCurrent = {name: 'stack!', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script>
     </nav>
 
     <nav class="sub">
@@ -41,13 +41,39 @@
         </form>
     </nav>
 
-    <section id='main' class="content fn">
-<h1 class='fqn'><span class='in-band'>Function <a href='index.html'>ndarray</a>::<wbr><a class='fn' href=''>arr0</a></span><span class='out-of-band'><span id='render-detail'>
+    <section id='main' class="content macro">
+<h1 class='fqn'><span class='in-band'><a href='index.html'>ndarray</a>::<wbr><a class='macro' href=''>stack!</a></span><span class='out-of-band'><span id='render-detail'>
             <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
                 [<span class='inner'>&#x2212;</span>]
             </a>
-        </span><a id='src-1244' class='srclink' href='../src/ndarray/src/free_functions.rs.html#25-28' title='goto source code'>[src]</a></span></h1>
-<pre class='rust fn'>pub fn arr0&lt;A&gt;(x: A) -&gt; <a class='type' href='../ndarray/type.OwnedArray.html' title='ndarray::OwnedArray'>OwnedArray</a>&lt;A, <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</pre><div class='docblock'><p>Create a zero-dimensional array with the element <code>x</code>.</p>
+        </span><a id='src-5754' class='srclink' href='../src/ndarray/src/stacking.rs.html#98-102' title='goto source code'>[src]</a></span></h1>
+<pre class='rust macro'>
+<span class='macro'>macro_rules</span><span class='macro'>!</span> <span class='ident'>stack</span> {
+    (<span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>axis</span>:<span class='ident'>expr</span>, $( <span class='macro-nonterminal'>$</span><span class='macro-nonterminal'>array</span>:<span class='ident'>expr</span> ),<span class='op'>+</span> ) <span class='op'>=&gt;</span> { ... };
+}</pre>
+<div class='docblock'><p>Stack arrays along the given axis.</p>
+
+<p>Uses the <a href="fn.stack.html"><code>stack</code></a> function, calling <code>ArrayView::from(&amp;a)</code> on each
+argument <code>a</code>.</p>
+
+<p><strong><em>Panics</em></strong> if the <code>stack</code> function would return an error.</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='attribute'>#[<span class='ident'>macro_use</span>(<span class='ident'>stack</span>)]</span>
+<span class='kw'>extern</span> <span class='kw'>crate</span> <span class='ident'>ndarray</span>;
+
+<span class='kw'>use</span> <span class='ident'>ndarray</span>::{<span class='ident'>arr2</span>, <span class='ident'>Axis</span>, <span class='ident'>stack</span>};
+
+
+<span class='kw'>let</span> <span class='ident'>a</span> <span class='op'>=</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>2.</span>, <span class='number'>2.</span>],
+               [<span class='number'>3.</span>, <span class='number'>3.</span>]]);
+<span class='macro'>assert</span><span class='macro'>!</span>(
+    <span class='macro'>stack</span><span class='macro'>!</span>[<span class='ident'>Axis</span>(<span class='number'>0</span>), <span class='ident'>a</span>, <span class='ident'>a</span>]
+    <span class='op'>==</span> <span class='ident'>arr2</span>(<span class='kw-2'>&amp;</span>[[<span class='number'>2.</span>, <span class='number'>2.</span>],
+              [<span class='number'>3.</span>, <span class='number'>3.</span>],
+              [<span class='number'>2.</span>, <span class='number'>2.</span>],
+              [<span class='number'>3.</span>, <span class='number'>3.</span>]])
+);</pre>
 </div></section>
     <section id='search' class="content hidden"></section>
 
