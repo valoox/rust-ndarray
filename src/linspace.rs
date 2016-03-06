@@ -1,3 +1,10 @@
+// Copyright 2014-2016 bluss and ndarray developers.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
 use libnum::Float;
 
 /// An iterator of a sequence of evenly spaced floats.
@@ -76,5 +83,28 @@ pub fn linspace<F>(a: F, b: F, n: usize) -> Linspace<F>
         step: step,
         index: 0,
         len: n,
+    }
+}
+
+/// Return an iterator of floats spaced by `step`.
+///
+/// The `Linspace` has `n` elements, where the first
+/// element is `a` and `b` is not included.
+/// Numerical reasons can result in `b` being included
+/// in the result.
+///
+/// Iterator element type is `F`, where `F` must be
+/// either `f32` or `f64`.
+#[inline]
+pub fn range<F>(a: F, b: F, step: F) -> Linspace<F>
+    where F: Float
+{
+    let len = b - a;
+    let steps = F::ceil(len / step);
+    Linspace {
+        start: a,
+        step: step,
+        len: steps.to_usize().unwrap(),
+        index: 0,
     }
 }

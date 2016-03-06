@@ -1,3 +1,10 @@
+// Copyright 2014-2016 bluss and ndarray developers.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
 #![crate_name="ndarray"]
 #![cfg_attr(has_deprecated, feature(deprecated))]
 #![doc(html_root_url = "http://bluss.github.io/rust-ndarray/master/")]
@@ -100,6 +107,7 @@ pub use iterators::{
 
 pub use arraytraits::AsArray;
 pub use linalg::{LinalgScalar, NdFloat};
+pub use stacking::stack;
 
 mod arraytraits;
 #[cfg(feature = "serde")]
@@ -129,6 +137,7 @@ mod linspace;
 mod numeric_util;
 mod si;
 mod error;
+mod stacking;
 
 /// Implementation's prelude. Common types used everywhere.
 mod imp_prelude {
@@ -148,6 +157,7 @@ mod imp_prelude {
         DataShared,
         ViewRepr,
     };
+    pub use dimension::DimensionExt;
     /// Wrapper type for private methods
     #[derive(Copy, Clone, Debug)]
     pub struct Priv<T>(pub T);
@@ -168,7 +178,7 @@ pub type Ixs = isize;
 /// `D` for the dimensionality.
 ///
 /// Type aliases [`OwnedArray`], [`RcArray`], [`ArrayView`], and [`ArrayViewMut`] refer
-/// to `ArrayBase` with different types for the data storage.
+/// to `ArrayBase` with different types for the data container.
 ///
 /// [`OwnedArray`]: type.OwnedArray.html
 /// [`RcArray`]: type.RcArray.html
@@ -356,7 +366,8 @@ pub type Ixs = isize;
 ///
 /// The trait [`ScalarOperand`](trait.ScalarOperand.html) marks types that can be used in arithmetic
 /// with arrays directly. For a scalar `K` the following combinations of operands
-/// are supported (scalar can be on either side).
+/// are supported (scalar can be on either the left or right side, but
+/// `ScalarOperand` docs has the detailed condtions).
 ///
 /// - `&A @ K` or `K @ &A` which produces a new `OwnedArray`
 /// - `B @ K` or `K @ B` which consumes `B`, updates it with the result and returns it

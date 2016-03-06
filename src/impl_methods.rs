@@ -1,3 +1,10 @@
+// Copyright 2014-2016 bluss and ndarray developers.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
 
 use std::cmp;
 use std::ptr;
@@ -605,7 +612,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
               E: Dimension,
     {
         if shape.size_checked() != Some(self.dim.size()) {
-            panic!("Incompatible shapes in reshape, attempted from: {:?}, to: {:?}",
+            panic!("ndarray: incompatible shapes in reshape, attempted from: {:?}, to: {:?}",
                    self.dim.slice(),
                    shape.slice())
         }
@@ -754,7 +761,7 @@ impl<A, S, D> ArrayBase<S, D> where S: Data<Elem=A>, D: Dimension
             where D: Dimension,
                   E: Dimension,
         {
-            panic!("Could not broadcast array from shape: {:?} to: {:?}",
+            panic!("ndarray: could not broadcast array from shape: {:?} to: {:?}",
                    from.slice(), to.slice())
         }
 

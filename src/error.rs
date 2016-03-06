@@ -1,3 +1,10 @@
+// Copyright 2014-2016 bluss and ndarray developers.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
 use std::fmt;
 use std::error::Error;
 use super::{
@@ -31,9 +38,9 @@ pub enum ErrorKind {
     IncompatibleLayout,
     /// the shape does not fit inside type limits
     RangeLimited,
-    /// stride leads to out of bounds indexing
+    /// out of bounds indexing
     OutOfBounds,
-    /// stride leads to aliasing array elements
+    /// aliasing array elements
     Unsupported,
     #[doc(hidden)]
     __Incomplete,
@@ -66,8 +73,8 @@ impl Error for ShapeError {
             ErrorKind::IncompatibleShape => "incompatible shapes",
             ErrorKind::IncompatibleLayout => "incompatible memory layout",
             ErrorKind::RangeLimited => "the shape does not fit in type limits",
-            ErrorKind::OutOfBounds => "stride leads to out of bounds indexing",
-            ErrorKind::Unsupported => "stride leads to aliasing array elements",
+            ErrorKind::OutOfBounds => "out of bounds indexing",
+            ErrorKind::Unsupported => "unsupported operation",
             ErrorKind::__Incomplete => "this error variant is not in use",
         }
     }

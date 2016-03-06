@@ -1,3 +1,10 @@
+// Copyright 2014-2016 bluss and ndarray developers.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
 //! Experimental BLAS (Basic Linear Algebra Subprograms) integration
 //!
 //! ***Requires crate feature `"rblas"`***
@@ -272,7 +279,7 @@ impl<'a, A> Vector<A> for BlasArrayView<'a, A, Ix> {
     }
 
     fn as_mut_ptr(&mut self) -> *mut A {
-        panic!("BlasArrayView is not mutable");
+        panic!("ndarray: as_mut_ptr called on BlasArrayView (not mutable)");
     }
 
     // increment: stride
@@ -321,7 +328,7 @@ impl<'a, A> Matrix<A> for BlasArrayView<'a, A, (Ix, Ix)> {
     }
 
     fn as_mut_ptr(&mut self) -> *mut A {
-        panic!("BlasArrayView is not mutable");
+        panic!("ndarray: as_mut_ptr called on BlasArrayView (not mutable)");
     }
 }
 

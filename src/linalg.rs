@@ -1,3 +1,10 @@
+// Copyright 2014-2016 bluss and ndarray developers.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
 use libnum::{Zero, One, Float};
 use std::any::Any;
 use std::fmt;
@@ -71,6 +78,8 @@ pub trait NdFloat :
 /// much float-relevant ndarray functionality as possible, including the traits
 /// needed for linear algebra (`Any`) and for *right hand side* scalar
 /// operations (`ScalarOperand`).
+///
+/// This trait can only be implemented by `f32` and `f64`.
 #[cfg(feature="assign_ops")]
 pub trait NdFloat :
     Float +
